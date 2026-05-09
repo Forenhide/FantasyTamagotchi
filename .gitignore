@@ -1,0 +1,7 @@
+build/
+.vs/
+*.user
+x64/
+vsproj/.vs/
+vsproj/Fantasy_.cfc21b4c/
+*.ipch
