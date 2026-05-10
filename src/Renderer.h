@@ -24,9 +24,8 @@ struct FloatingText {
 	sf::Text text;
 	bool active = false;
 	float lifetime = 0.f;
-	float maxLifeTime = 1.f;
-	sf::Vector2f velocity = {0.f, -50.f};
-	sf::Vector2f position = {};
+	float maxLifetime = 1.f;
+	sf::Vector2f velocity = {0.f, -30.f};
 
 	FloatingText(const sf::Font& font) : text(font) {}
 };
@@ -108,9 +107,10 @@ private:
 	void update_button_hover(Button& btn, sf::Vector2f mousePos);
 	void animate_button(Button& btn, float dt);
 
-	void add_popup(const std::string& str, const sf::Color& color, float x, float y);
+	void add_popup(const std::string& str, const sf::Color& color, float x, float y, int lifeTime);
 	void update_popups(float dt);
 	sf::Color get_popup_color(GameEvent event) const;
 	sf::Vector2f get_popup_position(PositionAnchor position) const;
+	int get_popup_lifetime(GameEvent event) const;
 	void consume_popups(std::vector<Request>& popups);
 };

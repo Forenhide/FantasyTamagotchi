@@ -221,7 +221,7 @@ void Renderer::update_stats(void) {
 	ageStat.setString(std::to_string(gameState.age));
 }
 
-void Renderer::add_popup(const std::string& str, const sf::Color& color, float x, float y) {
+void Renderer::add_popup(const std::string& str, const sf::Color& color, float x, float y, int lifeTime) {
 
 	FloatingText popup(font);
 
@@ -232,6 +232,8 @@ void Renderer::add_popup(const std::string& str, const sf::Color& color, float x
 	popup.text.setOutlineColor(sf::Color::White);
 
 	popup.text.setPosition({x, y});
+
+	popup.maxLifetime = lifeTime;
 
 	popup.lifetime = 0.f;
 	popup.active = true;
@@ -244,8 +246,9 @@ void Renderer::consume_popups(std::vector<Request>& popups) {
 	for (const auto& pop : popups) {
 		sf::Color col = get_popup_color(pop.event);
 		sf::Vector2f pos = get_popup_position(pop.pos);
+		int lifeTime = get_popup_lifetime(pop.event);
 
-		add_popup(pop.message, col, pos.x, pos.y);
+		add_popup(pop.message, col, pos.x, pos.y, lifeTime);
 	}
 
 	popups.clear();
@@ -263,7 +266,7 @@ void Renderer::update_popups(float dt) {
 		popup.lifetime += dt;
 		popup.text.move(popup.velocity * dt);
 
-		float ratio = 1.f - (popup.lifetime / popup.maxLifeTime);
+		float ratio = 1.f - (popup.lifetime / popup.maxLifetime);
 
 		sf::Color textC = popup.text.getFillColor();
 		sf::Color outlineC = popup.text.getOutlineColor();
@@ -273,7 +276,7 @@ void Renderer::update_popups(float dt) {
 		popup.text.setFillColor(textC);
 		popup.text.setOutlineColor(outlineC);
 
-		if (popup.lifetime >= popup.maxLifeTime) {
+		if (popup.lifetime >= popup.maxLifetime) {
 			popup.active = false;
 			popups.erase(
 				std::remove_if(popups.begin(), popups.end(), [](const FloatingText& pop) {
@@ -302,8 +305,23 @@ sf::Vector2f Renderer::get_popup_position(PositionAnchor position) const {
 		return {25.f, 778.f};
 	} else if (position == TopCenter) {
 		return {24.f, 358.f};
+	} else if (position == LeftUp) {
+		return {24.f, 446.f};
 	} else if (position == LeftCenter) {
-		return {24.f, 548.f};
+		return {24.f, 510.f};
+	} else if (position == LeftBottom) {
+		return {24.f, 574.f};
+	}
+}
+
+int Renderer::get_popup_lifetime(GameEvent event) const {
+	
+	if (event == GameEvent::STAT_CHANGE) {
+		return 1.f;
+	} else if (event == GameEvent::EVENT) {
+		return 3.f;
+	} else if (event == GameEvent::WARNING) {
+	    return 2.f;
 	}
 }
 

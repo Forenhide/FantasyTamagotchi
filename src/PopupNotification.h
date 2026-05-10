@@ -12,7 +12,9 @@ enum class GameEvent {
 enum PositionAnchor { 
 	BottomLeft, 
 	TopCenter,  
-	LeftCenter
+	LeftUp,
+	LeftCenter,
+	LeftBottom
 };
 
 struct Request {

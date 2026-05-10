@@ -244,12 +244,13 @@ void tick(GameState& g) {
 	pet_change_boredom(g, 3);
 	change_balance(g, TICK_MONEY);
 	pet_update_age(g);
+	pet_update_warnings(g);
 
 	// Requests
 	if (g.birthday)    g.pendingPopups.push_back({"It's my birthday today!", GameEvent::EVENT, TopCenter});
-	if (g.isIll)       g.pendingPopups.push_back({"I feel sick...", GameEvent::WARNING, LeftCenter});
+	if (g.isIll)       g.pendingPopups.push_back({"I feel sick...", GameEvent::WARNING, LeftUp});
 	if (g.starving)    g.pendingPopups.push_back({"I am starving!", GameEvent::WARNING, LeftCenter});
-	if (g.bored)       g.pendingPopups.push_back({"I want to play!", GameEvent::WARNING, LeftCenter});
+	if (g.bored)       g.pendingPopups.push_back({"I want to play!", GameEvent::WARNING, LeftBottom});
 	if (g.statChanged) g.pendingPopups.push_back({std::to_string(g.newStat), GameEvent::STAT_CHANGE, BottomLeft});
 
 	return;
