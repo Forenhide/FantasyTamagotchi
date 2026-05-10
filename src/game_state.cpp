@@ -99,7 +99,10 @@ void pet_handle_input(GameState& g) {
 		g.newStat = before - after;
 		std::cout << "New stat: " << g.newStat << '\n';
 		g.playPressed = false;
+
+		g.statChanged = true;
 		tick(g);
+		g.statChanged = false;
 	}
 	if (g.feedPressed == true) {
 		int before = g.hungerNum;
@@ -108,7 +111,10 @@ void pet_handle_input(GameState& g) {
 		g.newStat = before - after;
 		std::cout << "New stat: " << g.newStat << '\n';
 		g.feedPressed = false;
+
+		g.statChanged = true;
 		tick(g);
+		g.statChanged = false;
 	}
 	if (g.sleepPressed == true) {
 		int before = g.energy;
@@ -117,7 +123,10 @@ void pet_handle_input(GameState& g) {
 		g.newStat = after - before;
 		std::cout << "New stat: " << g.newStat << '\n';
 		g.sleepPressed = false;
+
+		g.statChanged = true;
 		tick(g);
+		g.statChanged = false;
 	}
 
 
@@ -234,8 +243,25 @@ void tick(GameState& g) {
 	pet_change_hunger(g, 5);
 	pet_change_boredom(g, 3);
 	change_balance(g, TICK_MONEY);
+	pet_update_age(g);
+
+	// Requests
+	if (g.birthday)    g.pendingPopups.push_back({"It's my birthday today!", GameEvent::EVENT, TopCenter});
+	if (g.isIll)       g.pendingPopups.push_back({"I feel sick...", GameEvent::WARNING, LeftCenter});
+	if (g.starving)    g.pendingPopups.push_back({"I am starving!", GameEvent::WARNING, LeftCenter});
+	if (g.bored)       g.pendingPopups.push_back({"I want to play!", GameEvent::WARNING, LeftCenter});
+	if (g.statChanged) g.pendingPopups.push_back({std::to_string(g.newStat), GameEvent::STAT_CHANGE, BottomLeft});
 
 	return;
+}
+
+std::vector<Request> drain_pending_popups(GameState& g) {
+	
+	std::vector<Request> drained;
+
+	drained.swap(g.pendingPopups);
+
+	return drained;
 }
 #pragma endregion
 
@@ -363,10 +389,17 @@ void pet_evolve(GameState& g) {
 #pragma region Update Warnings / Age
 void pet_update_warnings(GameState& g) {
 	
-	g.warnings.clear();
+	if (g.hungerNum > 80) {
+		g.starving = true;
+	} else {
+		g.starving = false;
+	}
 
-	if (g.hungerNum > 80) g.warnings.push_back("I am starving!");
-	if (g.boredomNum > 60) g.warnings.push_back("I want to play!");
+	if (g.boredomNum > 60)  {
+		g.bored = true;
+	} else {
+		g.bored = false;
+	}
 }
 
 void pet_update_age(GameState& g) {

@@ -2,6 +2,7 @@
 #define GAMESTATE_H
 
 #include "Item.h"
+#include "PopupNotification.h"
 #include <vector>
 #include <string>
 
@@ -20,6 +21,8 @@ constexpr int TICK_MONEY{1};
 const std::string HUNGER[5]{ "Starving", "Hungry", "Okay", "Well-fed", "Full" };
 const std::string MOOD[5]{"Frustrated", "Bored", "Okay", "Good", "Happy"};
 const std::string ART[5]{"😭", "😒", "😶", "😊", "😀"};
+
+
 
 
 struct GameState {
@@ -44,6 +47,8 @@ struct GameState {
 	bool isAlive{};
 	bool birthday{};
 	bool isIll{};
+	bool starving{};
+	bool bored{};
 
 	// Inventory & Shop
 	std::vector<Item> inventoryItems;
@@ -65,6 +70,10 @@ struct GameState {
 	bool playPressed{false};
 	bool feedPressed{false};
 	bool sleepPressed{false};
+	bool statChanged{false};
+
+	// Popups
+	std::vector<Request> pendingPopups; 
 };
 
 // Game
@@ -113,5 +122,8 @@ void change_balance(GameState& g, int delta);
 void clamp_balance(GameState& g);
 void transaction_clear_message(GameState& g);
 void transaction_set_message(GameState& g, std::string message);
+
+// Requests
+std::vector<Request> drain_pending_popups(GameState& g);
 
 #endif

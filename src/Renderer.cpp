@@ -2,15 +2,14 @@
 #include "GameState.h"
 #include <windows.h>
 #include <iostream>
+#include <algorithm>
 
 
 Renderer::Renderer(GameState& gameState) : 
 	gameState(gameState),
 	bgSprite(bgTexture),
 	idleSprite(idleTexture),
-	outerShadowSprite(outerShadowTexture),
-	innerShadowSprite(innerShadowTexture),
-	playBtn(font),
+	outerShadowSprite(outerShadowTexture), innerShadowSprite(innerShadowTexture), playBtn(font),
 	feedBtn(font),
 	sleepBtn(font),
 	inventoryBtn(font),
@@ -29,8 +28,7 @@ Renderer::Renderer(GameState& gameState) :
 	energyTitle(font),
 	energyStat(font),
 	ageTitle(font),
-	ageStat(font),
-	statPopup(font)
+	ageStat(font)
 {}
 
 bool Renderer::init(void) {
@@ -44,11 +42,6 @@ bool Renderer::init(void) {
 	setup_stats();
 	setup_animation();
 
-	statPopup.text.setFont(font);
-	statPopup.text.setCharacterSize(24);
-	statPopup.text.setOutlineThickness(1.f);
-	statPopup.text.setOutlineColor(sf::Color::White);
-	
 	music.play();
 	music.setVolume(3.f);
 	music.setLooping(true);
@@ -228,35 +221,90 @@ void Renderer::update_stats(void) {
 	ageStat.setString(std::to_string(gameState.age));
 }
 
-void Renderer::show_stat_popup(const std::string& str, const sf::Color& color) {
+void Renderer::add_popup(const std::string& str, const sf::Color& color, float x, float y) {
 
-	statPopup.text.setString(str);
-	statPopup.text.setFillColor(color);
+	FloatingText popup(font);
 
-	statPopup.text.setPosition({25.f, 778.f});
+	popup.text.setString(str);
+	popup.text.setFillColor(color);
+	popup.text.setCharacterSize(24);
+	popup.text.setOutlineThickness(1.f);
+	popup.text.setOutlineColor(sf::Color::White);
 
-	statPopup.lifetime = 0.f;
-	statPopup.active = true;
+	popup.text.setPosition({x, y});
+
+	popup.lifetime = 0.f;
+	popup.active = true;
+
+	popups.push_back(popup);
 }
 
-void Renderer::update_popup(float dt) {
+void Renderer::consume_popups(std::vector<Request>& popups) {
+
+	for (const auto& pop : popups) {
+		sf::Color col = get_popup_color(pop.event);
+		sf::Vector2f pos = get_popup_position(pop.pos);
+
+		add_popup(pop.message, col, pos.x, pos.y);
+	}
+
+	popups.clear();
+}
+
+void Renderer::update_popups(float dt) {
+
+	auto pops = drain_pending_popups(gameState);
+	consume_popups(pops);
 	
-	if (!statPopup.active) return;
+	
+	for (FloatingText& popup : popups) {
+		if (!popup.active) return;
 
-	statPopup.lifetime += dt;
-	statPopup.text.move(statPopup.velocity * dt);
+		popup.lifetime += dt;
+		popup.text.move(popup.velocity * dt);
 
-	float ratio = 1.f - (statPopup.lifetime / statPopup.maxLifeTime);
+		float ratio = 1.f - (popup.lifetime / popup.maxLifeTime);
 
-	sf::Color textC = statPopup.text.getFillColor();
-	sf::Color outlineC = statPopup.text.getOutlineColor();
-	textC.a = static_cast<std::uint8_t>(255 * ratio);
-	outlineC.a = static_cast<std::uint8_t>(255 * ratio);
+		sf::Color textC = popup.text.getFillColor();
+		sf::Color outlineC = popup.text.getOutlineColor();
+		textC.a = static_cast<std::uint8_t>(255 * ratio);
+		outlineC.a = static_cast<std::uint8_t>(255 * ratio);
 
-	statPopup.text.setFillColor(textC);
-	statPopup.text.setOutlineColor(outlineC);
+		popup.text.setFillColor(textC);
+		popup.text.setOutlineColor(outlineC);
 
-	if (statPopup.lifetime >= statPopup.maxLifeTime) statPopup.active = false;
+		if (popup.lifetime >= popup.maxLifeTime) {
+			popup.active = false;
+			popups.erase(
+				std::remove_if(popups.begin(), popups.end(), [](const FloatingText& pop) {
+					return pop.active == false;
+				}),
+				popups.end()
+			);
+		}
+	}
+}
+
+sf::Color Renderer::get_popup_color(GameEvent event) const {
+
+	if (event == GameEvent::STAT_CHANGE) {
+		return {92, 199, 108};
+	} else if (event == GameEvent::EVENT) {
+		return {230, 156, 105};
+	} else if (event == GameEvent::WARNING) {
+	    return {199, 92, 92};
+	}
+}
+
+sf::Vector2f Renderer::get_popup_position(PositionAnchor position) const {
+	
+	if (position == BottomLeft) {
+		return {25.f, 778.f};
+	} else if (position == TopCenter) {
+		return {24.f, 358.f};
+	} else if (position == LeftCenter) {
+		return {24.f, 548.f};
+	}
 }
 
 void Renderer::animate_subtitle(float dt) {
@@ -389,16 +437,25 @@ void Renderer::draw_pet_screen(void) {
 	window.draw(ageRec);
 	window.draw(ageTitle);
 	window.draw(ageStat);
-	
-	if (statPopup.active) window.draw(statPopup.text);
 
 	window.draw(idleSprite);
+
+	for (const FloatingText& popup : popups) {
+		if (popup.active == true) window.draw(popup.text);
+	}
 }
 
 void Renderer::render(void) {
 	
 	static sf::Clock clock;
 	float dt = clock.restart().asSeconds();
+
+	update_animation();
+	update_stats();
+	update_buttons(dt);
+	update_popups(dt);
+	animate_subtitle(dt);
+
 
 	window.clear();
 
@@ -407,11 +464,6 @@ void Renderer::render(void) {
 	} else if (gameState.shopOpened) {
 		draw_shop();
 	} else {
-		update_animation();
-		update_stats();
-		update_buttons(dt);
-		update_popup(dt);
-		animate_subtitle(dt);
 		draw_pet_screen();
 	}
 
@@ -425,24 +477,25 @@ void Renderer::handle_events(void) {
 
 		sf::Vector2f mousePos = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
 
+		// Button logic
 		if (const sf::Event::MouseButtonPressed* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>()) {
 			if (mouseEvent->button == sf::Mouse::Button::Left) {
 				if (playBtn.shape.getGlobalBounds().contains(mousePos)) {
 					gameState.playPressed = true;
 					pet_handle_input(gameState);
-					show_stat_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}));
+					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
 				if (feedBtn.shape.getGlobalBounds().contains(mousePos)) {
 					gameState.feedPressed = true;
 					pet_handle_input(gameState);
-					show_stat_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}));
+					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
 				if (sleepBtn.shape.getGlobalBounds().contains(mousePos)) {
 					gameState.sleepPressed = true;
 					pet_handle_input(gameState);
-					show_stat_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}));
+					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
 
@@ -455,6 +508,12 @@ void Renderer::handle_events(void) {
 				}
 			}
 		}
+
+		// Warnings
+		//if (gameState.isAlive) {
+		//	if (gameState.birthday) add_popup("It's my birthday today!", sf::Color({230, 156, 105}), 24.f, 358.f);
+		//	if (gameState.isIll) add_popup("I feel sick...", sf::Color({199, 92, 92}), 24.f, 548.f);
+		//} else {}
 
 		// Inventory / Shop
 	}
@@ -497,8 +556,7 @@ void Renderer::process_reaction_art(void) {
 			pet_set_art(game_state, "🤧");;
 			pet_set_reaction(game_state, "I feel sick...");
 		}
-	}
-	else {
+	} else {
 		pet_set_art(game_state, "💀");;
 		pet_set_reaction(game_state, "");
 		std::cout << '\t' << game_state.name << " has died...";

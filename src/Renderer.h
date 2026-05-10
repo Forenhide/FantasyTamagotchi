@@ -2,6 +2,7 @@
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include "PopupNotification.h"
 #include <string>
 #include <vector>
 
@@ -16,7 +17,7 @@ struct Button {
 	sf::FloatRect hitbox;
 
 	Button(const sf::Font& font) : text(font) {}
-};
+}; 
 
 struct FloatingText {
 
@@ -25,6 +26,7 @@ struct FloatingText {
 	float lifetime = 0.f;
 	float maxLifeTime = 1.f;
 	sf::Vector2f velocity = {0.f, -50.f};
+	sf::Vector2f position = {};
 
 	FloatingText(const sf::Font& font) : text(font) {}
 };
@@ -90,7 +92,7 @@ private:
 	Button inventoryBtn;
 	Button shopBtn;
 	sf::Music music;
-	FloatingText statPopup;
+	std::vector<FloatingText> popups;
 	bool btnHovered{false};
 	std::vector<Button*> buttons;
 
@@ -101,10 +103,14 @@ private:
 	void draw_pet_screen(void);
 	void draw_inventory(void);
 	void draw_shop(void);
-	void show_stat_popup(const std::string& str, const sf::Color& color);
-	void update_popup(float dt);
 	void animate_subtitle(float dt);
 	void update_buttons(float dt);
 	void update_button_hover(Button& btn, sf::Vector2f mousePos);
 	void animate_button(Button& btn, float dt);
+
+	void add_popup(const std::string& str, const sf::Color& color, float x, float y);
+	void update_popups(float dt);
+	sf::Color get_popup_color(GameEvent event) const;
+	sf::Vector2f get_popup_position(PositionAnchor position) const;
+	void consume_popups(std::vector<Request>& popups);
 };

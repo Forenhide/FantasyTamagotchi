@@ -26,6 +26,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\GameState.h" />
     <ClInclude Include="..\src\Item.h" />
+    <ClInclude Include="..\src\PopupNotification.h" />
     <ClInclude Include="..\src\Renderer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
