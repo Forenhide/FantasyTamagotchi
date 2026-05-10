@@ -9,7 +9,14 @@ Renderer::Renderer(GameState& gameState) :
 	gameState(gameState),
 	bgSprite(bgTexture),
 	idleSprite(idleTexture),
-	outerShadowSprite(outerShadowTexture), innerShadowSprite(innerShadowTexture), playBtn(font),
+	outerShadowSprite(outerShadowTexture), 
+	innerShadowSprite(innerShadowTexture), 
+	playBtnSprite(playBtnTexture),
+	feedBtnSprite(feedBtnTexture),
+	sleepBtnSprite(sleepBtnTexture),
+	inventoryBtnSprite(inventoryBtnTexture),
+	shopBtnSprite(shopBtnTexture),
+	playBtn(font),
 	feedBtn(font),
 	sleepBtn(font),
 	inventoryBtn(font),
@@ -60,6 +67,12 @@ void Renderer::load_resources(void) {
 	if (!idleTexture.loadFromFile("assets/idle.png")) throw std::runtime_error("pet");
 	if (!outerShadowTexture.loadFromFile("assets/shadow1.png")) throw std::runtime_error("outer shadow");
 	if (!innerShadowTexture.loadFromFile("assets/shadow2.png")) throw std::runtime_error("inner shadow");
+	if (!playBtnTexture.loadFromFile("assets/playBtn.png")) throw std::runtime_error("play btn");
+	if (!feedBtnTexture.loadFromFile("assets/feedBtn.png")) throw std::runtime_error("feed btn");
+	if (!sleepBtnTexture.loadFromFile("assets/sleepBtn.png")) throw std::runtime_error("sleep btn");
+	if (!inventoryBtnTexture.loadFromFile("assets/inventoryBtn.png")) throw std::runtime_error("inventory btn");
+	if (!shopBtnTexture.loadFromFile("assets/shopBtn.png")) throw std::runtime_error("shop btn");
+	
 	if (!font.openFromFile("assets/PressStart2P-Regular.ttf")) throw std::runtime_error("font");
 	if (!music.openFromFile("assets/Music.mp3")) throw std::runtime_error("music");
 }
@@ -71,6 +84,11 @@ void Renderer::setup_sprites(void) {
 	idleSprite.setTexture(idleTexture, true);
 	outerShadowSprite.setTexture(outerShadowTexture, true);
 	innerShadowSprite.setTexture(innerShadowTexture, true);
+	playBtnSprite.setTexture(playBtnTexture, true);
+	feedBtnSprite.setTexture(feedBtnTexture, true);
+	sleepBtnSprite.setTexture(sleepBtnTexture, true);
+	inventoryBtnSprite.setTexture(inventoryBtnTexture, true);
+	shopBtnSprite.setTexture(shopBtnTexture, true);
 
 	// Adjust scale
 	idleSprite.setScale({15.f, 15.f});
@@ -221,7 +239,7 @@ void Renderer::update_stats(void) {
 	ageStat.setString(std::to_string(gameState.age));
 }
 
-void Renderer::add_popup(const std::string& str, const sf::Color& color, float x, float y, int lifeTime) {
+void Renderer::add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime) {
 
 	FloatingText popup(font);
 
@@ -246,7 +264,7 @@ void Renderer::consume_popups(std::vector<Request>& popups) {
 	for (const auto& pop : popups) {
 		sf::Color col = get_popup_color(pop.event);
 		sf::Vector2f pos = get_popup_position(pop.pos);
-		int lifeTime = get_popup_lifetime(pop.event);
+		float lifeTime = get_popup_lifetime(pop.event);
 
 		add_popup(pop.message, col, pos.x, pos.y, lifeTime);
 	}
@@ -314,7 +332,7 @@ sf::Vector2f Renderer::get_popup_position(PositionAnchor position) const {
 	}
 }
 
-int Renderer::get_popup_lifetime(GameEvent event) const {
+float Renderer::get_popup_lifetime(GameEvent event) const {
 	
 	if (event == GameEvent::STAT_CHANGE) {
 		return 1.f;

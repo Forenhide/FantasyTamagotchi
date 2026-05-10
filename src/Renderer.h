@@ -40,7 +40,6 @@ public:
 	void handle_events(void);
 	bool is_open(void) const;
 	void setup_button(Button& btn, const std::string& text, const sf::Color& color, const sf::Color& outline, float x, float y, float width, float height, int fontSize, const sf::Color& fontColor);
-	void setup_buttons(void);
 	void setup_title(void);
 	void setup_stats_recs(sf::RectangleShape& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, const sf::Color& color, const sf::Color& outline, float x, float y, float width, float height, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor);
 	void setup_stats(void);
@@ -56,10 +55,20 @@ private:
 	sf::Texture idleTexture;
 	sf::Texture outerShadowTexture;
 	sf::Texture innerShadowTexture;
+	sf::Texture playBtnTexture;
+	sf::Texture feedBtnTexture;
+	sf::Texture sleepBtnTexture;
+	sf::Texture inventoryBtnTexture;
+	sf::Texture shopBtnTexture;
 	sf::Sprite bgSprite;
 	sf::Sprite idleSprite;
 	sf::Sprite outerShadowSprite;
 	sf::Sprite innerShadowSprite;
+	sf::Sprite playBtnSprite;
+	sf::Sprite feedBtnSprite;
+	sf::Sprite sleepBtnSprite;
+	sf::Sprite inventoryBtnSprite;
+	sf::Sprite shopBtnSprite;
 	std::vector<sf::IntRect> idleFrames;
 	float frameDuration = 0.13f;
 	int currentFrame = 0;
@@ -103,14 +112,15 @@ private:
 	void draw_inventory(void);
 	void draw_shop(void);
 	void animate_subtitle(float dt);
+	void setup_buttons(void);
 	void update_buttons(float dt);
 	void update_button_hover(Button& btn, sf::Vector2f mousePos);
 	void animate_button(Button& btn, float dt);
 
-	void add_popup(const std::string& str, const sf::Color& color, float x, float y, int lifeTime);
+	void add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime);
 	void update_popups(float dt);
 	sf::Color get_popup_color(GameEvent event) const;
 	sf::Vector2f get_popup_position(PositionAnchor position) const;
-	int get_popup_lifetime(GameEvent event) const;
+	float get_popup_lifetime(GameEvent event) const;
 	void consume_popups(std::vector<Request>& popups);
 };
