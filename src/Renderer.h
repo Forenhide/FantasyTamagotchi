@@ -3,10 +3,12 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include "PopupNotification.h"
+#include "SoundManager.h"
 #include <string>
 #include <vector>
 
 struct GameState;
+
 
 struct Button {
 	
@@ -46,6 +48,7 @@ public:
 
 private:
 	GameState& gameState;
+	SoundManager soundMgr;
 	sf::RenderWindow window;
 	sf::Vector2f mousePos;
 	

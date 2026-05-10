@@ -22,12 +22,14 @@
     <ClCompile Include="..\src\game_state.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\Renderer.cpp" />
+    <ClCompile Include="SoundManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\GameState.h" />
     <ClInclude Include="..\src\Item.h" />
     <ClInclude Include="..\src\PopupNotification.h" />
     <ClInclude Include="..\src\Renderer.h" />
+    <ClInclude Include="..\src\SoundManager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

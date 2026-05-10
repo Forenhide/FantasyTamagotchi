@@ -79,9 +79,6 @@ void Renderer::load_resources(void) {
 	
 	if (!font.openFromFile("assets/fonts/PressStart2P-Regular.ttf")) throw std::runtime_error("font");
 	if (!music.openFromFile("assets/sounds/Music.mp3")) throw std::runtime_error("music");
-	if (!btnClickBuffer.loadFromFile("assets/sounds/Click.mp3")) throw std::runtime_error("btn clicked sound");
-	if (!warningBuffer.loadFromFile("assets/sounds/Warning.wav")) throw std::runtime_error("warning sound");
-	if (!itemUsedBuffer.loadFromFile("assets/sounds/ItemUsed.wav")) throw std::runtime_error("item used sound");
 }
 
 void Renderer::setup_sprites(void) {
@@ -547,12 +544,6 @@ void Renderer::handle_events(void) {
 				}
 			}
 		}
-
-		// Warnings
-		//if (gameState.isAlive) {
-		//	if (gameState.birthday) add_popup("It's my birthday today!", sf::Color({230, 156, 105}), 24.f, 358.f);
-		//	if (gameState.isIll) add_popup("I feel sick...", sf::Color({199, 92, 92}), 24.f, 548.f);
-		//} else {}
 
 		// Inventory / Shop
 	}
