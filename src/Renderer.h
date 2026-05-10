@@ -10,13 +10,12 @@ struct GameState;
 
 struct Button {
 	
-	sf::RectangleShape shape;
-	sf::Text text;
+	sf::Sprite sprite;
+	sf::FloatRect hitbox;
 	float currentScale = 1.f;
 	bool isHovered = false;
-	sf::FloatRect hitbox;
 
-	Button(const sf::Font& font) : text(font) {}
+	Button(const sf::Sprite& btnSprite) : sprite(btnSprite) {}
 }; 
 
 struct FloatingText {
@@ -39,7 +38,7 @@ public:
 	void render(void);
 	void handle_events(void);
 	bool is_open(void) const;
-	void setup_button(Button& btn, const std::string& text, const sf::Color& color, const sf::Color& outline, float x, float y, float width, float height, int fontSize, const sf::Color& fontColor);
+	void setup_button(Button& btn, sf::Texture& texture, float x, float y);
 	void setup_title(void);
 	void setup_stats_recs(sf::RectangleShape& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, const sf::Color& color, const sf::Color& outline, float x, float y, float width, float height, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor);
 	void setup_stats(void);
@@ -72,6 +71,7 @@ private:
 	std::vector<sf::IntRect> idleFrames;
 	float frameDuration = 0.13f;
 	int currentFrame = 0;
+
 	sf::Font font;
 	sf::Text title1;
 	sf::Text title2;
@@ -94,24 +94,38 @@ private:
 	sf::RectangleShape ageRec;
 	sf::Text ageTitle;
 	sf::Text ageStat;
+
 	Button playBtn;
 	Button feedBtn;
 	Button sleepBtn;
 	Button inventoryBtn;
 	Button shopBtn;
-	sf::Music music;
-	std::vector<FloatingText> popups;
-	bool btnHovered{false};
+
 	std::vector<Button*> buttons;
+	bool btnHovered{false};
+
+	sf::Music music;
+	sf::SoundBuffer btnClickBuffer;
+	sf::SoundBuffer itemUsedBuffer;
+	sf::SoundBuffer warningBuffer;
+	sf::Sound btnClickSound;
+	sf::Sound itemUsedSound;
+	sf::Sound warningSound;
+
+	std::vector<FloatingText> popups;
 
 	void load_resources(void);
 	void setup_sprites(void);
-	void update_animation(void);
-	void update_stats(void);
+	void setup_sounds(void);
+	
 	void draw_pet_screen(void);
 	void draw_inventory(void);
 	void draw_shop(void);
+	
 	void animate_subtitle(float dt);
+	void update_animation(void);
+	void update_stats(void);
+
 	void setup_buttons(void);
 	void update_buttons(float dt);
 	void update_button_hover(Button& btn, sf::Vector2f mousePos);
@@ -123,4 +137,5 @@ private:
 	sf::Vector2f get_popup_position(PositionAnchor position) const;
 	float get_popup_lifetime(GameEvent event) const;
 	void consume_popups(std::vector<Request>& popups);
+	sf::Sound get_popup_sound(GameEvent event) const;
 };

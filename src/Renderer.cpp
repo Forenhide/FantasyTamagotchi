@@ -16,11 +16,14 @@ Renderer::Renderer(GameState& gameState) :
 	sleepBtnSprite(sleepBtnTexture),
 	inventoryBtnSprite(inventoryBtnTexture),
 	shopBtnSprite(shopBtnTexture),
-	playBtn(font),
-	feedBtn(font),
-	sleepBtn(font),
-	inventoryBtn(font),
-	shopBtn(font),
+	playBtn(playBtnSprite),
+	feedBtn(feedBtnSprite),
+	sleepBtn(sleepBtnSprite),
+	inventoryBtn(inventoryBtnSprite),
+	shopBtn(shopBtnSprite),
+	btnClickSound(btnClickBuffer),
+	warningSound(warningBuffer),
+	itemUsedSound(itemUsedBuffer),
 	title1(font, "FANTASY", 48),
 	title2(font, "TAMAGOTCHI", 48),
 	subtitle(font, "* Kitty Edition *", 20),
@@ -44,6 +47,7 @@ bool Renderer::init(void) {
 
 	load_resources();
 	setup_sprites();
+	setup_sounds();
 	setup_buttons();
 	setup_title();
 	setup_stats();
@@ -63,18 +67,21 @@ bool Renderer::is_open(void) const {
 
 void Renderer::load_resources(void) {
 	
-	if (!bgTexture.loadFromFile("assets/background.jpg")) throw std::runtime_error("bg");
-	if (!idleTexture.loadFromFile("assets/idle.png")) throw std::runtime_error("pet");
-	if (!outerShadowTexture.loadFromFile("assets/shadow1.png")) throw std::runtime_error("outer shadow");
-	if (!innerShadowTexture.loadFromFile("assets/shadow2.png")) throw std::runtime_error("inner shadow");
-	if (!playBtnTexture.loadFromFile("assets/playBtn.png")) throw std::runtime_error("play btn");
-	if (!feedBtnTexture.loadFromFile("assets/feedBtn.png")) throw std::runtime_error("feed btn");
-	if (!sleepBtnTexture.loadFromFile("assets/sleepBtn.png")) throw std::runtime_error("sleep btn");
-	if (!inventoryBtnTexture.loadFromFile("assets/inventoryBtn.png")) throw std::runtime_error("inventory btn");
-	if (!shopBtnTexture.loadFromFile("assets/shopBtn.png")) throw std::runtime_error("shop btn");
+	if (!bgTexture.loadFromFile("assets/sprites/background.jpg")) throw std::runtime_error("bg");
+	if (!idleTexture.loadFromFile("assets/sprites/idle.png")) throw std::runtime_error("pet");
+	if (!outerShadowTexture.loadFromFile("assets/sprites/shadow1.png")) throw std::runtime_error("outer shadow");
+	if (!innerShadowTexture.loadFromFile("assets/sprites/shadow2.png")) throw std::runtime_error("inner shadow");
+	if (!playBtnTexture.loadFromFile("assets/sprites/playBtn.png")) throw std::runtime_error("play btn");
+	if (!feedBtnTexture.loadFromFile("assets/sprites/feedBtn.png")) throw std::runtime_error("feed btn");
+	if (!sleepBtnTexture.loadFromFile("assets/sprites/sleepBtn.png")) throw std::runtime_error("sleep btn");
+	if (!inventoryBtnTexture.loadFromFile("assets/sprites/inventoryBtn.png")) throw std::runtime_error("inventory btn");
+	if (!shopBtnTexture.loadFromFile("assets/sprites/shopBtn.png")) throw std::runtime_error("shop btn");
 	
-	if (!font.openFromFile("assets/PressStart2P-Regular.ttf")) throw std::runtime_error("font");
-	if (!music.openFromFile("assets/Music.mp3")) throw std::runtime_error("music");
+	if (!font.openFromFile("assets/fonts/PressStart2P-Regular.ttf")) throw std::runtime_error("font");
+	if (!music.openFromFile("assets/sounds/Music.mp3")) throw std::runtime_error("music");
+	if (!btnClickBuffer.loadFromFile("assets/sounds/Click.mp3")) throw std::runtime_error("btn clicked sound");
+	if (!warningBuffer.loadFromFile("assets/sounds/Warning.wav")) throw std::runtime_error("warning sound");
+	if (!itemUsedBuffer.loadFromFile("assets/sounds/ItemUsed.wav")) throw std::runtime_error("item used sound");
 }
 
 void Renderer::setup_sprites(void) {
@@ -97,6 +104,17 @@ void Renderer::setup_sprites(void) {
 	idleSprite.setPosition({80.f, 420.f});
 	outerShadowSprite.setPosition({133.f, 780.f});
 	innerShadowSprite.setPosition({182.f, 795.f});
+}
+
+void Renderer::setup_sounds(void) {
+
+	btnClickSound.setBuffer(btnClickBuffer);
+	warningSound.setBuffer(warningBuffer);
+	itemUsedSound.setBuffer(itemUsedBuffer);
+
+	btnClickSound.setVolume(5.f);
+	warningSound.setVolume(4.f);
+	itemUsedSound.setVolume(5.f);
 }
 
 void Renderer::setup_stats(void) {
@@ -166,42 +184,67 @@ void Renderer::setup_title(void) {
 
 void Renderer::setup_buttons(void) {
 	
-	setup_button(playBtn, "Play", {255, 255, 255}, {115, 192, 255}, 24.f, 908.f, 178.f, 46.f, 20, {115, 192, 255});
-	setup_button(feedBtn, "Feed", {255, 255, 255}, {115, 192, 255}, 210.f, 908.f, 178.f, 46.f, 20, {115, 192, 255});
-	setup_button(sleepBtn, "Sleep", {255, 255, 255}, {115, 192, 255}, 397.f, 908.f, 178.f, 46.f, 20, {115, 192, 255});
-	setup_button(inventoryBtn, "Inventory", {255, 255, 255}, {255, 174, 174}, 24.f, 962.f, 216.f, 46.f, 20, {255, 174, 174});
-	setup_button(shopBtn, "Shop", {255, 255, 255}, {255, 174, 174}, 360.f, 962.f, 216.f, 46.f, 20, {255, 174, 174});
+	setup_button(playBtn, playBtnTexture, 24.f, 908.f);
+	setup_button(feedBtn, feedBtnTexture, 210.f, 908.f);
+	setup_button(sleepBtn, sleepBtnTexture, 397.f, 908.f);
+	setup_button(inventoryBtn, inventoryBtnTexture, 24.f, 962.f);
+	setup_button(shopBtn, shopBtnTexture, 360.f, 962.f);
 }
 
-void Renderer::setup_button(Button& btn, const std::string& text, const sf::Color& color, const sf::Color& outline, float x, float y, float width, float height, int fontSize, const sf::Color& fontColor) {
+void Renderer::setup_button(Button& btn, sf::Texture& texture, float x, float y) {
 
-	// Shape
-	btn.shape.setSize({width, height});
-	btn.shape.setFillColor(color);
-	btn.shape.setOutlineColor(outline);
-	btn.shape.setOutlineThickness(2.f);
+	btn.sprite.setTexture(texture, true);
 
-	// Text
-	btn.text.setString(text);
-	btn.text.setCharacterSize(fontSize);
-	btn.text.setFillColor(fontColor);
-
-	// Center text
-	sf::FloatRect text_bounds = btn.text.getLocalBounds();
-
-	btn.shape.setOrigin(btn.shape.getSize() / 2.f);
-	btn.shape.setScale({btn.currentScale, btn.currentScale});
-	btn.shape.setPosition({x + width / 2.f, y + height / 2.f});
-
-	sf::Vector2f pos = btn.shape.getPosition();
-
-	btn.text.setOrigin({text_bounds.position.x + text_bounds.size.x / 2.f, text_bounds.position.y + text_bounds.size.y / 2.f});
-	btn.text.setPosition({pos.x, pos.y});
-
-	btn.hitbox.size = {width, height};
+	btn.hitbox.size = btn.sprite.getGlobalBounds().size;
 	btn.hitbox.position = {x, y};
 
+	btn.sprite.setOrigin(btn.sprite.getGlobalBounds().size / 2.f);
+	btn.sprite.setScale({btn.currentScale, btn.currentScale});
+	btn.sprite.setPosition({x + btn.sprite.getGlobalBounds().size.x / 2.f, y + btn.sprite.getGlobalBounds().size.y / 2.f});
+
 	buttons.push_back(&btn);
+}
+
+void Renderer::update_buttons(float dt) {
+
+	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
+	update_button_hover(playBtn, mousePos);
+	update_button_hover(feedBtn, mousePos);
+	update_button_hover(sleepBtn, mousePos);
+	update_button_hover(inventoryBtn, mousePos);
+	update_button_hover(shopBtn, mousePos);
+
+	animate_button(playBtn, dt);
+	animate_button(feedBtn, dt);
+	animate_button(sleepBtn, dt);
+	animate_button(inventoryBtn, dt);
+	animate_button(shopBtn, dt);
+}
+
+void Renderer::update_button_hover(Button& btn, sf::Vector2f mousePos) {
+
+	bool hovering = btn.hitbox.contains(mousePos);
+	if (hovering != btn.isHovered) btn.isHovered = hovering;
+}
+
+void Renderer::animate_button(Button& btn, float dt) {
+
+	static const float NORMAL_SCALE = 1.f;
+	static const float TARGET_SCALE = 1.1f;
+	static const float SPEED = 1.f;
+
+	float target = btn.isHovered ? TARGET_SCALE : NORMAL_SCALE;
+
+	if (btn.currentScale < target) {
+		btn.currentScale += SPEED * dt;
+		if (btn.currentScale > target) btn.currentScale = target;
+	} else if (btn.currentScale > target) {
+		btn.currentScale -= SPEED * dt;
+		if (btn.currentScale < target) btn.currentScale = target;
+	}
+
+	btn.sprite.setScale({btn.currentScale, btn.currentScale});
 }
 
 void Renderer::setup_animation(void) {
@@ -276,8 +319,7 @@ void Renderer::update_popups(float dt) {
 
 	auto pops = drain_pending_popups(gameState);
 	consume_popups(pops);
-	
-	
+
 	for (FloatingText& popup : popups) {
 		if (!popup.active) return;
 
@@ -294,6 +336,7 @@ void Renderer::update_popups(float dt) {
 		popup.text.setFillColor(textC);
 		popup.text.setOutlineColor(outlineC);
 
+		// Delete
 		if (popup.lifetime >= popup.maxLifetime) {
 			popup.active = false;
 			popups.erase(
@@ -303,6 +346,13 @@ void Renderer::update_popups(float dt) {
 				popups.end()
 			);
 		}
+	}
+}
+
+sf::Sound Renderer::get_popup_sound(GameEvent event) const {
+	
+	if (event == GameEvent::WARNING) {
+		return warningSound;
 	}
 }
 
@@ -386,53 +436,6 @@ void Renderer::animate_subtitle(float dt) {
 	subtitle.setFillColor(color);
 }
 
-void Renderer::update_buttons(float dt) {
-
-	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-
-	update_button_hover(playBtn, mousePos);
-	update_button_hover(feedBtn, mousePos);
-	update_button_hover(sleepBtn, mousePos);
-	update_button_hover(inventoryBtn, mousePos);
-	update_button_hover(shopBtn, mousePos);
-
-	animate_button(playBtn, dt);
-	animate_button(feedBtn, dt);
-	animate_button(sleepBtn, dt);
-	animate_button(inventoryBtn, dt);
-	animate_button(shopBtn, dt);
-}
-
-void Renderer::update_button_hover(Button& btn, sf::Vector2f mousePos) {
-
-	bool hovering = btn.hitbox.contains(mousePos);
-	if (hovering != btn.isHovered) {
-		btn.isHovered = hovering;
-	}
-}
-
-void Renderer::animate_button(Button& btn, float dt) {
-
-	static const float TARGET_SCALE = 1.1f;
-	static const float NORMAL_SCALE = 1.0f;
-	static const float SPEED = 1.f;
-
-	float target = btn.isHovered ? TARGET_SCALE : NORMAL_SCALE;
-
-	if (btn.currentScale < target) {
-		btn.currentScale += SPEED * dt;
-		if (btn.currentScale > target) btn.currentScale = target;
-	} else if (btn.currentScale > target) {
-		btn.currentScale -= SPEED * dt;
-		if (btn.currentScale < target) btn.currentScale = target;
-	}
-
-	btn.shape.setScale({btn.currentScale, btn.currentScale});
-
-	sf::Vector2f pos = btn.shape.getPosition();
-	btn.text.setPosition(pos);
-}
-
 void Renderer::draw_pet_screen(void) {
 	
 	window.draw(bgSprite);
@@ -444,17 +447,12 @@ void Renderer::draw_pet_screen(void) {
 	window.draw(title2);
 	window.draw(subtitle);
 	for (Button* btn : buttons) {
-		if (!(btn->isHovered)) {
-			window.draw(btn->shape);
-			window.draw(btn->text);
-		}
+		if (!(btn->isHovered)) window.draw(btn->sprite);
 	}
 	for (Button* btn : buttons) {
-		if (btn->isHovered) {
-			window.draw(btn->shape);
-			window.draw(btn->text);
-		}
+		if (btn->isHovered) window.draw(btn->sprite);
 	}
+	window.draw(playBtn.sprite);
 	window.draw(nameRec);
 	window.draw(nameTitle);
 	window.draw(nameStat);
@@ -516,30 +514,35 @@ void Renderer::handle_events(void) {
 		// Button logic
 		if (const sf::Event::MouseButtonPressed* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>()) {
 			if (mouseEvent->button == sf::Mouse::Button::Left) {
-				if (playBtn.shape.getGlobalBounds().contains(mousePos)) {
+				if (playBtn.sprite.getGlobalBounds().contains(mousePos)) {
+					btnClickSound.play();
 					gameState.playPressed = true;
 					pet_handle_input(gameState);
 					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
-				if (feedBtn.shape.getGlobalBounds().contains(mousePos)) {
+				if (feedBtn.sprite.getGlobalBounds().contains(mousePos)) {
+					btnClickSound.play();
 					gameState.feedPressed = true;
 					pet_handle_input(gameState);
 					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
-				if (sleepBtn.shape.getGlobalBounds().contains(mousePos)) {
+				if (sleepBtn.sprite.getGlobalBounds().contains(mousePos)) {
+					btnClickSound.play();
 					gameState.sleepPressed = true;
 					pet_handle_input(gameState);
 					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
 
-				if (inventoryBtn.shape.getGlobalBounds().contains(mousePos)) {
+				if (inventoryBtn.sprite.getGlobalBounds().contains(mousePos)) {
+					btnClickSound.play();
 					gameState.inventoryOpened = true;
 				}
 
-				if (shopBtn.shape.getGlobalBounds().contains(mousePos)) {
+				if (shopBtn.sprite.getGlobalBounds().contains(mousePos)) {
+					btnClickSound.play();
 					gameState.shopOpened = true;
 				}
 			}
