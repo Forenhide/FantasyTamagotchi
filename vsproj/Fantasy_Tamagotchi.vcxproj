@@ -22,7 +22,7 @@
     <ClCompile Include="..\src\game_state.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\Renderer.cpp" />
-    <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="..\src\SoundManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\GameState.h" />

@@ -25,5 +25,7 @@ struct SoundManager {
 	int nextSound[SoundEffect::Count] = {0};
 
 	bool init(void);
+	void loadSounds(void);
+	void setSounds(void);
 	void play(SoundEffect::Type effect);
 };
