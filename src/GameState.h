@@ -49,6 +49,7 @@ struct GameState {
 	bool isIll{};
 	bool starving{};
 	bool bored{};
+	bool isPlaying{false};
 
 	// Inventory & Shop
 	std::vector<Item> inventoryItems;

@@ -8,7 +8,9 @@
 Renderer::Renderer(GameState& gameState) : 
 	gameState(gameState),
 	bgSprite(bgTexture),
-	idleSprite(idleTexture),
+	petIdleSprite(petIdleTexture),
+	petPlaySprite(petPlayTexture),
+	petHurtSprite(petHurtTexture),
 	outerShadowSprite(outerShadowTexture), 
 	innerShadowSprite(innerShadowTexture), 
 	playBtnSprite(playBtnTexture),
@@ -47,7 +49,8 @@ bool Renderer::init(void) {
 	setup_buttons();
 	setup_title();
 	setup_stats();
-	setup_animation();
+	setup_pet_idle_animation();
+	setup_pet_play_animation();
 
 	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
 
@@ -66,7 +69,9 @@ bool Renderer::is_open(void) const {
 void Renderer::load_resources(void) {
 	
 	if (!bgTexture.loadFromFile("assets/sprites/background.jpg")) throw std::runtime_error("bg");
-	if (!idleTexture.loadFromFile("assets/sprites/idle.png")) throw std::runtime_error("pet");
+	if (!petIdleTexture.loadFromFile("assets/sprites/IDLE.png")) throw std::runtime_error("pet");
+	if (!petPlayTexture.loadFromFile("assets/sprites/PLAY.png")) throw std::runtime_error("pet");
+	if (!petHurtTexture.loadFromFile("assets/sprites/HURT.png")) throw std::runtime_error("pet");
 	if (!outerShadowTexture.loadFromFile("assets/sprites/shadow1.png")) throw std::runtime_error("outer shadow");
 	if (!innerShadowTexture.loadFromFile("assets/sprites/shadow2.png")) throw std::runtime_error("inner shadow");
 	if (!playBtnTexture.loadFromFile("assets/sprites/playBtn.png")) throw std::runtime_error("play btn");
@@ -83,7 +88,9 @@ void Renderer::setup_sprites(void) {
 	
 	// Set textures
 	bgSprite.setTexture(bgTexture, true);
-	idleSprite.setTexture(idleTexture, true);
+	petIdleSprite.setTexture(petIdleTexture, true);
+	petPlaySprite.setTexture(petPlayTexture, true);
+	petHurtSprite.setTexture(petHurtTexture, true);
 	outerShadowSprite.setTexture(outerShadowTexture, true);
 	innerShadowSprite.setTexture(innerShadowTexture, true);
 	playBtnSprite.setTexture(playBtnTexture, true);
@@ -93,12 +100,68 @@ void Renderer::setup_sprites(void) {
 	shopBtnSprite.setTexture(shopBtnTexture, true);
 
 	// Adjust scale
-	idleSprite.setScale({15.f, 15.f});
+	petIdleSprite.setScale({15.f, 15.f});
+	petPlaySprite.setScale({15.f, 15.f});
+	petHurtSprite.setScale({15.f, 15.f});
 
 	// Adjust positions
-	idleSprite.setPosition({80.f, 420.f});
+	petIdleSprite.setPosition({-300.f, 110.f});
+	petPlaySprite.setPosition({-300.f, 110.f});
+	petHurtSprite.setPosition({-300.f, 110.f});
 	outerShadowSprite.setPosition({133.f, 780.f});
 	innerShadowSprite.setPosition({182.f, 795.f});
+}
+
+void Renderer::setup_pet_idle_animation(void) {
+	
+	idleFrames.push_back(sf::IntRect({0, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({80, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({160, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({240, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({320, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({400, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({480, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({560, 0}, {80, 64}));
+
+	petIdleSprite.setTexture(petIdleTexture, true);
+	petIdleSprite.setTextureRect(idleFrames[0]);
+}
+
+void Renderer::update_pet_idle_animation(void) {
+	
+	static sf::Clock clock;
+
+	if (clock.getElapsedTime().asSeconds() >= frameDuration) {
+		currentFrame = (currentFrame + 1) % idleFrames.size();
+		petIdleSprite.setTextureRect(idleFrames[currentFrame]);
+		clock.restart();
+	}
+}
+
+void Renderer::setup_pet_play_animation(void) {
+	
+	playFrames.push_back(sf::IntRect({0, 0}, {80, 64}));
+	playFrames.push_back(sf::IntRect({80, 0}, {80, 64}));
+	playFrames.push_back(sf::IntRect({160, 0}, {80, 64}));
+	playFrames.push_back(sf::IntRect({240, 0}, {80, 64}));
+	playFrames.push_back(sf::IntRect({320, 0}, {80, 64}));
+	playFrames.push_back(sf::IntRect({400, 0}, {80, 64}));
+	playFrames.push_back(sf::IntRect({480, 0}, {80, 64}));
+	playFrames.push_back(sf::IntRect({560, 0}, {80, 64}));
+
+	petPlaySprite.setTexture(petPlayTexture, true);
+	petPlaySprite.setTextureRect(playFrames[0]);
+}
+
+void Renderer::update_pet_play_animation(void) {
+	
+	static sf::Clock clock;
+
+	if (clock.getElapsedTime().asSeconds() >= frameDuration) {
+		currentFrame = (currentFrame + 1) % playFrames.size();
+		petPlaySprite.setTextureRect(playFrames[currentFrame]);
+		clock.restart();
+	}
 }
 
 void Renderer::setup_stats(void) {
@@ -229,32 +292,6 @@ void Renderer::animate_button(Button& btn, float dt) {
 	}
 
 	btn.sprite.setScale({btn.currentScale, btn.currentScale});
-}
-
-void Renderer::setup_animation(void) {
-	
-	idleFrames.push_back(sf::IntRect({0, 0}, {29, 28}));
-	idleFrames.push_back(sf::IntRect({29, 0}, {28, 28}));
-	idleFrames.push_back(sf::IntRect({57, 0}, {28, 28}));
-	idleFrames.push_back(sf::IntRect({85, 0}, {28, 28}));
-	idleFrames.push_back(sf::IntRect({113, 0}, {28, 28}));
-	idleFrames.push_back(sf::IntRect({141, 0}, {28, 28}));
-	idleFrames.push_back(sf::IntRect({169, 0}, {28, 28}));
-	idleFrames.push_back(sf::IntRect({197, 0}, {29, 28}));
-
-	idleSprite.setTexture(idleTexture);
-	idleSprite.setTextureRect(idleFrames[0]);
-}
-
-void Renderer::update_animation(void) {
-	
-	static sf::Clock clock;
-
-	if (clock.getElapsedTime().asSeconds() >= frameDuration) {
-		currentFrame = (currentFrame + 1) % idleFrames.size();
-		idleSprite.setTextureRect(idleFrames[currentFrame]);
-		clock.restart();
-	}
 }
 
 void Renderer::update_stats(void) {
@@ -460,7 +497,7 @@ void Renderer::draw_pet_screen(void) {
 	window.draw(ageTitle);
 	window.draw(ageStat);
 
-	window.draw(idleSprite);
+	window.draw(petIdleSprite);
 
 	for (const FloatingText& popup : popups) {
 		if (popup.active == true) window.draw(popup.text);
@@ -472,7 +509,7 @@ void Renderer::render(void) {
 	static sf::Clock clock;
 	float dt = clock.restart().asSeconds();
 
-	update_animation();
+	update_pet_idle_animation();
 	update_stats();
 	update_buttons(dt);
 	update_popups(dt);
@@ -506,21 +543,18 @@ void Renderer::handle_events(void) {
 					soundMgr.play(SoundEffect::Click);
 					gameState.playPressed = true;
 					pet_handle_input(gameState);
-					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
 				if (feedBtn.sprite.getGlobalBounds().contains(mousePos)) {
 					soundMgr.play(SoundEffect::Click);
 					gameState.feedPressed = true;
 					pet_handle_input(gameState);
-					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
 				if (sleepBtn.sprite.getGlobalBounds().contains(mousePos)) {
 					soundMgr.play(SoundEffect::Click);
 					gameState.sleepPressed = true;
 					pet_handle_input(gameState);
-					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
 

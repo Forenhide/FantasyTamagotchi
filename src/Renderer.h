@@ -44,7 +44,8 @@ public:
 	void setup_title(void);
 	void setup_stats_recs(sf::RectangleShape& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, const sf::Color& color, const sf::Color& outline, float x, float y, float width, float height, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor);
 	void setup_stats(void);
-	void setup_animation(void);
+	void setup_pet_idle_animation(void);
+	void setup_pet_play_animation(void);
 
 private:
 	GameState& gameState;
@@ -54,7 +55,9 @@ private:
 	
 	// Resources
 	sf::Texture bgTexture;
-	sf::Texture idleTexture;
+	sf::Texture petIdleTexture;
+	sf::Texture petPlayTexture;
+	sf::Texture petHurtTexture;
 	sf::Texture outerShadowTexture;
 	sf::Texture innerShadowTexture;
 	sf::Texture playBtnTexture;
@@ -63,7 +66,9 @@ private:
 	sf::Texture inventoryBtnTexture;
 	sf::Texture shopBtnTexture;
 	sf::Sprite bgSprite;
-	sf::Sprite idleSprite;
+	sf::Sprite petIdleSprite;
+	sf::Sprite petPlaySprite;
+	sf::Sprite petHurtSprite;
 	sf::Sprite outerShadowSprite;
 	sf::Sprite innerShadowSprite;
 	sf::Sprite playBtnSprite;
@@ -72,6 +77,7 @@ private:
 	sf::Sprite inventoryBtnSprite;
 	sf::Sprite shopBtnSprite;
 	std::vector<sf::IntRect> idleFrames;
+	std::vector<sf::IntRect> playFrames;
 	float frameDuration = 0.13f;
 	int currentFrame = 0;
 
@@ -119,7 +125,8 @@ private:
 	void draw_shop(void);
 	
 	void animate_subtitle(float dt);
-	void update_animation(void);
+	void update_pet_idle_animation(void);
+	void update_pet_play_animation(void);
 	void update_stats(void);
 
 	void setup_buttons(void);
