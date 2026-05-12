@@ -1,9 +1,10 @@
 #pragma once
 
 #include <SFML/Audio.hpp>
+#include <vector>
 
 
-constexpr int MAX_SOUNDS{8};
+constexpr int MAX_SOUNDS{3};
 
 namespace SoundEffect {
 	
@@ -20,7 +21,7 @@ namespace SoundEffect {
 struct SoundManager {
 
 	sf::SoundBuffer buffers[SoundEffect::Count];
-	sf::Sound sounds[SoundEffect::Count * MAX_SOUNDS];
+	std::vector<sf::Sound> sounds;
 
 	int nextSound[SoundEffect::Count] = {0};
 

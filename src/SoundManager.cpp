@@ -21,13 +21,14 @@ void SoundManager::setSounds(void) {
 	
 	for (int type = 0; type < SoundEffect::Count; ++type) {
 		for (int sound = 0; sound < MAX_SOUNDS; ++sound) {
-			int index = type * MAX_SOUNDS + sound;
-			sounds[index].setBuffer(buffers[type]);
+			sounds.emplace_back(buffers[type]);
 
-			if (type == SoundEffect::Click)			sounds[index].setVolume(5.f);
-			else if (type == SoundEffect::Warning)  sounds[index].setVolume(4.f);
-			else if (type == SoundEffect::ItemUsed) sounds[index].setVolume(5.f);
-			else									sounds[index].setVolume(5.f);
+			sf::Sound& s = sounds.back();
+
+			if (type == SoundEffect::Click)			s.setVolume(2.f);
+			else if (type == SoundEffect::Warning)  s.setVolume(6.f);
+			else if (type == SoundEffect::ItemUsed) s.setVolume(5.f);
+			else									s.setVolume(5.f);
 		}
 	}
 }

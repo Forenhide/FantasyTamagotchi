@@ -21,9 +21,6 @@ Renderer::Renderer(GameState& gameState) :
 	sleepBtn(sleepBtnSprite),
 	inventoryBtn(inventoryBtnSprite),
 	shopBtn(shopBtnSprite),
-	btnClickSound(btnClickBuffer),
-	warningSound(warningBuffer),
-	itemUsedSound(itemUsedBuffer),
 	title1(font, "FANTASY", 48),
 	title2(font, "TAMAGOTCHI", 48),
 	subtitle(font, "* Kitty Edition *", 20),
@@ -47,14 +44,15 @@ bool Renderer::init(void) {
 
 	load_resources();
 	setup_sprites();
-	setup_sounds();
 	setup_buttons();
 	setup_title();
 	setup_stats();
 	setup_animation();
 
+	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
+
 	music.play();
-	music.setVolume(3.f);
+	music.setVolume(0.5f);
 	music.setLooping(true);
 
 	return true;
@@ -101,17 +99,6 @@ void Renderer::setup_sprites(void) {
 	idleSprite.setPosition({80.f, 420.f});
 	outerShadowSprite.setPosition({133.f, 780.f});
 	innerShadowSprite.setPosition({182.f, 795.f});
-}
-
-void Renderer::setup_sounds(void) {
-
-	btnClickSound.setBuffer(btnClickBuffer);
-	warningSound.setBuffer(warningBuffer);
-	itemUsedSound.setBuffer(itemUsedBuffer);
-
-	btnClickSound.setVolume(5.f);
-	warningSound.setVolume(4.f);
-	itemUsedSound.setVolume(5.f);
 }
 
 void Renderer::setup_stats(void) {
@@ -307,6 +294,17 @@ void Renderer::consume_popups(std::vector<Request>& popups) {
 		float lifeTime = get_popup_lifetime(pop.event);
 
 		add_popup(pop.message, col, pos.x, pos.y, lifeTime);
+
+		switch (pop.event) {
+			case GameEvent::WARNING:
+				soundMgr.play(SoundEffect::Warning);
+				break;
+			case GameEvent::EVENT:
+				soundMgr.play(SoundEffect::Birthday);
+				break;
+			default: 
+				break;
+		}
 	}
 
 	popups.clear();
@@ -343,13 +341,6 @@ void Renderer::update_popups(float dt) {
 				popups.end()
 			);
 		}
-	}
-}
-
-sf::Sound Renderer::get_popup_sound(GameEvent event) const {
-	
-	if (event == GameEvent::WARNING) {
-		return warningSound;
 	}
 }
 
@@ -512,21 +503,21 @@ void Renderer::handle_events(void) {
 		if (const sf::Event::MouseButtonPressed* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>()) {
 			if (mouseEvent->button == sf::Mouse::Button::Left) {
 				if (playBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					btnClickSound.play();
+					soundMgr.play(SoundEffect::Click);
 					gameState.playPressed = true;
 					pet_handle_input(gameState);
 					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
 				if (feedBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					btnClickSound.play();
+					soundMgr.play(SoundEffect::Click);
 					gameState.feedPressed = true;
 					pet_handle_input(gameState);
 					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
 				}
 
 				if (sleepBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					btnClickSound.play();
+					soundMgr.play(SoundEffect::Click);
 					gameState.sleepPressed = true;
 					pet_handle_input(gameState);
 					//add_popup("+" + std::to_string(gameState.newStat), sf::Color({92, 199, 108}), 25.f, 778.f);
@@ -534,12 +525,12 @@ void Renderer::handle_events(void) {
 
 
 				if (inventoryBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					btnClickSound.play();
+					soundMgr.play(SoundEffect::Click);
 					gameState.inventoryOpened = true;
 				}
 
 				if (shopBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					btnClickSound.play();
+					soundMgr.play(SoundEffect::Click);
 					gameState.shopOpened = true;
 				}
 			}

@@ -108,18 +108,11 @@ private:
 	bool btnHovered{false};
 
 	sf::Music music;
-	sf::SoundBuffer btnClickBuffer;
-	sf::SoundBuffer itemUsedBuffer;
-	sf::SoundBuffer warningBuffer;
-	sf::Sound btnClickSound;
-	sf::Sound itemUsedSound;
-	sf::Sound warningSound;
 
 	std::vector<FloatingText> popups;
 
 	void load_resources(void);
 	void setup_sprites(void);
-	void setup_sounds(void);
 	
 	void draw_pet_screen(void);
 	void draw_inventory(void);
@@ -140,5 +133,4 @@ private:
 	sf::Vector2f get_popup_position(PositionAnchor position) const;
 	float get_popup_lifetime(GameEvent event) const;
 	void consume_popups(std::vector<Request>& popups);
-	sf::Sound get_popup_sound(GameEvent event) const;
 };
