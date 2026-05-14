@@ -8,7 +8,7 @@ enum class ItemType {
 	
 	FOOD,
 	MEDICINE,
-	TOY,
+	MOOD,
 	ENERGY,
 	UNIVERSAL
 };
@@ -17,7 +17,7 @@ struct Item {
 	
 	ItemType type;
 	std::string name;
-	int stat;
+	int value;
 	int price;
 };
 

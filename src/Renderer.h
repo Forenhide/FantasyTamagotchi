@@ -80,7 +80,7 @@ private:
 	sf::Texture joyPotionTexture;
 	sf::Texture energyPotionTexture;
 	sf::Texture universalPotionTexture;
-	sf::Texture motiMotiTexture;
+	sf::Texture mochiiTexture;
 	sf::Texture pineappleTexture;
 	sf::Texture teddyBearTexture;
 	sf::Texture tetrisTexture;
@@ -117,13 +117,13 @@ private:
 	sf::Sprite joyPotionSprite;
 	sf::Sprite energyPotionSprite;
 	sf::Sprite universalPotionSprite;
-	sf::Sprite motiMotiSprite;
+	sf::Sprite mochiSprite;
 	sf::Sprite pineappleSprite;
 	sf::Sprite teddyBearSprite;
 	sf::Sprite tetrisSprite;
 	sf::Sprite tiramisuSprite;
 	sf::Sprite yoYoSprite;
-
+	
 	std::vector<sf::IntRect> idleFrames;
 	std::vector<sf::IntRect> playFrames;
 	float frameDuration = 0.13f;

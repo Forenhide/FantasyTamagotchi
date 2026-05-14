@@ -38,7 +38,7 @@ Renderer::Renderer(GameState& gameState) :
 	joyPotionSprite(joyPotionTexture),
 	energyPotionSprite(energyPotionTexture),
 	universalPotionSprite(universalPotionTexture),
-	motiMotiSprite(motiMotiTexture),
+	mochiSprite(mochiTexture),
 	pineappleSprite(pineappleTexture),
 	teddyBearSprite(teddyBearTexture),
 	tetrisSprite(tetrisTexture),
@@ -120,7 +120,7 @@ void Renderer::load_resources(void) {
 	if (!joyPotionTexture.loadFromFile("assets/sprites/items/joyPotion.png")) throw std::runtime_error("shop btn");
 	if (!energyPotionTexture.loadFromFile("assets/sprites/items/energyPotion.png")) throw std::runtime_error("shop btn");
 	if (!universalPotionTexture.loadFromFile("assets/sprites/items/universalPotion.png")) throw std::runtime_error("shop btn");
-	if (!motiMotiTexture.loadFromFile("assets/sprites/items/moti-moti.png")) throw std::runtime_error("shop btn");
+	if (!mochiTexture.loadFromFile("assets/sprites/items/mochi.png")) throw std::runtime_error("shop btn");
 	if (!pineappleTexture.loadFromFile("assets/sprites/items/pineapple.png")) throw std::runtime_error("shop btn");
 	if (!teddyBearTexture.loadFromFile("assets/sprites/items/teddyBear.png")) throw std::runtime_error("shop btn");
 	if (!tetrisTexture.loadFromFile("assets/sprites/items/tetris.png")) throw std::runtime_error("shop btn");

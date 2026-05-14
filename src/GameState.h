@@ -17,6 +17,7 @@ constexpr int THRESHOLD{950};
 constexpr int ILLNESS_DUR{5};
 constexpr int ENERGY_CHECKPOINT{2};
 constexpr int TICK_MONEY{1};
+constexpr int MAX_ITEM_SLOTS{24};
 
 const std::string HUNGER[5]{ "Starving", "Hungry", "Okay", "Well-fed", "Full" };
 const std::string MOOD[5]{"Frustrated", "Bored", "Okay", "Good", "Happy"};
@@ -60,8 +61,10 @@ struct GameState {
 	bool isPlaying{false};
 
 	// Inventory & Shop
+	std::vector<Item> items;
 	std::vector<Item> inventoryItems;
 	std::vector<Item> shopItems;
+
 	std::string inventoryMessage;
 
 	// Shop data
