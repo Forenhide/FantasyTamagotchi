@@ -23,9 +23,17 @@ const std::string MOOD[5]{"Frustrated", "Bored", "Okay", "Good", "Happy"};
 const std::string ART[5]{"😭", "😒", "😶", "😊", "😀"};
 
 
+enum class Scene {
 
+	Pet,
+	Inventory,
+	Shop
+};
 
 struct GameState {
+
+	// Scene
+	Scene scene;
 
 	// Pet data
 	std::string name;
@@ -63,9 +71,7 @@ struct GameState {
 
 	// UI flags
 	bool playing{true};
-	bool inventoryOpened{false};
 	bool usedItem{false};
-	bool shopOpened{false};
 	bool success{true};
 	bool hasEnergy{true};
 	bool playPressed{false};

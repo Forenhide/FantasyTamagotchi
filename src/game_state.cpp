@@ -26,6 +26,9 @@ static int get_random_number(void) {
 
 #pragma region Game Initialization / Update
 void game_init(GameState& g) {
+
+	// Scene
+	g.scene = Scene::Pet;
 	
 	// Pet
 	g.name = "Tony Tony Chopper";
@@ -46,20 +49,25 @@ void game_init(GameState& g) {
 
 	// Inventory & Shop
 	g.inventoryItems = {
+
 		{ItemType::MEDICINE, "Healing Potion", 30, 5},
-		{ItemType::TOY, "Potion of Joy", 25, 7}
+		{ItemType::TOY, "Joy Potion", 25, 7},
+		{ItemType::ENERGY, "Energy Potion", 10, 4},
+		{ItemType::UNIVERSAL, "Universal Potion", 50, 35}
 	};
 
 	g.shopItems = {
 	
 		{ItemType::MEDICINE, "Healing Potion", 30, 5},
-			{ItemType::TOY, "Potion of Joy", 25, 7},
-			{ItemType::TOY, "Yo-Yo", 5, 2},
-			{ItemType::TOY, "Tetris", 11, 4},
-			{ItemType::TOY, "Teddy bear", 7, 3},
-			{ItemType::FOOD, "Moti-moti", 12, 5},
-			{ItemType::FOOD, "Pineapple", 35, 12},
-			{ItemType::FOOD, "Tiramisu", 20, 7}
+		{ItemType::TOY, "Potion of Joy", 25, 7},
+		{ItemType::ENERGY, "Energy Potion", 25, 7},
+		{ItemType::TOY, "Yo-Yo", 5, 2},
+		{ItemType::TOY, "Tetris", 11, 4},
+		{ItemType::TOY, "Teddy bear", 7, 3},
+		{ItemType::FOOD, "Moti-moti", 12, 5},
+		{ItemType::FOOD, "Pineapple", 35, 12},
+		{ItemType::FOOD, "Tiramisu", 20, 7},
+		{ItemType::UNIVERSAL, "Universal Potion", 50, 35}
 	};
 
 	// Shop data
@@ -68,26 +76,24 @@ void game_init(GameState& g) {
 
 	// UI flags
 	g.playing = true;
-	g.inventoryOpened = false;
 	g.usedItem = false;
-	g.shopOpened = false;
 	g.success = true;
 	g.hasEnergy = true;
 }
 
 void process_one_action(GameState& g) {
 
-	if (g.inventoryOpened) {
+	if (g.scene == Scene::Inventory) {
 		inventory_handle_input(g);
 		return;
 	}
-	if (g.shopOpened) {
+	if (g.scene == Scene::Shop) {
 		shop_handle_input(g);
 		return;
+	} else {
+		pet_check_health(g);
+		pet_handle_input(g);
 	}
-
-	pet_check_health(g);
-	pet_handle_input(g);
 }
 
 void pet_handle_input(GameState& g) {
@@ -97,7 +103,6 @@ void pet_handle_input(GameState& g) {
 		pet_play(g);
 		int after = g.boredomNum;
 		g.newStat = before - after;
-		std::cout << "New stat: " << g.newStat << '\n';
 		g.playPressed = false;
 
 		g.statChanged = true;
@@ -109,7 +114,6 @@ void pet_handle_input(GameState& g) {
 		pet_feed(g);
 		int after = g.hungerNum;
 		g.newStat = before - after;
-		std::cout << "New stat: " << g.newStat << '\n';
 		g.feedPressed = false;
 
 		g.statChanged = true;
@@ -121,7 +125,6 @@ void pet_handle_input(GameState& g) {
 		pet_sleep(g);
 		int after = g.energy;
 		g.newStat = after - before;
-		std::cout << "New stat: " << g.newStat << '\n';
 		g.sleepPressed = false;
 
 		g.statChanged = true;
@@ -152,13 +155,13 @@ void inventory_handle_input(GameState& g) {
 	}
 
 	if (choice == 0) {
-		g.inventoryOpened = false;
+		g.scene = Scene::Pet;
 		g.usedItem = false;
 		inventory_clear_message(g);
 	} else {
 		use_item(g, choice - 1);
 		g.usedItem = true;
-		g.inventoryOpened = false;
+		g.scene = Scene::Pet;
 		return;
 	}
 
@@ -184,7 +187,7 @@ void shop_handle_input(GameState& g) {
 	}
 
 	if (choice == 0) {
-		g.shopOpened = false;
+		g.scene == Scene::Pet;
 		transaction_clear_message(g);
 	} else {
 		buy_item(g, choice - 1);
@@ -220,11 +223,11 @@ void make_decision(GameState& g, int input) {
 			g.success = true;
 			break;
 		case 4:
-			g.inventoryOpened = true;
+			g.scene = Scene::Inventory;
 			g.success = false;
 			break;
 		case 5:
-			g.shopOpened = true;
+			g.scene = Scene::Shop;
 			g.success = false;
 			break;
 		default:
@@ -467,18 +470,29 @@ void use_item(GameState& g, int index) {
 	Item item = g.inventoryItems[index];
 
 	switch (item.type) {
-		case ItemType::MEDICINE:
+		case ItemType::MEDICINE: {
 			pet_change_health(g, item.stat);
 			inventory_set_message(g, item.name + " increased health by " + std::to_string(item.stat) + " points!");
-			break;
-		case ItemType::TOY:
+			} break;
+		case ItemType::TOY: {
 			pet_change_boredom(g, -item.stat);
 			inventory_set_message(g, item.name + " decreased boredom by " + std::to_string(item.stat) + " points!");
-			break;
-		case ItemType::FOOD:
+			} break;
+		case ItemType::FOOD: {
 			pet_change_hunger(g, -item.stat);
 			inventory_set_message(g, item.name + " decreased hunger by " + std::to_string(item.stat) + " points!");
-			break;
+			} break;
+		case ItemType::ENERGY: {
+			pet_change_energy(g, item.stat);
+			inventory_set_message(g, item.name + " increased energy by " + std::to_string(item.stat) + " points!");
+			} break;
+		case ItemType::UNIVERSAL: {
+			pet_change_health(g, item.stat);
+			pet_change_hunger(g, -item.stat);
+			pet_change_boredom(g, -item.stat);
+			pet_change_energy(g, item.stat);
+			inventory_set_message(g, item.name + " improved everything by " + std::to_string(item.stat) + " points!");
+			} break;
 	}
 
 	g.inventoryItems.erase(g.inventoryItems.begin() + index);

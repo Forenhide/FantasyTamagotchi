@@ -42,7 +42,7 @@ public:
 	bool is_open(void) const;
 	void setup_button(Button& btn, sf::Texture& texture, float x, float y);
 	void setup_title(void);
-	void setup_stats_recs(sf::RectangleShape& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, const sf::Color& color, const sf::Color& outline, float x, float y, float width, float height, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor);
+	void setup_stats_recs(sf::Sprite& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, float x, float y, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor);
 	void setup_stats(void);
 	void setup_pet_idle_animation(void);
 	void setup_pet_play_animation(void);
@@ -54,28 +54,76 @@ private:
 	sf::Vector2f mousePos;
 	
 	// Resources
-	sf::Texture bgTexture;
+	// Textures
+	sf::Texture petBgTexture;
+	sf::Texture inventoryBgTexture;
+	sf::Texture shopBgTexture;
+
 	sf::Texture petIdleTexture;
 	sf::Texture petPlayTexture;
 	sf::Texture petHurtTexture;
 	sf::Texture outerShadowTexture;
 	sf::Texture innerShadowTexture;
+
 	sf::Texture playBtnTexture;
 	sf::Texture feedBtnTexture;
 	sf::Texture sleepBtnTexture;
 	sf::Texture inventoryBtnTexture;
 	sf::Texture shopBtnTexture;
-	sf::Sprite bgSprite;
+
+	sf::Texture statRecTexture;
+	sf::Texture smallStatRecTexture;
+	sf::Texture itemSlotRecTexture;
+	sf::Texture tooltipRecTexture;
+
+	sf::Texture healingPotionTexture;
+	sf::Texture joyPotionTexture;
+	sf::Texture energyPotionTexture;
+	sf::Texture universalPotionTexture;
+	sf::Texture motiMotiTexture;
+	sf::Texture pineappleTexture;
+	sf::Texture teddyBearTexture;
+	sf::Texture tetrisTexture;
+	sf::Texture tiramisuTexture;
+	sf::Texture yoYoTexture;
+
+	// Sprites
+	sf::Sprite petBgSprite;
+	sf::Sprite inventoryBgSprite;
+	sf::Sprite shopBgSprite;
+
 	sf::Sprite petIdleSprite;
 	sf::Sprite petPlaySprite;
 	sf::Sprite petHurtSprite;
 	sf::Sprite outerShadowSprite;
 	sf::Sprite innerShadowSprite;
+
 	sf::Sprite playBtnSprite;
 	sf::Sprite feedBtnSprite;
 	sf::Sprite sleepBtnSprite;
 	sf::Sprite inventoryBtnSprite;
 	sf::Sprite shopBtnSprite;
+
+	sf::Sprite healthRecSprite;
+	sf::Sprite hungerRecSprite;
+	sf::Sprite moodRecSprite;
+	sf::Sprite nameRecSprite;
+	sf::Sprite ageRecSprite;
+	sf::Sprite energyRecSprite;
+	sf::Sprite itemSlotRecSprite;
+	sf::Sprite tooltipRecSprite;
+
+	sf::Sprite healingPotionSprite;
+	sf::Sprite joyPotionSprite;
+	sf::Sprite energyPotionSprite;
+	sf::Sprite universalPotionSprite;
+	sf::Sprite motiMotiSprite;
+	sf::Sprite pineappleSprite;
+	sf::Sprite teddyBearSprite;
+	sf::Sprite tetrisSprite;
+	sf::Sprite tiramisuSprite;
+	sf::Sprite yoYoSprite;
+
 	std::vector<sf::IntRect> idleFrames;
 	std::vector<sf::IntRect> playFrames;
 	float frameDuration = 0.13f;

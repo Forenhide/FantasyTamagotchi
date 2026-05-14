@@ -8,7 +8,9 @@ enum class ItemType {
 	
 	FOOD,
 	MEDICINE,
-	TOY
+	TOY,
+	ENERGY,
+	UNIVERSAL
 };
 
 struct Item {

@@ -7,7 +7,9 @@
 
 Renderer::Renderer(GameState& gameState) : 
 	gameState(gameState),
-	bgSprite(bgTexture),
+	petBgSprite(petBgTexture),
+	inventoryBgSprite(inventoryBgTexture),
+	shopBgSprite(shopBgTexture),
 	petIdleSprite(petIdleTexture),
 	petPlaySprite(petPlayTexture),
 	petHurtSprite(petHurtTexture),
@@ -18,11 +20,31 @@ Renderer::Renderer(GameState& gameState) :
 	sleepBtnSprite(sleepBtnTexture),
 	inventoryBtnSprite(inventoryBtnTexture),
 	shopBtnSprite(shopBtnTexture),
+	nameRecSprite(statRecTexture),
+	healthRecSprite(statRecTexture),
+	hungerRecSprite(statRecTexture),
+	moodRecSprite(statRecTexture),
+	energyRecSprite(smallStatRecTexture),
+	ageRecSprite(smallStatRecTexture),
+	itemSlotRecSprite(itemSlotRecTexture),
+	tooltipRecSprite(tooltipRecTexture),
 	playBtn(playBtnSprite),
 	feedBtn(feedBtnSprite),
 	sleepBtn(sleepBtnSprite),
 	inventoryBtn(inventoryBtnSprite),
 	shopBtn(shopBtnSprite),
+
+	healingPotionSprite(healingPotionTexture),
+	joyPotionSprite(joyPotionTexture),
+	energyPotionSprite(energyPotionTexture),
+	universalPotionSprite(universalPotionTexture),
+	motiMotiSprite(motiMotiTexture),
+	pineappleSprite(pineappleTexture),
+	teddyBearSprite(teddyBearTexture),
+	tetrisSprite(tetrisTexture),
+	tiramisuSprite(tiramisuTexture),
+	yoYoSprite(yoYoTexture),
+
 	title1(font, "FANTASY", 48),
 	title2(font, "TAMAGOTCHI", 48),
 	subtitle(font, "* Kitty Edition *", 20),
@@ -68,18 +90,44 @@ bool Renderer::is_open(void) const {
 
 void Renderer::load_resources(void) {
 	
-	if (!bgTexture.loadFromFile("assets/sprites/background.jpg")) throw std::runtime_error("bg");
-	if (!petIdleTexture.loadFromFile("assets/sprites/IDLE.png")) throw std::runtime_error("pet");
-	if (!petPlayTexture.loadFromFile("assets/sprites/PLAY.png")) throw std::runtime_error("pet");
-	if (!petHurtTexture.loadFromFile("assets/sprites/HURT.png")) throw std::runtime_error("pet");
-	if (!outerShadowTexture.loadFromFile("assets/sprites/shadow1.png")) throw std::runtime_error("outer shadow");
-	if (!innerShadowTexture.loadFromFile("assets/sprites/shadow2.png")) throw std::runtime_error("inner shadow");
-	if (!playBtnTexture.loadFromFile("assets/sprites/playBtn.png")) throw std::runtime_error("play btn");
-	if (!feedBtnTexture.loadFromFile("assets/sprites/feedBtn.png")) throw std::runtime_error("feed btn");
-	if (!sleepBtnTexture.loadFromFile("assets/sprites/sleepBtn.png")) throw std::runtime_error("sleep btn");
-	if (!inventoryBtnTexture.loadFromFile("assets/sprites/inventoryBtn.png")) throw std::runtime_error("inventory btn");
-	if (!shopBtnTexture.loadFromFile("assets/sprites/shopBtn.png")) throw std::runtime_error("shop btn");
-	
+	// Backgrounds
+	if (!petBgTexture.loadFromFile("assets/sprites/background.jpg")) throw std::runtime_error("bg");
+	if (!inventoryBgTexture.loadFromFile("assets/sprites/inventoryBg.jpg")) throw std::runtime_error("bg");
+	if (!shopBgTexture.loadFromFile("assets/sprites/shopBg.jpg")) throw std::runtime_error("bg");
+
+	// Pet
+	if (!petIdleTexture.loadFromFile("assets/sprites/pet/IDLE.png")) throw std::runtime_error("pet");
+	if (!petPlayTexture.loadFromFile("assets/sprites/pet/PLAY.png")) throw std::runtime_error("pet");
+	if (!petHurtTexture.loadFromFile("assets/sprites/pet/HURT.png")) throw std::runtime_error("pet");
+	if (!outerShadowTexture.loadFromFile("assets/sprites/pet/shadow1.png")) throw std::runtime_error("outer shadow");
+	if (!innerShadowTexture.loadFromFile("assets/sprites/pet/shadow2.png")) throw std::runtime_error("inner shadow");
+
+	// Recs
+	if (!statRecTexture.loadFromFile("assets/sprites/recs/rec.png")) throw std::runtime_error("stat rec");
+	if (!smallStatRecTexture.loadFromFile("assets/sprites/recs/recSmall.png")) throw std::runtime_error("small stat rec");
+	if (!itemSlotRecTexture.loadFromFile("assets/sprites/recs/itemSlotRec.png")) throw std::runtime_error("stat rec");
+	if (!tooltipRecTexture.loadFromFile("assets/sprites/recs/tooltipRec.png")) throw std::runtime_error("stat rec");
+
+	// Buttons
+	if (!playBtnTexture.loadFromFile("assets/sprites/buttons/playBtn.png")) throw std::runtime_error("play btn");
+	if (!feedBtnTexture.loadFromFile("assets/sprites/buttons/feedBtn.png")) throw std::runtime_error("feed btn");
+	if (!sleepBtnTexture.loadFromFile("assets/sprites/buttons/sleepBtn.png")) throw std::runtime_error("sleep btn");
+	if (!inventoryBtnTexture.loadFromFile("assets/sprites/buttons/inventoryBtn.png")) throw std::runtime_error("inventory btn");
+	if (!shopBtnTexture.loadFromFile("assets/sprites/buttons/shopBtn.png")) throw std::runtime_error("shop btn");
+
+	// Items
+	if (!healingPotionTexture.loadFromFile("assets/sprites/items/healingPotion.png")) throw std::runtime_error("shop btn");
+	if (!joyPotionTexture.loadFromFile("assets/sprites/items/joyPotion.png")) throw std::runtime_error("shop btn");
+	if (!energyPotionTexture.loadFromFile("assets/sprites/items/energyPotion.png")) throw std::runtime_error("shop btn");
+	if (!universalPotionTexture.loadFromFile("assets/sprites/items/universalPotion.png")) throw std::runtime_error("shop btn");
+	if (!motiMotiTexture.loadFromFile("assets/sprites/items/moti-moti.png")) throw std::runtime_error("shop btn");
+	if (!pineappleTexture.loadFromFile("assets/sprites/items/pineapple.png")) throw std::runtime_error("shop btn");
+	if (!teddyBearTexture.loadFromFile("assets/sprites/items/teddyBear.png")) throw std::runtime_error("shop btn");
+	if (!tetrisTexture.loadFromFile("assets/sprites/items/tetris.png")) throw std::runtime_error("shop btn");
+	if (!tiramisuTexture.loadFromFile("assets/sprites/items/tiramisu.png")) throw std::runtime_error("shop btn");
+	if (!yoYoTexture.loadFromFile("assets/sprites/items/yo-yo.png")) throw std::runtime_error("shop btn");
+
+	// Other
 	if (!font.openFromFile("assets/fonts/PressStart2P-Regular.ttf")) throw std::runtime_error("font");
 	if (!music.openFromFile("assets/sounds/Music.mp3")) throw std::runtime_error("music");
 }
@@ -87,12 +135,25 @@ void Renderer::load_resources(void) {
 void Renderer::setup_sprites(void) {
 	
 	// Set textures
-	bgSprite.setTexture(bgTexture, true);
+	petBgSprite.setTexture(petBgTexture, true);
+	inventoryBgSprite.setTexture(inventoryBgTexture, true);
+	shopBgSprite.setTexture(shopBgTexture, true);
+
 	petIdleSprite.setTexture(petIdleTexture, true);
 	petPlaySprite.setTexture(petPlayTexture, true);
 	petHurtSprite.setTexture(petHurtTexture, true);
 	outerShadowSprite.setTexture(outerShadowTexture, true);
 	innerShadowSprite.setTexture(innerShadowTexture, true);
+
+	nameRecSprite.setTexture(statRecTexture, true);
+	healthRecSprite.setTexture(statRecTexture, true);
+	hungerRecSprite.setTexture(statRecTexture, true);
+	moodRecSprite.setTexture(statRecTexture, true);
+	energyRecSprite.setTexture(smallStatRecTexture, true);
+	ageRecSprite.setTexture(smallStatRecTexture, true);
+	itemSlotRecSprite.setTexture(itemSlotRecTexture, true);
+	tooltipRecSprite.setTexture(tooltipRecTexture, true);
+
 	playBtnSprite.setTexture(playBtnTexture, true);
 	feedBtnSprite.setTexture(feedBtnTexture, true);
 	sleepBtnSprite.setTexture(sleepBtnTexture, true);
@@ -166,22 +227,20 @@ void Renderer::update_pet_play_animation(void) {
 
 void Renderer::setup_stats(void) {
 
-	setup_stats_recs(nameRec, nameTitle, nameStat, "Name", gameState.name, {255, 255, 255, 130}, {255, 255, 255}, 24.f, 164.f, 264.f, 74.f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {115, 192, 255});
-	setup_stats_recs(healthRec, healthTitle, healthStat, "Health", std::to_string(gameState.health), {255, 255, 255, 130}, {255, 255, 255}, 24.f, 246.f, 264.f, 74.f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {92, 199, 108});
-	setup_stats_recs(hungerRec, hungerTitle, hungerStat, "Hunger", gameState.hunger, {255, 255, 255, 130}, {255, 255, 255}, 312.f, 164.f, 264.f, 74.f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {92, 199, 108});
-	setup_stats_recs(moodRec, moodTitle, moodStat, "Mood", gameState.mood, {255, 255, 255, 130}, {255, 255, 255}, 312.f, 246.f, 264.f, 74.f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {199, 92, 92});
-	setup_stats_recs(energyRec, energyTitle, energyStat, "Energy", std::to_string(gameState.energy), {255, 255, 255, 130}, {255, 255, 255}, 24.f, 818.f, 132.f, 74.f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {92, 199, 108});
-	setup_stats_recs(ageRec, ageTitle, ageStat, "Age", std::to_string(gameState.age), {255, 255, 255, 130}, {255, 255, 255}, 444.f, 818.f, 132.f, 74.f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {115, 192, 255});
+	setup_stats_recs(nameRecSprite, nameTitle, nameStat, "Name", gameState.name, 17.5f, 157.5f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {115, 192, 255});
+	setup_stats_recs(healthRecSprite, healthTitle, healthStat, "Health", std::to_string(gameState.health), 17.5f, 246.f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {92, 199, 108});
+	setup_stats_recs(hungerRecSprite, hungerTitle, hungerStat, "Hunger", gameState.hunger, 305.5f, 157.5f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {92, 199, 108});
+	setup_stats_recs(moodRecSprite, moodTitle, moodStat, "Mood", gameState.mood, 305.5f, 246.5f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {199, 92, 92});
+	setup_stats_recs(energyRecSprite, energyTitle, energyStat, "Energy", std::to_string(gameState.energy), 17.5f, 811.5f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {92, 199, 108});
+	setup_stats_recs(ageRecSprite, ageTitle, ageStat, "Age", std::to_string(gameState.age), 437.5f, 811.5f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {115, 192, 255});
 }
 
-void Renderer::setup_stats_recs(sf::RectangleShape& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, const sf::Color& color, const sf::Color& outline, float x, float y, float width, float height, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor) {
+void Renderer::setup_stats_recs(sf::Sprite& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, float x, float y, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor) {
 
-	// Shape
-	rec.setSize({width, height});
+	// Rectangle position
 	rec.setPosition({x, y});
-	rec.setFillColor(color);
-	rec.setOutlineColor(outline);
-	rec.setOutlineThickness(2.f);
+	float width = rec.getGlobalBounds().size.x;
+	float height = rec.getGlobalBounds().size.y;
 
 	// Text
 	titleText.setString(title);
@@ -209,6 +268,43 @@ void Renderer::setup_stats_recs(sf::RectangleShape& rec, sf::Text& titleText, sf
 
 	titleText.setPosition({x + width / 2.f, y + height / 2.f});
 	statText.setPosition({x + width / 2.f, y + height / 2.f});
+}
+
+void Renderer::update_stats(void) {
+	
+	healthStat.setString(std::to_string(gameState.health));
+	hungerStat.setString(gameState.hunger);
+	moodStat.setString(gameState.mood);
+	energyStat.setString(std::to_string(gameState.energy));
+	ageStat.setString(std::to_string(gameState.age));
+
+	// Center stats
+	sf::FloatRect healthBounds = healthStat.getLocalBounds();
+	sf::FloatRect hungerBounds = hungerStat.getLocalBounds();
+	sf::FloatRect moodBounds = moodStat.getLocalBounds();
+	sf::FloatRect energyBounds = energyStat.getLocalBounds();
+	sf::FloatRect ageBounds = ageStat.getLocalBounds();
+
+	healthStat.setOrigin({
+		healthBounds.position.x + healthBounds.size.x / 2.f,
+		healthBounds.position.y + healthBounds.size.y / 2.f - 16.f
+	});
+	hungerStat.setOrigin({
+		hungerBounds.position.x + hungerBounds.size.x / 2.f,
+		hungerBounds.position.y + hungerBounds.size.y / 2.f - 16.f
+	});
+	moodStat.setOrigin({
+		moodBounds.position.x + moodBounds.size.x / 2.f,
+		moodBounds.position.y + moodBounds.size.y / 2.f - 16.f
+	});
+	energyStat.setOrigin({
+		energyBounds.position.x + energyBounds.size.x / 2.f,
+		energyBounds.position.y + energyBounds.size.y / 2.f - 16.f
+	});
+	ageStat.setOrigin({
+		ageBounds.position.x + ageBounds.size.x / 2.f,
+		ageBounds.position.y + ageBounds.size.y / 2.f - 16.f
+	});
 }
 
 void Renderer::setup_title(void) {
@@ -292,15 +388,6 @@ void Renderer::animate_button(Button& btn, float dt) {
 	}
 
 	btn.sprite.setScale({btn.currentScale, btn.currentScale});
-}
-
-void Renderer::update_stats(void) {
-	
-	healthStat.setString(std::to_string(gameState.health));
-	hungerStat.setString(gameState.hunger);
-	moodStat.setString(gameState.mood);
-	energyStat.setString(std::to_string(gameState.energy));
-	ageStat.setString(std::to_string(gameState.age));
 }
 
 void Renderer::add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime) {
@@ -463,7 +550,7 @@ void Renderer::animate_subtitle(float dt) {
 
 void Renderer::draw_pet_screen(void) {
 	
-	window.draw(bgSprite);
+	window.draw(petBgSprite);
 	window.draw(outerShadowSprite);
 	window.draw(innerShadowSprite);
 
@@ -478,26 +565,28 @@ void Renderer::draw_pet_screen(void) {
 		if (btn->isHovered) window.draw(btn->sprite);
 	}
 	window.draw(playBtn.sprite);
-	window.draw(nameRec);
+	window.draw(nameRecSprite);
 	window.draw(nameTitle);
 	window.draw(nameStat);
-	window.draw(healthRec);
+	window.draw(healthRecSprite);
 	window.draw(healthTitle);
 	window.draw(healthStat);
-	window.draw(hungerRec);
+	window.draw(hungerRecSprite);
 	window.draw(hungerTitle);
 	window.draw(hungerStat);
-	window.draw(moodRec);
+	window.draw(moodRecSprite);
 	window.draw(moodTitle);
 	window.draw(moodStat);
-	window.draw(energyRec);
+	
+	window.draw(petIdleSprite);
+
+	window.draw(energyRecSprite);
 	window.draw(energyTitle);
 	window.draw(energyStat);
-	window.draw(ageRec);
+	window.draw(ageRecSprite);
 	window.draw(ageTitle);
 	window.draw(ageStat);
 
-	window.draw(petIdleSprite);
 
 	for (const FloatingText& popup : popups) {
 		if (popup.active == true) window.draw(popup.text);
@@ -518,9 +607,9 @@ void Renderer::render(void) {
 
 	window.clear();
 
-	if (gameState.inventoryOpened) {
+	if (gameState.scene == Scene::Inventory) {
 		draw_inventory();
-	} else if (gameState.shopOpened) {
+	} else if (gameState.scene == Scene::Shop) {
 		draw_shop();
 	} else {
 		draw_pet_screen();
@@ -560,12 +649,12 @@ void Renderer::handle_events(void) {
 
 				if (inventoryBtn.sprite.getGlobalBounds().contains(mousePos)) {
 					soundMgr.play(SoundEffect::Click);
-					gameState.inventoryOpened = true;
+					gameState.scene = Scene::Inventory;
 				}
 
 				if (shopBtn.sprite.getGlobalBounds().contains(mousePos)) {
 					soundMgr.play(SoundEffect::Click);
-					gameState.shopOpened = true;
+					gameState.scene = Scene::Shop;
 				}
 			}
 		}
