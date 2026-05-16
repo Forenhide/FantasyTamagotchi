@@ -50,6 +50,7 @@ void game_init(GameState& g) {
 	// Inventory & Shop
 	g.items = { {ItemType::MEDICINE, "Healing Potion", 30, 5},
 				{ItemType::MOOD, "Joy Potion", 25, 7},
+				{ItemType::ENERGY, "Energy Potion", 10, 9},
 				{ItemType::UNIVERSAL, "Universal Potion", 50, 35},
 				{ItemType::FOOD, "Mochi", 12, 5},
 				{ItemType::FOOD, "Pineapple", 35, 12},
@@ -60,7 +61,8 @@ void game_init(GameState& g) {
 
 	g.inventoryItems = { {ItemType::MEDICINE, "Healing Potion", 30, 5},
 						 {ItemType::MOOD, "Joy Potion", 25, 7},
-						 {ItemType::UNIVERSAL, "Universal Potion", 50, 35} };
+						 {ItemType::UNIVERSAL, "Energy Potion", 50, 35},
+						 {ItemType::FOOD, "Tiramisu", 20, 7} };
 
 	// Shop data
 	g.balance = 5;

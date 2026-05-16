@@ -177,6 +177,28 @@ void Renderer::setup_sprites(void) {
 	useBtnSprite.setTexture(useBtnTexture, true);
 	buyBtnSprite.setTexture(buyBtnTexture, true);
 
+	healingPotionSprite.setTexture(healingPotionTexture, true);
+	joyPotionSprite.setTexture(joyPotionTexture, true);
+	energyPotionSprite.setTexture(energyPotionTexture, true);
+	universalPotionSprite.setTexture(universalPotionTexture, true);
+	mochiSprite.setTexture(mochiTexture, true);
+	pineappleSprite.setTexture(pineappleTexture, true);
+	teddyBearSprite.setTexture(teddyBearTexture, true);
+	tetrisSprite.setTexture(tetrisTexture, true);
+	tiramisuSprite.setTexture(tiramisuTexture, true);
+	yoYoSprite.setTexture(yoYoTexture, true);
+
+	itemSprites.push_back(healingPotionSprite);
+	itemSprites.push_back(joyPotionSprite);
+	itemSprites.push_back(energyPotionSprite);
+	itemSprites.push_back(universalPotionSprite);
+	itemSprites.push_back(mochiSprite);
+	itemSprites.push_back(pineappleSprite);
+	itemSprites.push_back(teddyBearSprite);
+	itemSprites.push_back(tetrisSprite);
+	itemSprites.push_back(tiramisuSprite);
+	itemSprites.push_back(yoYoSprite);
+
 	// Adjust scale
 	petIdleSprite.setScale({15.f, 15.f});
 	petPlaySprite.setScale({15.f, 15.f});
@@ -771,9 +793,13 @@ void Renderer::update_inventory(void) {
 	
 	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
 		itemSlotRecSprite.setPosition({itemsPosition[i]});
-		window.draw(itemSlotRecSprite);
 
-		// Items (sprite + price)
+		if (gameState.inventoryItems[i].name == gameState.items[i].name) {
+			itemSprites[i].setPosition({itemsPosition[i].x + 20.f, itemsPosition[i].y + 20.f});
+		}
+
+		window.draw(itemSlotRecSprite);
+		window.draw(itemSprites[i]);
 	};
 }
 
@@ -781,97 +807,3 @@ void Renderer::draw_shop(void) {
 
 
 }
-
-
-
-
-/*
-void Renderer::render_pet(void) {
-
-	pet_update_warnings(game_state);
-	pet_update_age(game_state);
-
-	process_reaction_art();
-	process_warnings();
-
-	display_item_message();
-	
-}
-
-
-void Renderer::process_reaction_art(void) {
-
-	if (game_state.isAlive) {
-		if (game_state.birthday) {
-			std::cout << " It's my birthday today! I am " << game_state.age << " years old!";
-		}
-		if (game_state.isIll) {
-			pet_set_art(game_state, "🤧");;
-			pet_set_reaction(game_state, "I feel sick...");
-		}
-	} else {
-		pet_set_art(game_state, "💀");;
-		pet_set_reaction(game_state, "");
-		std::cout << '\t' << game_state.name << " has died...";
-	}
-	std::cout << "\n\n";
-
-	std::cout << "\t\t   " << game_state.art;
-	std::cout << '\t' << game_state.reaction << '\n';
-}
-
-void Renderer::process_warnings(void) {
-
-	if (!(game_state.warnings.empty())) {
-		for (int i = 0; i < game_state.warnings.size(); i++) {
-			std::cout << game_state.warnings[i] << '\n';
-		}
-		std::cout << '\n';
-	}
-	else {
-		std::cout << "\n\n";
-	}
-}
-
-
-
-
-
-void Renderer::render_inventory(void) {
-
-	system("cls");
-
-	std::cout << "INVENTORY" << "\n\n";
-
-	for (int i = 0; i < game_state.inventoryItems.size(); i++) {
-		std::cout << "[" << i + 1 << "] " << game_state.inventoryItems[i].name << '\n';
-	}
-	
-	std::cout << "\n[0] Exit";
-	std::cout << "\n\n";
-}
-
-void Renderer::display_item_message(void) const {
-
-	std::cout << game_state.inventoryMessage << "\n\n";
-}
-
-void Renderer::render_shop(void) {
-
-	system("cls");
-	
-	std::cout << "SHOP" << "\n\n";
-	std::cout << "Balance: $" << game_state.balance << "\n\n\n";
-
-	for (int i = 0; i < game_state.shopItems.size(); i++) {
-		std::cout << "[" << i + 1 << "] " << game_state.shopItems[i].name << " ($" << game_state.shopItems[i].price << ")\n";
-	}
-
-	std::cout << "\n[0] Exit";
-
-	if (!(game_state.transactionMessage.empty()))
-		std::cout << "\n\n" << game_state.transactionMessage;
-
-	std::cout << "\n\n";
-}
-*/

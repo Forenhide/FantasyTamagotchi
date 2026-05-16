@@ -130,6 +130,8 @@ private:
 	sf::Sprite tetrisSprite;
 	sf::Sprite tiramisuSprite;
 	sf::Sprite yoYoSprite;
+
+	std::vector<sf::Sprite> itemSprites;
 	
 	std::vector<sf::IntRect> idleFrames;
 	std::vector<sf::IntRect> playFrames;
