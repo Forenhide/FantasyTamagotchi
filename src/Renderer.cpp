@@ -6,6 +6,7 @@
 
 
 Renderer::Renderer(GameState& gameState) : 
+
 	gameState(gameState),
 	petBgSprite(petBgTexture),
 	inventoryBgSprite(inventoryBgTexture),
@@ -20,6 +21,9 @@ Renderer::Renderer(GameState& gameState) :
 	sleepBtnSprite(sleepBtnTexture),
 	inventoryBtnSprite(inventoryBtnTexture),
 	shopBtnSprite(shopBtnTexture),
+	backBtnSprite(backBtnTexture),
+	useBtnSprite(useBtnTexture),
+	buyBtnSprite(buyBtnTexture),
 	nameRecSprite(statRecTexture),
 	healthRecSprite(statRecTexture),
 	hungerRecSprite(statRecTexture),
@@ -33,6 +37,9 @@ Renderer::Renderer(GameState& gameState) :
 	sleepBtn(sleepBtnSprite),
 	inventoryBtn(inventoryBtnSprite),
 	shopBtn(shopBtnSprite),
+	backBtn(backBtnSprite),
+	useBtn(useBtnSprite),
+	buyBtn(buyBtnSprite),
 
 	healingPotionSprite(healingPotionTexture),
 	joyPotionSprite(joyPotionTexture),
@@ -48,6 +55,7 @@ Renderer::Renderer(GameState& gameState) :
 	title1(font, "FANTASY", 48),
 	title2(font, "TAMAGOTCHI", 48),
 	subtitle(font, "* Kitty Edition *", 20),
+	inventoryTitle(font, "INVENTORY", 48),
 	nameTitle(font),
 	nameStat(font),
 	healthTitle(font),
@@ -69,10 +77,13 @@ bool Renderer::init(void) {
 	load_resources();
 	setup_sprites();
 	setup_buttons();
-	setup_title();
+	setup_titles();
 	setup_stats();
 	setup_pet_idle_animation();
 	setup_pet_play_animation();
+
+	// Inventory
+	setup_items_position();
 
 	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
 
@@ -114,6 +125,9 @@ void Renderer::load_resources(void) {
 	if (!sleepBtnTexture.loadFromFile("assets/sprites/buttons/sleepBtn.png")) throw std::runtime_error("sleep btn");
 	if (!inventoryBtnTexture.loadFromFile("assets/sprites/buttons/inventoryBtn.png")) throw std::runtime_error("inventory btn");
 	if (!shopBtnTexture.loadFromFile("assets/sprites/buttons/shopBtn.png")) throw std::runtime_error("shop btn");
+	if (!backBtnTexture.loadFromFile("assets/sprites/buttons/backBtn.png")) throw std::runtime_error("back btn");
+	if (!useBtnTexture.loadFromFile("assets/sprites/buttons/useBtn.png")) throw std::runtime_error("use btn");
+	if (!buyBtnTexture.loadFromFile("assets/sprites/buttons/buyBtn.png")) throw std::runtime_error("buybtn");
 
 	// Items
 	if (!healingPotionTexture.loadFromFile("assets/sprites/items/healingPotion.png")) throw std::runtime_error("shop btn");
@@ -159,6 +173,9 @@ void Renderer::setup_sprites(void) {
 	sleepBtnSprite.setTexture(sleepBtnTexture, true);
 	inventoryBtnSprite.setTexture(inventoryBtnTexture, true);
 	shopBtnSprite.setTexture(shopBtnTexture, true);
+	backBtnSprite.setTexture(backBtnTexture, true);
+	useBtnSprite.setTexture(useBtnTexture, true);
+	buyBtnSprite.setTexture(buyBtnTexture, true);
 
 	// Adjust scale
 	petIdleSprite.setScale({15.f, 15.f});
@@ -307,8 +324,9 @@ void Renderer::update_stats(void) {
 	});
 }
 
-void Renderer::setup_title(void) {
+void Renderer::setup_titles(void) {
 	
+	// Pet
 	title1.setFillColor({230, 156, 105});
 	title1.setOutlineColor({255, 255, 255});
 	title1.setOutlineThickness(1.f);
@@ -323,6 +341,14 @@ void Renderer::setup_title(void) {
 	subtitle.setOutlineColor({255, 255, 255});
 	subtitle.setOutlineThickness(1.f);
 	subtitle.setPosition({130.f, 120.f});
+
+	// Inventory
+	inventoryTitle.setFillColor({52, 168, 83});
+	inventoryTitle.setOutlineColor({255, 255, 255});
+	inventoryTitle.setOutlineThickness(1.f);
+	inventoryTitle.setPosition({84.f, 16.f});
+
+	// Shop
 }
 
 void Renderer::setup_buttons(void) {
@@ -332,6 +358,10 @@ void Renderer::setup_buttons(void) {
 	setup_button(sleepBtn, sleepBtnTexture, 397.f, 908.f);
 	setup_button(inventoryBtn, inventoryBtnTexture, 24.f, 962.f);
 	setup_button(shopBtn, shopBtnTexture, 360.f, 962.f);
+
+	setup_button(backBtn, backBtnTexture, 397.f, 962.f);
+	setup_button(useBtn, useBtnTexture, 344.f, 668.f);
+	setup_button(buyBtn, buyBtnTexture, 344.f, 668.f);
 }
 
 void Renderer::setup_button(Button& btn, sf::Texture& texture, float x, float y) {
@@ -345,7 +375,7 @@ void Renderer::setup_button(Button& btn, sf::Texture& texture, float x, float y)
 	btn.sprite.setScale({btn.currentScale, btn.currentScale});
 	btn.sprite.setPosition({x + btn.sprite.getGlobalBounds().size.x / 2.f, y + btn.sprite.getGlobalBounds().size.y / 2.f});
 
-	buttons.push_back(&btn);
+	if (&btn != &backBtn && &btn != &useBtn && &btn != &buyBtn) buttons.push_back(&btn);
 }
 
 void Renderer::update_buttons(float dt) {
@@ -357,12 +387,18 @@ void Renderer::update_buttons(float dt) {
 	update_button_hover(sleepBtn, mousePos);
 	update_button_hover(inventoryBtn, mousePos);
 	update_button_hover(shopBtn, mousePos);
+	update_button_hover(backBtn, mousePos);
+	update_button_hover(useBtn, mousePos);
+	update_button_hover(buyBtn, mousePos);
 
 	animate_button(playBtn, dt);
 	animate_button(feedBtn, dt);
 	animate_button(sleepBtn, dt);
 	animate_button(inventoryBtn, dt);
 	animate_button(shopBtn, dt);
+	animate_button(backBtn, dt);
+	animate_button(useBtn, dt);
+	animate_button(buyBtn, dt);
 }
 
 void Renderer::update_button_hover(Button& btn, sf::Vector2f mousePos) {
@@ -564,7 +600,6 @@ void Renderer::draw_pet_screen(void) {
 	for (Button* btn : buttons) {
 		if (btn->isHovered) window.draw(btn->sprite);
 	}
-	window.draw(playBtn.sprite);
 	window.draw(nameRecSprite);
 	window.draw(nameTitle);
 	window.draw(nameStat);
@@ -587,7 +622,6 @@ void Renderer::draw_pet_screen(void) {
 	window.draw(ageTitle);
 	window.draw(ageStat);
 
-
 	for (const FloatingText& popup : popups) {
 		if (popup.active == true) window.draw(popup.text);
 	}
@@ -598,20 +632,20 @@ void Renderer::render(void) {
 	static sf::Clock clock;
 	float dt = clock.restart().asSeconds();
 
-	update_pet_idle_animation();
-	update_stats();
 	update_buttons(dt);
-	update_popups(dt);
-	animate_subtitle(dt);
-
 
 	window.clear();
 
 	if (gameState.scene == Scene::Inventory) {
 		draw_inventory();
+		update_inventory();
 	} else if (gameState.scene == Scene::Shop) {
 		draw_shop();
 	} else {
+		update_pet_idle_animation();
+		update_stats();
+		update_popups(dt);
+		animate_subtitle(dt);
 		draw_pet_screen();
 	}
 
@@ -628,44 +662,119 @@ void Renderer::handle_events(void) {
 		// Button logic
 		if (const sf::Event::MouseButtonPressed* mouseEvent = event->getIf<sf::Event::MouseButtonPressed>()) {
 			if (mouseEvent->button == sf::Mouse::Button::Left) {
-				if (playBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					soundMgr.play(SoundEffect::Click);
-					gameState.playPressed = true;
-					pet_handle_input(gameState);
-				}
+				if (gameState.scene == Scene::Pet) {
+					if (playBtn.sprite.getGlobalBounds().contains(mousePos)) {
+						soundMgr.play(SoundEffect::Click);
+						gameState.playPressed = true;
+						pet_handle_input(gameState);
+					}
 
-				if (feedBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					soundMgr.play(SoundEffect::Click);
-					gameState.feedPressed = true;
-					pet_handle_input(gameState);
-				}
+					if (feedBtn.sprite.getGlobalBounds().contains(mousePos)) {
+						soundMgr.play(SoundEffect::Click);
+						gameState.feedPressed = true;
+						pet_handle_input(gameState);
+					}
 
-				if (sleepBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					soundMgr.play(SoundEffect::Click);
-					gameState.sleepPressed = true;
-					pet_handle_input(gameState);
-				}
+					if (sleepBtn.sprite.getGlobalBounds().contains(mousePos)) {
+						soundMgr.play(SoundEffect::Click);
+						gameState.sleepPressed = true;
+						pet_handle_input(gameState);
+					}
 
+					if (inventoryBtn.sprite.getGlobalBounds().contains(mousePos)) {
+						soundMgr.play(SoundEffect::Click);
+						gameState.scene = Scene::Inventory;
+					}
 
-				if (inventoryBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					soundMgr.play(SoundEffect::Click);
-					gameState.scene = Scene::Inventory;
-				}
+					if (shopBtn.sprite.getGlobalBounds().contains(mousePos)) {
+						soundMgr.play(SoundEffect::Click);
+						gameState.scene = Scene::Shop;
+					}
+				} else if (gameState.scene == Scene::Inventory) {
+					if (backBtn.sprite.getGlobalBounds().contains(mousePos)) {
+						soundMgr.play(SoundEffect::Click);
+						gameState.scene = Scene::Pet;
+					}
 
-				if (shopBtn.sprite.getGlobalBounds().contains(mousePos)) {
-					soundMgr.play(SoundEffect::Click);
-					gameState.scene = Scene::Shop;
+					if (useBtn.sprite.getGlobalBounds().contains(mousePos)) {
+						soundMgr.play(SoundEffect::Click);
+					}
 				}
-			}
+			} 
 		}
-
-		// Inventory / Shop
 	}
 }
 
 void Renderer::draw_inventory(void) {
 	
+	window.draw(inventoryBgSprite);
+	window.draw(inventoryTitle);
+	
+	if (!(backBtn.isHovered)) window.draw(backBtn.sprite);
+	if (backBtn.isHovered) window.draw(backBtn.sprite);
+}
 
+void Renderer::setup_items_position(void) {
+	
+	sf::Vector2f pos1({24.f, 88.f});
+	sf::Vector2f pos2({168.f, 88.f});
+	sf::Vector2f pos3({312.f, 88.f});
+	sf::Vector2f pos4({456.f, 88.f});
+	sf::Vector2f pos5({24.f, 223.f});
+	sf::Vector2f pos6({168.f, 223.f});
+	sf::Vector2f pos7({312.f, 223.f});
+	sf::Vector2f pos8({456.f, 223.f});
+	sf::Vector2f pos9({24.f, 358.f});
+	sf::Vector2f pos10({168.f, 358.f});
+	sf::Vector2f pos11({312.f, 358.f});
+	sf::Vector2f pos12({456.f, 358.f});
+	sf::Vector2f pos13({24.f, 493.f});
+	sf::Vector2f pos14({168.f, 493.f});
+	sf::Vector2f pos15({312.f, 493.f});
+	sf::Vector2f pos16({456.f, 493.f});
+	sf::Vector2f pos17({24.f, 628.f});
+	sf::Vector2f pos18({168.f, 628.f});
+	sf::Vector2f pos19({312.f, 628.f});
+	sf::Vector2f pos20({468.f, 628.f});
+	sf::Vector2f pos21({24.f, 763.f});
+	sf::Vector2f pos22({168.f, 763.f});
+	sf::Vector2f pos23({312.f, 763.f});
+	sf::Vector2f pos24({456.f, 763.f});
+
+	itemsPosition.push_back(pos1);
+	itemsPosition.push_back(pos2);
+	itemsPosition.push_back(pos3);
+	itemsPosition.push_back(pos4);
+	itemsPosition.push_back(pos5);
+	itemsPosition.push_back(pos6);
+	itemsPosition.push_back(pos7);
+	itemsPosition.push_back(pos8);
+	itemsPosition.push_back(pos9);
+	itemsPosition.push_back(pos10);
+	itemsPosition.push_back(pos11);
+	itemsPosition.push_back(pos12);
+	itemsPosition.push_back(pos13);
+	itemsPosition.push_back(pos14);
+	itemsPosition.push_back(pos15);
+	itemsPosition.push_back(pos16);
+	itemsPosition.push_back(pos17);
+	itemsPosition.push_back(pos18);
+	itemsPosition.push_back(pos19);
+	itemsPosition.push_back(pos20);
+	itemsPosition.push_back(pos21);
+	itemsPosition.push_back(pos22);
+	itemsPosition.push_back(pos23);
+	itemsPosition.push_back(pos24);
+}
+
+void Renderer::update_inventory(void) {
+	
+	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
+		itemSlotRecSprite.setPosition({itemsPosition[i]});
+		window.draw(itemSlotRecSprite);
+
+		// Items (sprite + price)
+	};
 }
 
 void Renderer::draw_shop(void) {

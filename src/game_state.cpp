@@ -49,14 +49,18 @@ void game_init(GameState& g) {
 
 	// Inventory & Shop
 	g.items = { {ItemType::MEDICINE, "Healing Potion", 30, 5},
-				{ItemType::MEDICINE, "Joy Potion", 25, 7},
-				{ItemType::MEDICINE, "Universal Potion", 50, 35},
-				{ItemType::MEDICINE, "Mochi", 12, 5},
-				{ItemType::MEDICINE, "Pineapple", 35, 12},
-				{ItemType::MEDICINE, "Teddy Bear", 7, 3},
-				{ItemType::MEDICINE, "Tetris", 11, 4},
-				{ItemType::MEDICINE, "Tiramisu", 20, 7},
-				{ItemType::MEDICINE, "Yo-Yo", 5, 2} };
+				{ItemType::MOOD, "Joy Potion", 25, 7},
+				{ItemType::UNIVERSAL, "Universal Potion", 50, 35},
+				{ItemType::FOOD, "Mochi", 12, 5},
+				{ItemType::FOOD, "Pineapple", 35, 12},
+				{ItemType::MOOD, "Teddy Bear", 7, 3},
+				{ItemType::MOOD, "Tetris", 11, 4},
+				{ItemType::FOOD, "Tiramisu", 20, 7},
+				{ItemType::MOOD, "Yo-Yo", 5, 2} };
+
+	g.inventoryItems = { {ItemType::MEDICINE, "Healing Potion", 30, 5},
+						 {ItemType::MOOD, "Joy Potion", 25, 7},
+						 {ItemType::UNIVERSAL, "Universal Potion", 50, 35} };
 
 	// Shop data
 	g.balance = 5;
@@ -462,7 +466,7 @@ void use_item(GameState& g, int index) {
 			pet_change_health(g, item.value);
 			inventory_set_message(g, item.name + " increased health by " + std::to_string(item.value) + " points!");
 			} break;
-		case ItemType::TOY: {
+		case ItemType::MOOD: {
 			pet_change_boredom(g, -item.value);
 			inventory_set_message(g, item.name + " decreased boredom by " + std::to_string(item.value) + " points!");
 			} break;

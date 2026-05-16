@@ -7,8 +7,9 @@
 #include <string>
 #include <vector>
 
-struct GameState;
+constexpr int MAX_ITEM_SLOTS{24};
 
+struct GameState;
 
 struct Button {
 	
@@ -41,7 +42,7 @@ public:
 	void handle_events(void);
 	bool is_open(void) const;
 	void setup_button(Button& btn, sf::Texture& texture, float x, float y);
-	void setup_title(void);
+	void setup_titles(void);
 	void setup_stats_recs(sf::Sprite& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, float x, float y, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor);
 	void setup_stats(void);
 	void setup_pet_idle_animation(void);
@@ -70,6 +71,9 @@ private:
 	sf::Texture sleepBtnTexture;
 	sf::Texture inventoryBtnTexture;
 	sf::Texture shopBtnTexture;
+	sf::Texture backBtnTexture;
+	sf::Texture useBtnTexture;
+	sf::Texture buyBtnTexture;
 
 	sf::Texture statRecTexture;
 	sf::Texture smallStatRecTexture;
@@ -80,7 +84,7 @@ private:
 	sf::Texture joyPotionTexture;
 	sf::Texture energyPotionTexture;
 	sf::Texture universalPotionTexture;
-	sf::Texture mochiiTexture;
+	sf::Texture mochiTexture;
 	sf::Texture pineappleTexture;
 	sf::Texture teddyBearTexture;
 	sf::Texture tetrisTexture;
@@ -103,6 +107,9 @@ private:
 	sf::Sprite sleepBtnSprite;
 	sf::Sprite inventoryBtnSprite;
 	sf::Sprite shopBtnSprite;
+	sf::Sprite backBtnSprite;
+	sf::Sprite useBtnSprite;
+	sf::Sprite buyBtnSprite;
 
 	sf::Sprite healthRecSprite;
 	sf::Sprite hungerRecSprite;
@@ -132,6 +139,7 @@ private:
 	sf::Font font;
 	sf::Text title1;
 	sf::Text title2;
+	sf::Text inventoryTitle;
 	sf::Text subtitle;
 	sf::RectangleShape nameRec;
 	sf::Text nameTitle;
@@ -157,6 +165,9 @@ private:
 	Button sleepBtn;
 	Button inventoryBtn;
 	Button shopBtn;
+	Button backBtn;
+	Button useBtn;
+	Button buyBtn;
 
 	std::vector<Button*> buttons;
 	bool btnHovered{false};
@@ -164,6 +175,9 @@ private:
 	sf::Music music;
 
 	std::vector<FloatingText> popups;
+
+	// Inventory
+	std::vector<sf::Vector2f> itemsPosition;
 
 	void load_resources(void);
 	void setup_sprites(void);
@@ -181,6 +195,10 @@ private:
 	void update_buttons(float dt);
 	void update_button_hover(Button& btn, sf::Vector2f mousePos);
 	void animate_button(Button& btn, float dt);
+
+	// Inventory
+	void update_inventory(void);
+	void setup_items_position(void);
 
 	void add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime);
 	void update_popups(float dt);
