@@ -48,20 +48,20 @@ void game_init(GameState& g) {
 	g.isIll = false;
 
 	// Inventory & Shop
-	g.items = { {ItemType::MEDICINE, "Healing Potion", 30, 5},
-				{ItemType::MOOD, "Joy Potion", 25, 7},
-				{ItemType::ENERGY, "Energy Potion", 10, 9},
-				{ItemType::UNIVERSAL, "Universal Potion", 50, 35},
-				{ItemType::FOOD, "Mochi", 12, 5},
-				{ItemType::FOOD, "Pineapple", 35, 12},
-				{ItemType::MOOD, "Teddy Bear", 7, 3},
-				{ItemType::MOOD, "Tetris", 11, 4},
-				{ItemType::FOOD, "Tiramisu", 20, 7},
-				{ItemType::MOOD, "Yo-Yo", 5, 2} };
+	g.items = { {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
+				{ItemType::MOOD, "Joy Potion", 25, 7, 1},
+				{ItemType::ENERGY, "Energy Potion", 10, 9, 2},
+				{ItemType::UNIVERSAL, "Universal Potion", 50, 35, 3},
+				{ItemType::FOOD, "Mochi", 12, 5, 4},
+				{ItemType::FOOD, "Pineapple", 35, 12, 5},
+				{ItemType::MOOD, "Teddy Bear", 7, 3, 6},
+				{ItemType::MOOD, "Tetris", 11, 4, 7},
+				{ItemType::FOOD, "Tiramisu", 20, 7, 8},
+				{ItemType::MOOD, "Yo-Yo", 5, 2, 9} };
 
-	g.inventoryItems = { {ItemType::MEDICINE, "Healing Potion", 30, 5},
-						 {ItemType::MOOD, "Joy Potion", 25, 7},
-						 {ItemType::UNIVERSAL, "Energy Potion", 50, 35} };
+	g.inventoryItems = { {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
+						 {ItemType::MOOD, "Joy Potion", 25, 7, 1},
+						 {ItemType::UNIVERSAL, "Energy Potion", 50, 35, 2} };
 
 	// Shop data
 	g.balance = 5;

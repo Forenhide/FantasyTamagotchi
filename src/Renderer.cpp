@@ -720,6 +720,19 @@ void Renderer::handle_events(void) {
 
 					if (useBtn.sprite.getGlobalBounds().contains(mousePos)) {
 						soundMgr.play(SoundEffect::Click);
+						gameState.scene = Scene::Pet;
+					}
+
+					for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
+						sf::Vector2f pos = itemsPosition[i];
+						sf::FloatRect slotBounds;
+
+						slotBounds.size = itemSlotRecSprite.getGlobalBounds().size;
+						slotBounds.position = {pos.x, pos.y};
+						
+						if (slotBounds.contains(mousePos)) {
+							std::cout << "lmao\n";
+						}
 					}
 				}
 			} 
@@ -795,18 +808,18 @@ void Renderer::update_inventory(float dt) {
 
 	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
 
+		Item& item = gameState.inventoryItems[i];
+
 		itemSlotRecSprite.setOrigin(itemSlotRecSprite.getGlobalBounds().size / 2.f);
 		itemSlotRecSprite.setPosition({itemsPosition[i].x + itemSlotRecSprite.getGlobalBounds().size.x / 2.f, itemsPosition[i].y + itemSlotRecSprite.getGlobalBounds().size.y / 2.f});
 
-		for (int j = 0; j < gameState.items.size(); ++j) {
-			if (gameState.inventoryItems[i].name == gameState.items[j].name) {
-				itemSprites[j].setOrigin(itemSprites[j].getLocalBounds().size / 2.f);
-				itemSprites[j].setPosition({itemsPosition[i].x + 60.f, itemsPosition[i].y + 60.f});
-				animate_item(itemSlotRecSprite, itemSprites[j], mousePos, gameState.inventoryItems[i].currentScale, dt);
-				window.draw(itemSlotRecSprite);
-				window.draw(itemSprites[j]);
-			}
-		}
+		sf::Sprite& sprite = itemSprites[item.index];
+
+		sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
+		sprite.setPosition({itemsPosition[i].x + 60.f, itemsPosition[i].y + 60.f});
+		animate_item(itemSlotRecSprite, sprite, mousePos, item.currentScale, dt);
+		window.draw(itemSlotRecSprite);
+		window.draw(sprite);
 	}
 }
 
@@ -830,9 +843,6 @@ void Renderer::animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mous
 
 	rec.setScale({currentScale, currentScale});
 	item.setScale({currentScale, currentScale});
-
-	std::cout << "rec W: " << rec.getGlobalBounds().size.x << '\n';
-	std::cout << "rec H: " << rec.getGlobalBounds().size.y << '\n';
 }
 
 void Renderer::draw_shop(void) {
