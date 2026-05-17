@@ -16,7 +16,9 @@ constexpr int EVOLVE_TICK{300};
 constexpr int THRESHOLD{950};
 constexpr int ILLNESS_DUR{5};
 constexpr int ENERGY_CHECKPOINT{2};
-constexpr int TICK_MONEY{1};
+constexpr int TICK_MONEY{1};\
+constexpr int SHOP_UPDATE_TICK{10};
+constexpr int MAX_ITEM_SLOTS{24};
 
 const std::string HUNGER[5]{ "Starving", "Hungry", "Okay", "Well-fed", "Full" };
 const std::string MOOD[5]{"Frustrated", "Bored", "Okay", "Good", "Happy"};
@@ -27,7 +29,9 @@ enum class Scene {
 
 	Pet,
 	Inventory,
-	Shop
+	InventoryTooltip,
+	Shop,
+	ShopTooltip
 };
 
 struct GameState {
@@ -126,6 +130,9 @@ void inventory_clear_message(GameState& g);
 void inventory_set_message(GameState& g, std::string message);
 
 // Shop
+void populate_shop_at_start(GameState& g);
+void update_shop(GameState& g);
+
 void buy_item(GameState& g, int index);
 void change_balance(GameState& g, int delta);
 void clamp_balance(GameState& g);

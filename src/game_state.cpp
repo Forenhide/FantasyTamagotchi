@@ -16,11 +16,11 @@ static int get_inverted_level(int value, int max, int levels) {
 static int get_random_number(void) {
 	
 	std::random_device rd;
-	std::mt19937 g(rd());
+	std::mt19937 gen(rd());
 
 	std::uniform_int_distribution<int> randomNum(0, 1000);
 
-	return randomNum(g);
+	return randomNum(gen);
 }
 #pragma endregion
 
@@ -47,7 +47,7 @@ void game_init(GameState& g) {
 	g.birthday = false;
 	g.isIll = false;
 
-	// Inventory & Shop
+	// Items
 	g.items = { {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
 				{ItemType::MOOD, "Joy Potion", 25, 7, 1},
 				{ItemType::ENERGY, "Energy Potion", 10, 9, 2},
@@ -63,6 +63,8 @@ void game_init(GameState& g) {
 						 {ItemType::MOOD, "Joy Potion", 25, 7, 1},
 						 {ItemType::UNIVERSAL, "Energy Potion", 50, 35, 2} };
 
+	populate_shop_at_start(g);
+
 	// Shop data
 	g.balance = 5;
 	g.isEnoughBalance = true;
@@ -72,6 +74,22 @@ void game_init(GameState& g) {
 	g.usedItem = false;
 	g.success = true;
 	g.hasEnergy = true;
+}
+
+void populate_shop_at_start(GameState& g) {
+
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);
+
+	g.shopItems.clear();
+	g.shopItems.resize(MAX_ITEM_SLOTS);
+
+	for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
+		int index = randomIndex(gen);
+		g.shopItems.push_back(g.items[index]);
+		std::cout << "Added '" << g.items[index].name << "' to shop\n";
+	}	
 }
 
 void process_one_action(GameState& g) {
@@ -180,7 +198,7 @@ void shop_handle_input(GameState& g) {
 	}
 
 	if (choice == 0) {
-		g.scene == Scene::Pet;
+		g.scene = Scene::Pet;
 		transaction_clear_message(g);
 	} else {
 		buy_item(g, choice - 1);
@@ -248,6 +266,8 @@ void tick(GameState& g) {
 	if (g.starving)    g.pendingPopups.push_back({"I am starving!", GameEvent::WARNING, LeftCenter});
 	if (g.bored)       g.pendingPopups.push_back({"I want to play!", GameEvent::WARNING, LeftBottom});
 	if (g.statChanged) g.pendingPopups.push_back({std::to_string(g.newStat), GameEvent::STAT_CHANGE, BottomLeft});
+
+	update_shop(g);
 
 	return;
 }
@@ -458,7 +478,7 @@ bool pet_goal_reached(GameState& g) {
 #pragma region Inventory
 void use_item(GameState& g, int index) {
 
-	if (index < 0 || index >= g.inventoryItems.size()) return;
+	if (index < 0 || index >= static_cast<int>(g.inventoryItems.size())) return;
 
 	Item item = g.inventoryItems[index];
 
@@ -540,6 +560,24 @@ void transaction_clear_message(GameState& g) {
 void transaction_set_message(GameState& g, std::string message) {
 
 	g.transactionMessage = message;
+}
+
+void update_shop(GameState& g) {
+	
+	if (g.tickCount % SHOP_UPDATE_TICK == 0) {
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);
+
+		g.shopItems.clear();
+		g.shopItems.resize(MAX_ITEM_SLOTS);
+
+		for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
+			int index = randomIndex(gen);
+			g.shopItems.push_back(g.items[index]);
+			std::cout << "Added '" << g.items[index].name << "' to shop\n";
+		}	
+	}
 }
 
 #pragma endregion

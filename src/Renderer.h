@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-constexpr int MAX_ITEM_SLOTS{24};
-
 struct GameState;
 
 struct Button {
@@ -180,6 +178,8 @@ private:
 
 	// Inventory
 	std::vector<sf::Vector2f> itemsPosition;
+	std::vector<sf::Sprite> slotSprites;
+	int selectedItem;
 
 	void load_resources(void);
 	void setup_sprites(void);
@@ -202,6 +202,10 @@ private:
 	void update_inventory(float dt);
 	void setup_items_position(void);
 	void animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mousePos, float& currentScale, float dt);
+	void update_tooltip(float dt);
+	void clear_other_items(float dt);
+	void show_tooltip(int dt);
+	void setup_slot_sprites(void);
 
 	// Shop
 	void update_shop(void);

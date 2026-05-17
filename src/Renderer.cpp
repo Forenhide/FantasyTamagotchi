@@ -67,7 +67,9 @@ Renderer::Renderer(GameState& gameState) :
 	energyTitle(font),
 	energyStat(font),
 	ageTitle(font),
-	ageStat(font)
+	ageStat(font),
+
+	selectedItem(-1)
 {}
 
 bool Renderer::init(void) {
@@ -84,6 +86,7 @@ bool Renderer::init(void) {
 
 	// Inventory
 	setup_items_position();
+	setup_slot_sprites();
 
 	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
 
@@ -661,6 +664,10 @@ void Renderer::render(void) {
 	if (gameState.scene == Scene::Inventory) {
 		draw_inventory();
 		update_inventory(dt);
+	} else if (gameState.scene == Scene::InventoryTooltip) {
+			draw_inventory();
+			update_inventory(dt);
+			update_tooltip(dt);
 	} else if (gameState.scene == Scene::Shop) {
 		draw_shop();
 	} else {
@@ -718,11 +725,6 @@ void Renderer::handle_events(void) {
 						gameState.scene = Scene::Pet;
 					}
 
-					if (useBtn.sprite.getGlobalBounds().contains(mousePos)) {
-						soundMgr.play(SoundEffect::Click);
-						gameState.scene = Scene::Pet;
-					}
-
 					for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
 						sf::Vector2f pos = itemsPosition[i];
 						sf::FloatRect slotBounds;
@@ -731,8 +733,19 @@ void Renderer::handle_events(void) {
 						slotBounds.position = {pos.x, pos.y};
 						
 						if (slotBounds.contains(mousePos)) {
-							std::cout << "lmao\n";
+							selectedItem = i;
+							gameState.scene = Scene::InventoryTooltip;
 						}
+					}
+				} else if (gameState.scene == Scene::InventoryTooltip) {
+					if (backBtn.sprite.getGlobalBounds().contains(mousePos)) {
+						soundMgr.play(SoundEffect::Click);
+						gameState.scene = Scene::Inventory;
+					}
+
+					if (useBtn.sprite.getGlobalBounds().contains(mousePos)) {
+						soundMgr.play(SoundEffect::Click);
+						gameState.scene = Scene::Pet;
 					}
 				}
 			} 
@@ -802,6 +815,23 @@ void Renderer::setup_items_position(void) {
 	itemsPosition.push_back(pos24);
 }
 
+void Renderer::setup_slot_sprites(void) {
+	
+	slotSprites.clear();
+
+	for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
+		sf::Sprite slot(itemSlotRecTexture);
+		slot.setTexture(itemSlotRecTexture, true);
+
+		sf::FloatRect bounds = slot.getLocalBounds();
+		
+		slot.setOrigin({bounds.position.x + bounds.size.x / 2.f, bounds.position.y + bounds.size.y / 2.f});
+		slot.setPosition({itemsPosition[i].x + slot.getLocalBounds().size.x / 2.f, itemsPosition[i].y + slot.getLocalBounds().size.y / 2.f});
+
+		slotSprites.push_back(slot);
+	}
+} 
+
 void Renderer::update_inventory(float dt) {
 	
 	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -809,16 +839,13 @@ void Renderer::update_inventory(float dt) {
 	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
 
 		Item& item = gameState.inventoryItems[i];
-
-		itemSlotRecSprite.setOrigin(itemSlotRecSprite.getGlobalBounds().size / 2.f);
-		itemSlotRecSprite.setPosition({itemsPosition[i].x + itemSlotRecSprite.getGlobalBounds().size.x / 2.f, itemsPosition[i].y + itemSlotRecSprite.getGlobalBounds().size.y / 2.f});
-
 		sf::Sprite& sprite = itemSprites[item.index];
 
 		sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
 		sprite.setPosition({itemsPosition[i].x + 60.f, itemsPosition[i].y + 60.f});
-		animate_item(itemSlotRecSprite, sprite, mousePos, item.currentScale, dt);
-		window.draw(itemSlotRecSprite);
+		animate_item(slotSprites[i], sprite, mousePos, item.currentScale, dt);
+
+		window.draw(slotSprites[i]);
 		window.draw(sprite);
 	}
 }
@@ -843,6 +870,34 @@ void Renderer::animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mous
 
 	rec.setScale({currentScale, currentScale});
 	item.setScale({currentScale, currentScale});
+}
+
+void Renderer::update_tooltip(float dt) {
+	
+	if (gameState.scene == Scene::InventoryTooltip) {
+		clear_other_items(dt);
+		//show_tooltip(dt);
+	} else if (gameState.scene == Scene::ShopTooltip) {
+		clear_other_items(dt);
+		//show_tooltip(dt);
+	}
+}
+
+void Renderer::clear_other_items(float dt) {
+	
+	static const float TARGET_SCALE = 0.f;
+	static const float NORMAL_SCALE = 1.f;
+	static const float SPEED = 3.f;
+
+	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
+		Item& item = gameState.inventoryItems[i];
+		float scale = slotSprites[i].getScale().x;
+		if (i != selectedItem) {
+			item.currentScale -= SPEED * dt;
+			if (item.currentScale < TARGET_SCALE) item.currentScale = TARGET_SCALE;
+			slotSprites[i].setScale({item.currentScale, item.currentScale});
+		}
+	}
 }
 
 void Renderer::draw_shop(void) {
