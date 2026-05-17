@@ -19,6 +19,8 @@ struct Item {
 	std::string name;
 	int value;
 	int price;
+
+	float currentScale{1.f};
 };
 
 #endif

@@ -199,8 +199,12 @@ private:
 	void animate_button(Button& btn, float dt);
 
 	// Inventory
-	void update_inventory(void);
+	void update_inventory(float dt);
 	void setup_items_position(void);
+	void animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mousePos, float& currentScale, float dt);
+
+	// Shop
+	void update_shop(void);
 
 	void add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime);
 	void update_popups(float dt);

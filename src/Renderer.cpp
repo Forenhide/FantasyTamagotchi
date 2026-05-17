@@ -660,7 +660,7 @@ void Renderer::render(void) {
 
 	if (gameState.scene == Scene::Inventory) {
 		draw_inventory();
-		update_inventory();
+		update_inventory(dt);
 	} else if (gameState.scene == Scene::Shop) {
 		draw_shop();
 	} else {
@@ -789,21 +789,73 @@ void Renderer::setup_items_position(void) {
 	itemsPosition.push_back(pos24);
 }
 
-void Renderer::update_inventory(void) {
+void Renderer::update_inventory(float dt) {
 	
+	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
 	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
-		itemSlotRecSprite.setPosition({itemsPosition[i]});
 
-		if (gameState.inventoryItems[i].name == gameState.items[i].name) {
-			itemSprites[i].setPosition({itemsPosition[i].x + 20.f, itemsPosition[i].y + 20.f});
+		itemSlotRecSprite.setOrigin(itemSlotRecSprite.getGlobalBounds().size / 2.f);
+		itemSlotRecSprite.setPosition({itemsPosition[i].x + itemSlotRecSprite.getGlobalBounds().size.x / 2.f, itemsPosition[i].y + itemSlotRecSprite.getGlobalBounds().size.y / 2.f});
+
+		for (int j = 0; j < gameState.items.size(); ++j) {
+			if (gameState.inventoryItems[i].name == gameState.items[j].name) {
+				itemSprites[j].setOrigin(itemSprites[j].getLocalBounds().size / 2.f);
+				itemSprites[j].setPosition({itemsPosition[i].x + 60.f, itemsPosition[i].y + 60.f});
+				animate_item(itemSlotRecSprite, itemSprites[j], mousePos, gameState.inventoryItems[i].currentScale, dt);
+				window.draw(itemSlotRecSprite);
+				window.draw(itemSprites[j]);
+			}
 		}
+	}
+}
 
-		window.draw(itemSlotRecSprite);
-		window.draw(itemSprites[i]);
-	};
+void Renderer::animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mousePos, float& currentScale, float dt) {
+
+	static const float REC_TARGET_SIZE = 135.f;
+	static const float REC_NORMAL_SIZE = 120.f;
+	static const float REC_TARGET_SCALE = REC_TARGET_SIZE / REC_NORMAL_SIZE;
+	static const float NORMAL_SCALE = 1.f;
+	static const float SPEED = 1.f;
+
+	float target = rec.getGlobalBounds().contains(mousePos) ? REC_TARGET_SCALE : NORMAL_SCALE;
+
+	if (currentScale < target) {
+		currentScale += SPEED * dt;
+		if (currentScale > target) currentScale = target;
+	} else if (currentScale > target) {
+		currentScale -= SPEED * dt;
+		if (currentScale < target) currentScale = target;
+	}
+
+	rec.setScale({currentScale, currentScale});
+	item.setScale({currentScale, currentScale});
+
+	std::cout << "rec W: " << rec.getGlobalBounds().size.x << '\n';
+	std::cout << "rec H: " << rec.getGlobalBounds().size.y << '\n';
 }
 
 void Renderer::draw_shop(void) {
 
 
 }
+
+/*
+void Renderer::update_shop(void) {
+	
+	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
+		itemSlotRecSprite.setPosition({itemsPosition[i]});
+		for (int j = 0; j < gameState.items.size(); ++j) {
+			if (gameState.inventoryItems[i].name == gameState.items[j].name) {
+				itemSprites[j].setPosition({itemsPosition[i].x + 20.f, itemsPosition[i].y + 20.f});
+				window.draw(itemSlotRecSprite);
+				window.draw(itemSprites[j]);
+
+				sf::Text price(font);
+				price.setString(std::to_string(gameState.items[j].price));
+				price.setCharacterSize();
+				window.draw();
+			}
+		}
+	}
+}*/
