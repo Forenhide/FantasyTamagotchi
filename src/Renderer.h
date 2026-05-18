@@ -180,7 +180,6 @@ private:
 	std::vector<sf::Sprite> slotSprites;
 	int selectedItem;
 	sf::Text itemName;
-	std::vector<sf::Text> itemStats;
 
 	void load_resources(void);
 	void setup_sprites(void);

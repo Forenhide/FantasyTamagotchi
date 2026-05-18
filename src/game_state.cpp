@@ -48,42 +48,18 @@ void game_init(GameState& g) {
 	g.isIll = false;
 
 	// Items
-	g.items = { {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
-				{ItemType::MOOD, "Joy Potion", 25, 7, 1},
-				{ItemType::ENERGY, "Energy Potion", 10, 9, 2},
-				{ItemType::UNIVERSAL, "Universal Potion", 50, 35, 3},
-				{ItemType::FOOD, "Mochi", 12, 5, 4},
-				{ItemType::FOOD, "Pineapple", 35, 12, 5},
-				{ItemType::MOOD, "Teddy Bear", 7, 3, 6},
-				{ItemType::MOOD, "Tetris", 11, 4, 7},
-				{ItemType::FOOD, "Tiramisu", 20, 7, 8},
-				{ItemType::MOOD, "Yo-Yo", 5, 2, 9} };
+	g.items = { {"Healing Potion", 30, 0, { {5, ItemEffect::StatType::HEALTH} }},
+				{"Joy Potion", 25, 1, { {7, ItemEffect::StatType::MOOD} }},
+				{"Energy Potion", 10, 2, { {9, ItemEffect::StatType::ENERGY} }},
+				{"Universal Potion", 50, 3, { {35, ItemEffect::StatType::HEALTH}, {50, ItemEffect::StatType::HUNGER}, {50, ItemEffect::StatType::MOOD}, {50, ItemEffect::StatType::ENERGY} }},
+				{"Mochi", 12, 4, { {5, ItemEffect::StatType::HUNGER} }},
+				{"Pineapple", 35, 5, { {2, ItemEffect::StatType::HUNGER} }},
+				{"Teddy Bear", 7, 6, { {3, ItemEffect::StatType::MOOD} }},
+				{"Tetris", 11, 7, { {5, ItemEffect::StatType::MOOD} }},
+				{"Tiramisu", 20, 8, {{ 7, ItemEffect::StatType::HUNGER} }},
+				{"Yo-Yo", 5, 9, { {2, ItemEffect::StatType::HUNGER} }} };
 
-	g.inventoryItems = { {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
-						 {ItemType::MOOD, "Joy Potion", 25, 7, 1},
-						 {ItemType::UNIVERSAL, "Energy Potion", 50, 35, 2},
-						 {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
-
-						 {ItemType::MOOD, "Joy Potion", 25, 7, 1},
-						 {ItemType::ENERGY, "Energy Potion", 10, 9, 2},
-						 {ItemType::UNIVERSAL, "Universal Potion", 50, 35, 3},
-						 {ItemType::FOOD, "Mochi", 12, 5, 4},
-						 {ItemType::FOOD, "Pineapple", 35, 12, 5},
-						 {ItemType::MOOD, "Teddy Bear", 7, 3, 6},
-						 {ItemType::MOOD, "Tetris", 11, 4, 7},
-						 {ItemType::FOOD, "Tiramisu", 20, 7, 8},
-						 {ItemType::MOOD, "Yo-Yo", 5, 2, 9},
-						 {ItemType::MOOD, "Joy Potion", 25, 7, 1},
-						 {ItemType::ENERGY, "Energy Potion", 10, 9, 2},
-						 {ItemType::UNIVERSAL, "Universal Potion", 50, 35, 3},
-						 {ItemType::FOOD, "Mochi", 12, 5, 4},
-						 {ItemType::FOOD, "Pineapple", 35, 12, 5},
-						 {ItemType::MOOD, "Teddy Bear", 7, 3, 6},
-						 {ItemType::MOOD, "Tetris", 11, 4, 7},
-						 {ItemType::FOOD, "Tiramisu", 20, 7, 8},
-						 {ItemType::MOOD, "Yo-Yo", 5, 2, 9},
-						 {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
-						 {ItemType::UNIVERSAL, "Universal Potion", 50, 35, 3} };
+	g.inventoryItems = { g.items[0], g.items[1], g.items[2] };
 
 	populate_shop_at_start(g);
 
@@ -501,33 +477,29 @@ void use_item(GameState& g, int index) {
 
 	if (index < 0 || index >= static_cast<int>(g.inventoryItems.size())) return;
 
-	Item item = g.inventoryItems[index];
-
-	switch (item.type) {
-		case ItemType::MEDICINE: {
-			pet_change_health(g, item.value);
-			inventory_set_message(g, item.name + " increased health by " + std::to_string(item.value) + " points!");
+	Item& item = g.inventoryItems[index];
+	
+	for (int i = 0; i < item.itemEffects.size(); ++i) {
+		switch (item.itemEffects[i].type) {
+			case ItemEffect::StatType::HEALTH: {
+				pet_change_health(g, item.itemEffects[i].value);
+				inventory_set_message(g, item.name + " increased health by " + std::to_string(item.itemEffects[i].value) + " points!");
 			} break;
-		case ItemType::MOOD: {
-			pet_change_boredom(g, -item.value);
-			inventory_set_message(g, item.name + " decreased boredom by " + std::to_string(item.value) + " points!");
+			case ItemEffect::StatType::HUNGER: {
+				pet_change_hunger(g, item.itemEffects[i].value);
+				inventory_set_message(g, item.name + " decreased hunger by " + std::to_string(item.itemEffects[i].value) + " points!");
 			} break;
-		case ItemType::FOOD: {
-			pet_change_hunger(g, -item.value);
-			inventory_set_message(g, item.name + " decreased hunger by " + std::to_string(item.value) + " points!");
+			case ItemEffect::StatType::MOOD: {
+				pet_change_boredom(g, item.itemEffects[i].value);
+				inventory_set_message(g, item.name + " decreased boredom by " + std::to_string(item.itemEffects[i].value) + " points!");
 			} break;
-		case ItemType::ENERGY: {
-			pet_change_energy(g, item.value);
-			inventory_set_message(g, item.name + " increased energy by " + std::to_string(item.value) + " points!");
+			case ItemEffect::StatType::ENERGY: {
+				pet_change_energy(g, item.itemEffects[i].value);
+				inventory_set_message(g, item.name + " increased energy by " + std::to_string(item.itemEffects[i].value) + " points!");
 			} break;
-		case ItemType::UNIVERSAL: {
-			pet_change_health(g, item.value);
-			pet_change_hunger(g, -item.value);
-			pet_change_boredom(g, -item.value);
-			pet_change_energy(g, item.value);
-			inventory_set_message(g, item.name + " improved everything by " + std::to_string(item.value) + " points!");
-			} break;
-	}
+			default: break;
+		}
+	} 
 
 	g.inventoryItems.erase(g.inventoryItems.begin() + index);
 }

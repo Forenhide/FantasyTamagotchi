@@ -847,15 +847,6 @@ void Renderer::setup_tooltip_window(void) {
 	itemName.setFillColor(sf::Color::White);
 	itemName.setOutlineThickness(1.f);
 	itemName.setOutlineColor({64, 64, 64});
-
-	itemName.setOrigin({tooltipRecSprite.getLocalBounds().position.x + tooltipRecSprite.getLocalBounds().size.x / 2.f, tooltipRecSprite.getLocalBounds().position.y + tooltipRecSprite.getLocalBounds().size.y / 2.f}); // ????
-
-	for (int i = 0; i < itemStats.size(); ++i) {
-		itemStats[i].setCharacterSize(16.f);
-		itemStats[i].setFillColor({255, 255, 255, 0});
-		itemStats[i].setOutlineThickness(1.f);
-		itemStats[i].setPosition({tooltipRecSprite.getPosition().x + tooltipRecSprite.getLocalBounds().size.x / 2.f, tooltipRecSprite.getPosition().y + tooltipRecSprite.getLocalBounds().size.y / 2.f + 54.f});
-	}
 }
 
 void Renderer::update_inventory(float dt) {
@@ -876,6 +867,8 @@ void Renderer::update_inventory(float dt) {
 				sprite.setPosition({slotBounds.position.x + slotBounds.size.x / 2.f, slotBounds.position.y + slotBounds.size.y / 2.f});
 
 				animate_item(slot, sprite, mousePos, item.currentScale, dt);
+
+				if (item.currentScale <= 0.02) continue;
 
 				window.draw(slot);
 				window.draw(sprite);
@@ -915,7 +908,7 @@ void Renderer::update_tooltip(float dt) {
 
 void Renderer::show_tooltip(float dt) {
 	
-	static const float TARGET_SCALE = 0.0f;
+	static const float TARGET_SCALE = 0.01f;
 
 	static const float ITEM_TARGET_SCALE = 1.0f;
 
@@ -956,19 +949,28 @@ void Renderer::show_tooltip(float dt) {
 
 					slot.move(direction * MOVE_SPEED * dt);
 				}
-
-				itemName.setString(item.name);
-
-				// Tooltip rec
+				
+				// Tooltip rectangle
 				float tooltipDirection = TARGET_TOOLTIP_POS_Y - tooltipRecSprite.getPosition().y;
+
 				if (std::abs(tooltipDirection) <= MOVE_SPEED * dt) {
 					tooltipRecSprite.setPosition({tooltipRecSprite.getPosition().x, TARGET_TOOLTIP_POS_Y});
-					itemName.setPosition({itemName.getPosition().x, TARGET_TOOLTIP_POS_Y});
+					
 				} else {
 					tooltipRecSprite.move({0.f, (tooltipDirection > 0 ? MOVE_SPEED * dt : -MOVE_SPEED * dt)});
 					itemName.move({0.f, (tooltipDirection > 0 ? MOVE_SPEED * dt : -MOVE_SPEED * dt)});
 				}
 
+				// Tooltip text
+				itemName.setString(item.name);
+
+				sf::FloatRect nameBounds = itemName.getLocalBounds();
+
+				itemName.setOrigin({nameBounds.position.x + nameBounds.size.x / 2.f, nameBounds.position.y + nameBounds.size.y / 2.f});
+
+				sf::FloatRect tooltipBounds = tooltipRecSprite.getGlobalBounds();
+
+				itemName.setPosition({tooltipBounds.position.x + tooltipBounds.size.x / 2.f, tooltipBounds.position.y + tooltipBounds.size.y / 2.f - 38.f});
 			}
 		}
 	}

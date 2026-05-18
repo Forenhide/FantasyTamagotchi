@@ -2,24 +2,25 @@
 #define ITEM_H
 
 #include <string>
+#include <vector>
 
 
-enum class ItemType {
+struct ItemEffect {
 	
-	FOOD,
-	MEDICINE,
-	MOOD,
-	ENERGY,
-	UNIVERSAL
+	int value;
+	enum class StatType { HEALTH,
+						  HUNGER,
+						  MOOD,
+						  ENERGY };
+	StatType type;
 };
 
 struct Item {
 	
-	ItemType type;
 	std::string name;
-	int value;
 	int price;
 	int index;
+	std::vector<ItemEffect> itemEffects;
 
 	float currentScale{0.45f};
 };
