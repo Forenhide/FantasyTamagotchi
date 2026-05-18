@@ -59,7 +59,7 @@ void game_init(GameState& g) {
 				{"Tiramisu", 20, 8, {{ 7, ItemEffect::StatType::HUNGER} }},
 				{"Yo-Yo", 5, 9, { {2, ItemEffect::StatType::HUNGER} }} };
 
-	g.inventoryItems = { g.items[0], g.items[1], g.items[2], g.items[3] };
+	g.inventory = { g.items[0], g.items[1], g.items[2], g.items[3] };
 
 	populate_shop_at_start(g);
 
@@ -80,12 +80,12 @@ void populate_shop_at_start(GameState& g) {
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);
 
-	g.shopItems.clear();
-	g.shopItems.resize(MAX_ITEM_SLOTS);
+	g.shop.clear();
+	g.shop.resize(MAX_ITEM_SLOTS);
 
 	for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
 		int index = randomIndex(gen);
-		g.shopItems.push_back(g.items[index]);
+		g.shop.push_back(g.items[index]);
 	}	
 }
 
@@ -148,7 +148,7 @@ void inventory_handle_input(GameState& g) {
 
 	int choice{};
 
-	std::cout << "Make a choice (0-" << g.inventoryItems.size() << "): ";
+	std::cout << "Make a choice (0-" << g.inventory.size() << "): ";
 
 	if (!(std::cin >> choice)) {
 		std::cin.clear();
@@ -156,7 +156,7 @@ void inventory_handle_input(GameState& g) {
 		return;
 	}
 
-	if ((choice < 0) || (choice > static_cast<int>(g.inventoryItems.size()))) {
+	if ((choice < 0) || (choice > static_cast<int>(g.inventory.size()))) {
 		std::cin.ignore(1000, '\n');
 		std::cout << "Wrong input.\n";
 		return;
@@ -180,7 +180,7 @@ void shop_handle_input(GameState& g) {
 
 	int choice{};
 
-	std::cout << "Make a choice (0-" << g.shopItems.size() << "): ";
+	std::cout << "Make a choice (0-" << g.shop.size() << "): ";
 
 	if (!(std::cin >> choice)) {
 		std::cin.clear();
@@ -188,7 +188,7 @@ void shop_handle_input(GameState& g) {
 		return;
 	}
 
-	if ((choice < 0) || (choice > static_cast<int>(g.shopItems.size()))) {
+	if ((choice < 0) || (choice > static_cast<int>(g.shop.size()))) {
 		std::cin.ignore(1000, '\n');
 		std::cout << "Wrong input.\n";
 		return;
@@ -475,9 +475,9 @@ bool pet_goal_reached(GameState& g) {
 #pragma region Inventory
 void use_item(GameState& g, int index) {
 
-	if (index < 0 || index >= static_cast<int>(g.inventoryItems.size())) return;
+	if (index < 0 || index >= static_cast<int>(g.inventory.size())) return;
 
-	Item& item = g.inventoryItems[index];
+	Item& item = g.inventory[index];
 	
 	for (int i = 0; i < item.itemEffects.size(); ++i) {
 		switch (item.itemEffects[i].type) {
@@ -501,7 +501,7 @@ void use_item(GameState& g, int index) {
 		}
 	} 
 
-	g.inventoryItems.erase(g.inventoryItems.begin() + index);
+	g.inventory.erase(g.inventory.begin() + index);
 }
 
 void inventory_clear_message(GameState& g) {
@@ -519,14 +519,14 @@ void inventory_set_message(GameState& g, std::string message) {
 #pragma region Shop
 void buy_item(GameState& g, int index) {
 
-	if (index < 0 || index >= g.shopItems.size()) return;
+	if (index < 0 || index >= g.shop.size()) return;
 
-	Item item = g.shopItems[index];
+	Item item = g.shop[index];
 
 	if (g.balance >= item.price) {
 		change_balance(g, -item.price);
-		g.inventoryItems.push_back(g.shopItems[index]);
-		g.shopItems.erase(g.shopItems.begin() + index);
+		g.inventory.push_back(g.shop[index]);
+		g.shop.erase(g.shop.begin() + index);
 		transaction_set_message(g, "You've purchased '" + item.name + "' for $" + std::to_string(item.price));
 	} else {
 		transaction_set_message(g, "Insufficient balance.");
@@ -562,12 +562,12 @@ void update_shop(GameState& g) {
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);
 
-		g.shopItems.clear();
-		g.shopItems.resize(MAX_ITEM_SLOTS);
+		g.shop.clear();
+		g.shop.resize(MAX_ITEM_SLOTS);
 
 		for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
 			int index = randomIndex(gen);
-			g.shopItems.push_back(g.items[index]);
+			g.shop.push_back(g.items[index]);
 		}	
 	}
 }

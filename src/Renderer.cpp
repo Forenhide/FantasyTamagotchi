@@ -714,6 +714,7 @@ void Renderer::handle_events(void) {
 
 					if (inventoryBtn.sprite.getGlobalBounds().contains(mousePos)) {
 						soundMgr.play(SoundEffect::Click);
+						build_inventory_visuals();
 						gameState.scene = Scene::Inventory;
 					}
 
@@ -722,15 +723,18 @@ void Renderer::handle_events(void) {
 						gameState.scene = Scene::Shop;
 					}
 				} else if (gameState.scene == Scene::Inventory) {
+
 					if (backBtn.sprite.getGlobalBounds().contains(mousePos)) {
 						soundMgr.play(SoundEffect::Click);
 						gameState.scene = Scene::Pet;
 					}
 
-					for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
+					for (size_t i = 0; i < inventory.visuals.size(); ++i) {
 
 						if (slotSprites[i].getGlobalBounds().contains(mousePos)) {
-							selectedItem = i;
+							selectedItemState.itemIndex = (int)i;
+							selectedItemState.t = 0.f;
+
 							gameState.scene = Scene::InventoryTooltip;
 							break;
 						}
@@ -756,11 +760,23 @@ void Renderer::draw_inventory(void) {
 	
 	window.draw(inventoryBgSprite);
 	window.draw(inventoryTitle);
-	window.draw(tooltipRecSprite);
-	window.draw(itemName);
+	//window.draw(tooltipRecSprite);
+	//window.draw(itemName);
 	
 	if (!(backBtn.isHovered)) window.draw(backBtn.sprite);
 	if (backBtn.isHovered) window.draw(backBtn.sprite);
+}
+
+void Renderer::build_inventory_visuals(void) {
+
+	inventory.visuals.resize(gameState.inventory.size());
+
+	for (size_t i = 0; i < inventory.visuals.size(); ++i) {
+		inventory.visuals[i].position = itemsPosition[i];
+		inventory.visuals[i].hoverT = 0.f;
+		inventory.visuals[i].hovered = false;
+		inventory.visuals[i].selected = false;
+	}
 }
 
 void Renderer::setup_items_position(void) {
@@ -854,27 +870,60 @@ void Renderer::update_inventory(float dt) {
 	
 	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
+	float hide = (gameState.scene == Scene::InventoryTooltip) ? 1.f : 0.f;
 
-		Item& item = gameState.inventoryItems[i];
+	for (size_t i = 0; i < inventory.visuals.size(); ++i) {
 
-		for (int j = 0; j < gameState.items.size(); ++j) {
-			if (item.name == gameState.items[j].name) {
-				sf::Sprite& sprite = itemSprites[j];
-				sf::Sprite& slot = slotSprites[i];
+		auto& v = inventory.visuals[i];
+		v.hovered = (gameState.scene == Scene::Inventory) && slotSprites[i].getGlobalBounds().contains(mousePos);
 
-				sf::FloatRect slotBounds = slot.getGlobalBounds();
-				sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
-				sprite.setPosition({slotBounds.position.x + slotBounds.size.x / 2.f, slotBounds.position.y + slotBounds.size.y / 2.f});
+		float target = hide ? 0.f : (v.hovered ? 0.55f : 0.45f);
 
-				animate_item(slot, sprite, mousePos, item.currentScale, dt);
+		v.hoverT += (target - v.hoverT) * 10.f * dt;
 
-				if (item.currentScale <= 0.02) continue;
+		// slot
+		sf::Sprite& slot = slotSprites[i];
+		slot.setPosition(v.position + sf::Vector2f(60.f, 60.f));
+		slot.setScale({v.hoverT, v.hoverT});
 
-				window.draw(slot);
-				window.draw(sprite);
-			}
-		}
+		// item
+		const Item& item = gameState.inventory[i];
+
+		const Item* def = nullptr;
+
+		for (auto& d : gameState.items)
+			if (d.name == item.name) def = &d;
+
+		if (!def) continue;
+
+		sf::Sprite& sprite = itemSprites[def->index];
+
+		sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
+		sprite.setPosition(slot.getPosition());
+		sprite.setScale({v.hoverT, v.hoverT});
+
+		window.draw(slot);
+		window.draw(sprite);
+
+		/*// Item to sprite
+		for (size_t j = 0; j < gameState.items.size(); ++j) {
+			if (item.name != gameState.items[j].name) continue;
+
+			sf::Sprite& sprite = itemSprites[j];
+			sf::Sprite& slot = slotSprites[i];
+
+			sf::FloatRect slotBounds = slot.getGlobalBounds();
+
+			sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
+			sprite.setPosition({slotBounds.position.x + slotBounds.size.x / 2.f, slotBounds.position.y + slotBounds.size.y / 2.f});
+
+			animate_item(slot, sprite, mousePos, item.currentScale, dt);
+
+			if (item.currentScale <= 0.02) continue;
+
+			window.draw(slot);
+			window.draw(sprite);
+		}*/
 	}
 }
 
@@ -900,24 +949,128 @@ void Renderer::animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mous
 
 void Renderer::update_tooltip(float dt) {
 	
+	if (gameState.scene != Scene::InventoryTooltip) return;
+
+	selectedItemState.t += dt * 2.5f;
+	float t = std::min(selectedItemState.t, 1.f);
+
+	int i = selectedItemState.itemIndex;
+	if (i < 0) return;
+	if (i >= gameState.inventory.size()) return;
+
+	const Item& item = gameState.inventory[i];
+
+	const Item* def = nullptr;
+	for (auto& d : gameState.items)
+		if (d.name == item.name) def = &d;
+
+	if (!def) return;
+
+	// Tooltip from top
+	sf::Vector2f tooltipTarget(78.f, 256.f);
+	sf::Vector2f tooltipStart(78.f, -130.f);
+
+	sf::Vector2f tooltipPos = tooltipStart + (tooltipTarget - tooltipStart) * t;
+
+	tooltipRecSprite.setPosition(tooltipPos);
+
+	itemName.setString(def->name);
+	
+	sf::FloatRect nameBounds = itemName.getLocalBounds();
+
+	itemName.setOrigin({nameBounds.position.x + nameBounds.size.x / 2.f, nameBounds.position.y + nameBounds.size.y / 2.f});
+
+	sf::FloatRect tooltipBounds = tooltipRecSprite.getGlobalBounds();
+
+	itemName.setPosition({tooltipBounds.position.x + tooltipBounds.size.x / 2.f, tooltipBounds.position.y + tooltipBounds.size.y / 2.f - 38.f});
+
+	window.draw(tooltipRecSprite);
+	window.draw(itemName);
+
+	// Item effects
+	const std::vector<ItemEffect>& effects = def->itemEffects;
+
+	float fontSize = 12.f;
+	float gap = 4.f;
+
+	float totalHeight = (fontSize * effects.size()) + ((effects.size() - 1) * gap);
+
+	float centerY = tooltipBounds.position.y + tooltipBounds.size.y / 2.f;
+
+	float startY = centerY - totalHeight / 2.f + fontSize / 2.f + gap;
+
+	float posX = 234.f;
+
+	for (size_t j = 0; j < effects.size(); ++j) {
+		
+		const ItemEffect& e = effects[j];
+
+		sf::Text text(font);
+		text.setCharacterSize(fontSize);
+		text.setFillColor(sf::Color::White);
+		text.setOutlineThickness(1.f);
+
+		switch (e.type) {
+			case ItemEffect::StatType::HEALTH: {
+				text.setString("+" + std::to_string(e.value) + " health");
+				text.setOutlineColor({199, 92, 92});
+			} break;
+
+			case ItemEffect::StatType::HUNGER: {
+				text.setString("-" + std::to_string(e.value) + " hunger");
+				text.setOutlineColor({199, 92, 92});
+			} break;
+
+			case ItemEffect::StatType::MOOD: {
+				text.setString("-" + std::to_string(e.value) + " boredom");
+				text.setOutlineColor({115, 192, 255});
+			} break;
+
+			case ItemEffect::StatType::ENERGY: {
+				text.setString("+" + std::to_string(e.value) + " energy");
+				text.setOutlineColor({92, 199, 108});
+			} break;
+		}
+
+		float posY = startY + j * (fontSize + gap);
+
+		text.setPosition({posX, posY});
+
+		window.draw(text);
+	}
+
+	// Item from bottom
+	sf::Vector2f bottomStart(300.f, 1100.f);
+	sf::Vector2f centerTarget(300.f, 512.f);
+
+	sf::Vector2f itemPos = bottomStart + (centerTarget - bottomStart) * t;
+
+	const Item* defItem = def;
+
+	sf::Sprite& sprite = itemSprites[defItem->index];
+
+	sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
+	sprite.setPosition(itemPos);
+	sprite.setScale({1.f, 1.f});
+
+	window.draw(sprite);
+
+
+
+	/*
 	if (gameState.scene == Scene::InventoryTooltip) {
 		show_tooltip(dt);
 	} else if (gameState.scene == Scene::ShopTooltip) {
 		// same thing
-	}
+	} */
 }
 
+/*
 void Renderer::show_tooltip(float dt) {
-	
+
 	static const float TARGET_SCALE = 0.01f;
 
-	static const float ITEM_TARGET_SCALE = 1.0f;
-
-	static const sf::Vector2f TARGET_POS = {168.f, 380.f};
-	static const float TARGET_TOOLTIP_POS_Y = 236.f;
-
 	static const float SCALE_SPEED = 3.f;
-	static const float MOVE_SPEED = 500.f;
 
 	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
 		Item& item = gameState.inventoryItems[i];
@@ -925,30 +1078,37 @@ void Renderer::show_tooltip(float dt) {
 		for (int j = 0; j < gameState.items.size(); ++j) {
 			if (item.name != gameState.items[j].name) continue;
 
-			sf::Sprite& sprite = itemSprites[j];
-			sf::Sprite& slot = slotSprites[i];
+			// Hide item grid
+			item.currentScale -= SCALE_SPEED * dt;
+			if (item.currentScale < TARGET_SCALE) item.currentScale = TARGET_SCALE;
+			slotSprites[i].setScale({item.currentScale, item.currentScale});
+			itemSprites[j].setScale({item.currentScale, item.currentScale});
 
-			float scale = slotSprites[i].getScale().x;
+			// Animate tooltip
+			if (i == selectedItem) {
+				static const sf::Vector2f TARGET_POS = {168.f, 380.f};
+				static const float TARGET_TOOLTIP_POS_Y = 236.f;
+				static const float MOVE_SPEED = 500.f;
 
-			if (i != selectedItem) {
-				item.currentScale -= SCALE_SPEED * dt;
-				if (item.currentScale < TARGET_SCALE) item.currentScale = TARGET_SCALE;
-				slot.setScale({item.currentScale, item.currentScale});
-				sprite.setScale({item.currentScale, item.currentScale});
-			} else {
-				item.currentScale += SCALE_SPEED * dt;
-				if (item.currentScale > ITEM_TARGET_SCALE) item.currentScale = ITEM_TARGET_SCALE;
-				slot.setScale({item.currentScale, item.currentScale});
-				sprite.setScale({item.currentScale, item.currentScale});
+				FocusedItem tooltipItem(slotSprites[i], itemSprites[j]);
 
-				sf::Vector2f direction = TARGET_POS - slot.getPosition() + slot.getLocalBounds().size / 2.f;
+				tooltipItem.item.setScale({1.f, 1.f});
+				tooltipItem.slot.setScale({1.f, 1.f});
+
+				sf::FloatRect slotounds = tooltipItem.slot.getLocalBounds();
+				sf::FloatRect itemBounds = tooltipItem.item.getLocalBounds();
+		
+				tooltipItem.slot.setOrigin(slotounds.size / 2.f);
+				tooltipItem.item.setOrigin(itemBounds.size / 2.f);
+
+				sf::Vector2f direction = TARGET_POS - tooltipItem.slot.getPosition() + tooltipItem.slot.getLocalBounds().size / 2.f;
 				float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
 
 				if (length > 1.f) {
 				
 					direction /= length;
 
-					slot.move(direction * MOVE_SPEED * dt);
+					tooltipItem.slot.move(direction * MOVE_SPEED * dt);
 				}
 				
 				// Tooltip rectangle
@@ -1026,7 +1186,8 @@ void Renderer::show_tooltip(float dt) {
 			}
 		}
 	}
-}
+}*/
+
 
 void Renderer::draw_shop(void) {
 

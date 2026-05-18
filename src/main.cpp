@@ -13,7 +13,6 @@ int main(void) {
 		renderer.handle_events(); 
 		renderer.render(); 
 	}
-	// call game update tick if not handled by events 
 
 	return 0;
 } 

@@ -65,8 +65,8 @@ struct GameState {
 
 	// Inventory & Shop
 	std::vector<Item> items;
-	std::vector<Item> inventoryItems;
-	std::vector<Item> shopItems;
+	std::vector<Item> inventory;
+	std::vector<Item> shop;
 
 	std::string inventoryMessage;
 

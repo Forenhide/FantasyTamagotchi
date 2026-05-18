@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+
 struct GameState;
 
 struct Button {
@@ -30,6 +31,39 @@ struct FloatingText {
 	FloatingText(const sf::Font& font) : text(font) {}
 };
 
+enum class TooltipState {
+	
+	HIDDEN,
+	OPENING,
+	OPEN,
+	CLOSING
+};
+
+struct SelectedItemState {
+	
+	int itemIndex = -1;
+	float t = 0.f;
+};
+
+struct InventoryItem {
+	
+	int itemId;
+	int quantity;
+};
+
+struct InventorySlotVisual {
+	
+	sf::Vector2f position;
+	float hoverT;
+	bool hovered;
+	bool selected;
+};
+
+struct InventorySystem {
+	
+	std::vector<InventoryItem> items;
+	std::vector<InventorySlotVisual> visuals;
+};
 
 class Renderer {
 
@@ -175,6 +209,8 @@ private:
 	std::vector<FloatingText> popups;
 
 	// Inventory
+	InventorySystem inventory;
+	SelectedItemState selectedItemState;
 	std::vector<sf::Sprite> itemSprites;
 	std::vector<sf::Vector2f> itemsPosition;
 	std::vector<sf::Sprite> slotSprites;
@@ -199,6 +235,7 @@ private:
 	void animate_button(Button& btn, float dt);
 
 	// Inventory
+	void build_inventory_visuals(void);
 	void update_inventory(float dt);
 	void setup_items_position(void);
 	void animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mousePos, float& currentScale, float dt);
