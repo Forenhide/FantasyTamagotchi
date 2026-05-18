@@ -61,7 +61,29 @@ void game_init(GameState& g) {
 
 	g.inventoryItems = { {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
 						 {ItemType::MOOD, "Joy Potion", 25, 7, 1},
-						 {ItemType::UNIVERSAL, "Energy Potion", 50, 35, 2} };
+						 {ItemType::UNIVERSAL, "Energy Potion", 50, 35, 2},
+						 {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
+
+						 {ItemType::MOOD, "Joy Potion", 25, 7, 1},
+						 {ItemType::ENERGY, "Energy Potion", 10, 9, 2},
+						 {ItemType::UNIVERSAL, "Universal Potion", 50, 35, 3},
+						 {ItemType::FOOD, "Mochi", 12, 5, 4},
+						 {ItemType::FOOD, "Pineapple", 35, 12, 5},
+						 {ItemType::MOOD, "Teddy Bear", 7, 3, 6},
+						 {ItemType::MOOD, "Tetris", 11, 4, 7},
+						 {ItemType::FOOD, "Tiramisu", 20, 7, 8},
+						 {ItemType::MOOD, "Yo-Yo", 5, 2, 9},
+						 {ItemType::MOOD, "Joy Potion", 25, 7, 1},
+						 {ItemType::ENERGY, "Energy Potion", 10, 9, 2},
+						 {ItemType::UNIVERSAL, "Universal Potion", 50, 35, 3},
+						 {ItemType::FOOD, "Mochi", 12, 5, 4},
+						 {ItemType::FOOD, "Pineapple", 35, 12, 5},
+						 {ItemType::MOOD, "Teddy Bear", 7, 3, 6},
+						 {ItemType::MOOD, "Tetris", 11, 4, 7},
+						 {ItemType::FOOD, "Tiramisu", 20, 7, 8},
+						 {ItemType::MOOD, "Yo-Yo", 5, 2, 9},
+						 {ItemType::MEDICINE, "Healing Potion", 30, 5, 0},
+						 {ItemType::UNIVERSAL, "Universal Potion", 50, 35, 3} };
 
 	populate_shop_at_start(g);
 
@@ -88,7 +110,6 @@ void populate_shop_at_start(GameState& g) {
 	for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
 		int index = randomIndex(gen);
 		g.shopItems.push_back(g.items[index]);
-		std::cout << "Added '" << g.items[index].name << "' to shop\n";
 	}	
 }
 
@@ -575,7 +596,6 @@ void update_shop(GameState& g) {
 		for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
 			int index = randomIndex(gen);
 			g.shopItems.push_back(g.items[index]);
-			std::cout << "Added '" << g.items[index].name << "' to shop\n";
 		}	
 	}
 }

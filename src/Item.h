@@ -21,7 +21,7 @@ struct Item {
 	int price;
 	int index;
 
-	float currentScale{1.f};
+	float currentScale{0.45f};
 };
 
 #endif

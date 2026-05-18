@@ -69,7 +69,8 @@ Renderer::Renderer(GameState& gameState) :
 	ageTitle(font),
 	ageStat(font),
 
-	selectedItem(-1)
+	selectedItem(-1),
+	itemName(font)
 {}
 
 bool Renderer::init(void) {
@@ -87,6 +88,7 @@ bool Renderer::init(void) {
 	// Inventory
 	setup_items_position();
 	setup_slot_sprites();
+	setup_tooltip_window();
 
 	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
 
@@ -726,15 +728,11 @@ void Renderer::handle_events(void) {
 					}
 
 					for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
-						sf::Vector2f pos = itemsPosition[i];
-						sf::FloatRect slotBounds;
 
-						slotBounds.size = itemSlotRecSprite.getGlobalBounds().size;
-						slotBounds.position = {pos.x, pos.y};
-						
-						if (slotBounds.contains(mousePos)) {
+						if (slotSprites[i].getGlobalBounds().contains(mousePos)) {
 							selectedItem = i;
 							gameState.scene = Scene::InventoryTooltip;
+							break;
 						}
 					}
 				} else if (gameState.scene == Scene::InventoryTooltip) {
@@ -757,6 +755,7 @@ void Renderer::draw_inventory(void) {
 	
 	window.draw(inventoryBgSprite);
 	window.draw(inventoryTitle);
+	window.draw(tooltipRecSprite);
 	
 	if (!(backBtn.isHovered)) window.draw(backBtn.sprite);
 	if (backBtn.isHovered) window.draw(backBtn.sprite);
@@ -819,18 +818,45 @@ void Renderer::setup_slot_sprites(void) {
 	
 	slotSprites.clear();
 
+	sf::Vector2f offset(60.f, 60.f);
+
 	for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
 		sf::Sprite slot(itemSlotRecTexture);
 		slot.setTexture(itemSlotRecTexture, true);
 
 		sf::FloatRect bounds = slot.getLocalBounds();
 		
-		slot.setOrigin({bounds.position.x + bounds.size.x / 2.f, bounds.position.y + bounds.size.y / 2.f});
-		slot.setPosition({itemsPosition[i].x + slot.getLocalBounds().size.x / 2.f, itemsPosition[i].y + slot.getLocalBounds().size.y / 2.f});
+		slot.setOrigin(bounds.size / 2.f);
+
+		sf::Vector2f center = itemsPosition[i] + offset;
+		slot.setPosition(center);
+
+		slot.setScale({0.45f, 0.45f});
 
 		slotSprites.push_back(slot);
 	}
 } 
+
+void Renderer::setup_tooltip_window(void) {
+
+	tooltipRecSprite.setTexture(tooltipRecTexture, true);
+	tooltipRecSprite.setPosition({78.f, -130.f});
+
+	itemName.setCharacterSize(16.f);
+	itemName.setFillColor(sf::Color::White);
+	itemName.setOutlineThickness(1.f);
+	itemName.setOutlineColor({64, 64, 64});
+
+	itemName.setOrigin(itemName.getLocalBounds().size / 2.f);
+	itemName.setPosition({tooltipRecSprite.getPosition().x + tooltipRecSprite.getLocalBounds().size.x / 2.f, tooltipRecSprite.getPosition().y + tooltipRecSprite.getLocalBounds().size.y / 2.f + 14.f});
+
+	for (int i = 0; i < itemStats.size(); ++i) {
+		itemStats[i].setCharacterSize(16.f);
+		itemStats[i].setFillColor({255, 255, 255, 0});
+		itemStats[i].setOutlineThickness(1.f);
+		itemStats[i].setPosition({tooltipRecSprite.getPosition().x + tooltipRecSprite.getLocalBounds().size.x / 2.f, tooltipRecSprite.getPosition().y + tooltipRecSprite.getLocalBounds().size.y / 2.f + 54.f});
+	}
+}
 
 void Renderer::update_inventory(float dt) {
 	
@@ -839,23 +865,29 @@ void Renderer::update_inventory(float dt) {
 	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
 
 		Item& item = gameState.inventoryItems[i];
-		sf::Sprite& sprite = itemSprites[item.index];
 
-		sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
-		sprite.setPosition({itemsPosition[i].x + 60.f, itemsPosition[i].y + 60.f});
-		animate_item(slotSprites[i], sprite, mousePos, item.currentScale, dt);
+		for (int j = 0; j < gameState.items.size(); ++j) {
+			if (item.name == gameState.items[j].name) {
+				sf::Sprite& sprite = itemSprites[j];
+				sf::Sprite& slot = slotSprites[i];
 
-		window.draw(slotSprites[i]);
-		window.draw(sprite);
+				sf::FloatRect slotBounds = slot.getGlobalBounds();
+				sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
+				sprite.setPosition({slotBounds.position.x + slotBounds.size.x / 2.f, slotBounds.position.y + slotBounds.size.y / 2.f});
+
+				animate_item(slot, sprite, mousePos, item.currentScale, dt);
+
+				window.draw(slot);
+				window.draw(sprite);
+			}
+		}
 	}
 }
 
 void Renderer::animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mousePos, float& currentScale, float dt) {
 
-	static const float REC_TARGET_SIZE = 135.f;
-	static const float REC_NORMAL_SIZE = 120.f;
-	static const float REC_TARGET_SCALE = REC_TARGET_SIZE / REC_NORMAL_SIZE;
-	static const float NORMAL_SCALE = 1.f;
+	static const float REC_TARGET_SCALE = 0.55f;
+	static const float NORMAL_SCALE = 0.45f;
 	static const float SPEED = 1.f;
 
 	float target = rec.getGlobalBounds().contains(mousePos) ? REC_TARGET_SCALE : NORMAL_SCALE;
@@ -875,27 +907,63 @@ void Renderer::animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mous
 void Renderer::update_tooltip(float dt) {
 	
 	if (gameState.scene == Scene::InventoryTooltip) {
-		clear_other_items(dt);
-		//show_tooltip(dt);
+		show_tooltip(dt);
 	} else if (gameState.scene == Scene::ShopTooltip) {
-		clear_other_items(dt);
-		//show_tooltip(dt);
+		// same thing
 	}
 }
 
-void Renderer::clear_other_items(float dt) {
+void Renderer::show_tooltip(float dt) {
 	
-	static const float TARGET_SCALE = 0.f;
-	static const float NORMAL_SCALE = 1.f;
-	static const float SPEED = 3.f;
+	static const float TARGET_SCALE = 0.0f;
+
+	static const float ITEM_TARGET_SCALE = 1.0f;
+
+	static const sf::Vector2f TARGET_POS = {168.f, 380.f};
+	static const float TARGET_TOOLTIP_POS_Y = 236.f;
+
+	static const float SCALE_SPEED = 3.f;
+	static const float MOVE_SPEED = 500.f;
 
 	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
 		Item& item = gameState.inventoryItems[i];
-		float scale = slotSprites[i].getScale().x;
-		if (i != selectedItem) {
-			item.currentScale -= SPEED * dt;
-			if (item.currentScale < TARGET_SCALE) item.currentScale = TARGET_SCALE;
-			slotSprites[i].setScale({item.currentScale, item.currentScale});
+
+		for (int j = 0; j < gameState.items.size(); ++j) {
+			if (item.name != gameState.items[j].name) continue;
+
+			sf::Sprite& sprite = itemSprites[j];
+			sf::Sprite& slot = slotSprites[i];
+
+			float scale = slotSprites[i].getScale().x;
+
+			if (i != selectedItem) {
+				item.currentScale -= SCALE_SPEED * dt;
+				if (item.currentScale < TARGET_SCALE) item.currentScale = TARGET_SCALE;
+				slot.setScale({item.currentScale, item.currentScale});
+				sprite.setScale({item.currentScale, item.currentScale});
+			} else {
+				item.currentScale += SCALE_SPEED * dt;
+				if (item.currentScale > ITEM_TARGET_SCALE) item.currentScale = ITEM_TARGET_SCALE;
+				slot.setScale({item.currentScale, item.currentScale});
+				sprite.setScale({item.currentScale, item.currentScale});
+
+				sf::Vector2f direction = TARGET_POS - slot.getPosition() + slot.getLocalBounds().size / 2.f;
+				float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
+
+				if (length > 1.f) {
+				
+					direction /= length;
+
+					slot.move(direction * MOVE_SPEED * dt);
+				}
+
+				// Tooltip window
+				float tooltipDirection = TARGET_TOOLTIP_POS_Y - tooltipRecSprite.getPosition().y;
+				if (std::abs(tooltipDirection) <= MOVE_SPEED * dt) 
+					tooltipRecSprite.setPosition({tooltipRecSprite.getPosition().x, TARGET_TOOLTIP_POS_Y});
+				else
+					tooltipRecSprite.move({0.f, (tooltipDirection > 0 ? MOVE_SPEED * dt : -MOVE_SPEED * dt)});
+			}
 		}
 	}
 }

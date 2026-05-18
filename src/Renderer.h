@@ -129,8 +129,6 @@ private:
 	sf::Sprite tiramisuSprite;
 	sf::Sprite yoYoSprite;
 
-	std::vector<sf::Sprite> itemSprites;
-	
 	std::vector<sf::IntRect> idleFrames;
 	std::vector<sf::IntRect> playFrames;
 	float frameDuration = 0.13f;
@@ -177,9 +175,12 @@ private:
 	std::vector<FloatingText> popups;
 
 	// Inventory
+	std::vector<sf::Sprite> itemSprites;
 	std::vector<sf::Vector2f> itemsPosition;
 	std::vector<sf::Sprite> slotSprites;
 	int selectedItem;
+	sf::Text itemName;
+	std::vector<sf::Text> itemStats;
 
 	void load_resources(void);
 	void setup_sprites(void);
@@ -203,9 +204,9 @@ private:
 	void setup_items_position(void);
 	void animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mousePos, float& currentScale, float dt);
 	void update_tooltip(float dt);
-	void clear_other_items(float dt);
-	void show_tooltip(int dt);
+	void show_tooltip(float dt);
 	void setup_slot_sprites(void);
+	void setup_tooltip_window(void);
 
 	// Shop
 	void update_shop(void);
