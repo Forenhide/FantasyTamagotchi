@@ -743,6 +743,7 @@ void Renderer::handle_events(void) {
 
 					if (useBtn.sprite.getGlobalBounds().contains(mousePos)) {
 						soundMgr.play(SoundEffect::Click);
+						use_item(gameState, selectedItem);
 						gameState.scene = Scene::Pet;
 					}
 				}
@@ -961,7 +962,7 @@ void Renderer::show_tooltip(float dt) {
 					itemName.move({0.f, (tooltipDirection > 0 ? MOVE_SPEED * dt : -MOVE_SPEED * dt)});
 				}
 
-				// Tooltip text
+				// Tooltip stat name
 				itemName.setString(item.name);
 
 				sf::FloatRect nameBounds = itemName.getLocalBounds();
@@ -971,6 +972,57 @@ void Renderer::show_tooltip(float dt) {
 				sf::FloatRect tooltipBounds = tooltipRecSprite.getGlobalBounds();
 
 				itemName.setPosition({tooltipBounds.position.x + tooltipBounds.size.x / 2.f, tooltipBounds.position.y + tooltipBounds.size.y / 2.f - 38.f});
+
+				// Tooltip stat value
+				std::vector<ItemEffect>& effects = item.itemEffects;
+				float fontSize = 12.f;
+				float gap = 4.f;
+				float totalHeight = (fontSize * effects.size()) + ((effects.size() - 1) * gap);
+				float centerY = tooltipBounds.position.y + tooltipBounds.size.y / 2.f;
+				float startY = centerY - totalHeight / 2.f + fontSize / 2.f + gap;
+				float posX = 234.f;
+
+				std::vector<sf::Text> effectTexts;
+
+				for (int i = 0; i < effects.size(); ++i) {
+
+					const ItemEffect& e = effects[i];
+
+					sf::Text text(font);
+					text.setCharacterSize(fontSize);
+					text.setFillColor(sf::Color::White);
+					text.setOutlineThickness(1.f);
+					
+					switch (e.type) {
+						case ItemEffect::StatType::HEALTH: {
+							text.setString("+" + std::to_string(e.value) + " health");
+							text.setOutlineColor({199, 92, 92});
+						} break;
+						case ItemEffect::StatType::HUNGER: {
+							text.setString("-" + std::to_string(e.value) + " hunger");
+							text.setOutlineColor({199, 92, 92});
+						} break;
+						case ItemEffect::StatType::MOOD: {
+							text.setString("-" + std::to_string(e.value) + " boredom");
+							text.setOutlineColor({115, 192, 255});
+						} break;
+						case ItemEffect::StatType::ENERGY: {
+							text.setString("+" + std::to_string(e.value) + " energy");
+							text.setOutlineColor({92, 199, 108});
+						} break;
+					}
+
+					float posY = startY + i * (fontSize + gap);
+					text.setPosition({posX, posY});
+
+					window.draw(text);
+				}
+
+				// Buttons
+				// [Back]
+
+
+				// [Use]
 			}
 		}
 	}

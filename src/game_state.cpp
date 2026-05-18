@@ -59,7 +59,7 @@ void game_init(GameState& g) {
 				{"Tiramisu", 20, 8, {{ 7, ItemEffect::StatType::HUNGER} }},
 				{"Yo-Yo", 5, 9, { {2, ItemEffect::StatType::HUNGER} }} };
 
-	g.inventoryItems = { g.items[0], g.items[1], g.items[2] };
+	g.inventoryItems = { g.items[0], g.items[1], g.items[2], g.items[3] };
 
 	populate_shop_at_start(g);
 
