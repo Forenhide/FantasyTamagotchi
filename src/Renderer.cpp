@@ -756,6 +756,7 @@ void Renderer::draw_inventory(void) {
 	window.draw(inventoryBgSprite);
 	window.draw(inventoryTitle);
 	window.draw(tooltipRecSprite);
+	window.draw(itemName);
 	
 	if (!(backBtn.isHovered)) window.draw(backBtn.sprite);
 	if (backBtn.isHovered) window.draw(backBtn.sprite);
@@ -847,8 +848,7 @@ void Renderer::setup_tooltip_window(void) {
 	itemName.setOutlineThickness(1.f);
 	itemName.setOutlineColor({64, 64, 64});
 
-	itemName.setOrigin(itemName.getLocalBounds().size / 2.f);
-	itemName.setPosition({tooltipRecSprite.getPosition().x + tooltipRecSprite.getLocalBounds().size.x / 2.f, tooltipRecSprite.getPosition().y + tooltipRecSprite.getLocalBounds().size.y / 2.f + 14.f});
+	itemName.setOrigin({tooltipRecSprite.getLocalBounds().position.x + tooltipRecSprite.getLocalBounds().size.x / 2.f, tooltipRecSprite.getLocalBounds().position.y + tooltipRecSprite.getLocalBounds().size.y / 2.f}); // ????
 
 	for (int i = 0; i < itemStats.size(); ++i) {
 		itemStats[i].setCharacterSize(16.f);
@@ -957,12 +957,18 @@ void Renderer::show_tooltip(float dt) {
 					slot.move(direction * MOVE_SPEED * dt);
 				}
 
-				// Tooltip window
+				itemName.setString(item.name);
+
+				// Tooltip rec
 				float tooltipDirection = TARGET_TOOLTIP_POS_Y - tooltipRecSprite.getPosition().y;
-				if (std::abs(tooltipDirection) <= MOVE_SPEED * dt) 
+				if (std::abs(tooltipDirection) <= MOVE_SPEED * dt) {
 					tooltipRecSprite.setPosition({tooltipRecSprite.getPosition().x, TARGET_TOOLTIP_POS_Y});
-				else
+					itemName.setPosition({itemName.getPosition().x, TARGET_TOOLTIP_POS_Y});
+				} else {
 					tooltipRecSprite.move({0.f, (tooltipDirection > 0 ? MOVE_SPEED * dt : -MOVE_SPEED * dt)});
+					itemName.move({0.f, (tooltipDirection > 0 ? MOVE_SPEED * dt : -MOVE_SPEED * dt)});
+				}
+
 			}
 		}
 	}
