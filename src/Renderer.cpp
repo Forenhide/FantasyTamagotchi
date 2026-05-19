@@ -63,7 +63,9 @@ Renderer::Renderer(GameState& gameState) :
 	ageTitle(font),
 	ageStat(font),
 
-	itemName(font)
+	itemName(font),
+	itemPrice(font),
+	itemPriceTooltip(font)
 {}
 
 bool Renderer::init(void) {
@@ -977,7 +979,7 @@ void Renderer::setup_items_position(void) {
 	sf::Vector2f pos17({24.f, 628.f});
 	sf::Vector2f pos18({168.f, 628.f});
 	sf::Vector2f pos19({312.f, 628.f});
-	sf::Vector2f pos20({468.f, 628.f});
+	sf::Vector2f pos20({456.f, 628.f});
 	sf::Vector2f pos21({24.f, 763.f});
 	sf::Vector2f pos22({168.f, 763.f});
 	sf::Vector2f pos23({312.f, 763.f});
@@ -1041,6 +1043,16 @@ void Renderer::setup_tooltip_window(void) {
 	itemName.setFillColor(sf::Color::White);
 	itemName.setOutlineThickness(1.f);
 	itemName.setOutlineColor({64, 64, 64});
+
+	itemPrice.setCharacterSize(27.f);
+	itemPrice.setFillColor({232, 212, 149});
+	itemPrice.setOutlineThickness(1.f);
+	itemPrice.setOutlineColor({64, 64, 64});
+
+	itemPriceTooltip.setCharacterSize(12.f);
+	itemPriceTooltip.setFillColor({232, 212, 149});
+	itemPriceTooltip.setOutlineThickness(1.f);
+	itemPriceTooltip.setOutlineColor({64, 64, 64});
 }
 
 void Renderer::update_items(float dt) {
@@ -1081,8 +1093,14 @@ void Renderer::update_items(float dt) {
 		sprite.setPosition(slot.getPosition());
 		sprite.setScale({v.hoverT, v.hoverT});
 
+		itemPrice.setString(std::to_string(def->price) + "g");
+		itemPrice.setCharacterSize(27.f);
+		itemPrice.setPosition({v.position.x + 8.f, v.position.y + 8.f});
+		itemPrice.setScale({v.hoverT, v.hoverT});
+
 		window.draw(slot);
 		window.draw(sprite);
+		if (gameState.scene == Scene::Shop) window.draw(itemPrice);
 	}
 }
 
@@ -1136,6 +1154,7 @@ void Renderer::update_tooltip(float dt) {
 	tooltipRecSprite.setPosition(tooltipPos);
 
 	itemName.setString(def->name);
+	itemPriceTooltip.setString(std::to_string(def->price) + "g");
 	
 	sf::FloatRect nameBounds = itemName.getLocalBounds();
 
@@ -1144,9 +1163,11 @@ void Renderer::update_tooltip(float dt) {
 	sf::FloatRect tooltipBounds = tooltipRecSprite.getGlobalBounds();
 
 	itemName.setPosition({tooltipBounds.position.x + tooltipBounds.size.x / 2.f, tooltipBounds.position.y + tooltipBounds.size.y / 2.f - 38.f});
+	itemPriceTooltip.setPosition({tooltipBounds.position.x + 8.f, tooltipBounds.position.y + 8.f});
 
 	window.draw(tooltipRecSprite);
 	window.draw(itemName);
+	if (gameState.scene == Scene::ShopTooltip) window.draw(itemPriceTooltip);
 
 	// Item effects
 	const std::vector<ItemEffect>& effects = def->itemEffects;
@@ -1211,7 +1232,7 @@ void Renderer::update_tooltip(float dt) {
 	sf::Sprite& sprite = itemSprites[defItem->index];
 
 	sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
-	sprite.setPosition(itemPos);
+	sprite.setPosition(centerTarget);
 	sprite.setScale({1.f, 1.f});
 
 	window.draw(sprite);

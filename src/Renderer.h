@@ -258,6 +258,8 @@ private:
 	std::vector<sf::Vector2f> itemsPosition;
 	std::vector<sf::Sprite> slotSprites;
 	sf::Text itemName;
+	sf::Text itemPrice;
+	sf::Text itemPriceTooltip;
 
 	void load_resources(void);
 	void setup_sprites(void);
