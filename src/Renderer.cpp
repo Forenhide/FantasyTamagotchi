@@ -431,9 +431,11 @@ void Renderer::apply_scene_layout(const Scene& scene) {
 		case Scene::ShopTooltip: {
 			v[static_cast<size_t>(ButtonType::ShopBackButton)].targetScale = 1.f;
 			v[static_cast<size_t>(ButtonType::ShopBackButton)].targetPosition = {78.f, 668.f};
+			v[static_cast<size_t>(ButtonType::ShopBackButton)].currentPosition = {-100.f, 668.f};
 
 			v[static_cast<size_t>(ButtonType::BuyButton)].targetScale = 1.f;
 			v[static_cast<size_t>(ButtonType::BuyButton)].targetPosition = {344.f, 668.f};
+			v[static_cast<size_t>(ButtonType::BuyButton)].currentPosition = {700.f, 668.f};
 		} break;
 		default: break;
 	}
@@ -1199,7 +1201,7 @@ void Renderer::update_tooltip(float dt) {
 	}
 
 	// Item from bottom
-	sf::Vector2f bottomStart(300.f, 1100.f);
+	sf::Vector2f bottomStart(300.f, 600.f);
 	sf::Vector2f centerTarget(300.f, 512.f);
 
 	sf::Vector2f itemPos = bottomStart + (centerTarget - bottomStart) * t;
