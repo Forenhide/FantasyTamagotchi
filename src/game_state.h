@@ -1,8 +1,8 @@
 #ifndef GAMESTATE_H
 #define GAMESTATE_H
 
-#include "Item.h"
-#include "PopupNotification.h"
+#include "item.h"
+#include "popup_notification.h"
 #include <vector>
 #include <string>
 

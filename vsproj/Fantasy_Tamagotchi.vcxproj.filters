@@ -18,30 +18,30 @@
     <ClCompile Include="..\src\game_state.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Renderer.cpp">
+    <ClCompile Include="..\src\renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\SoundManager.cpp">
+    <ClCompile Include="..\src\sound_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\GameState.h">
+    <ClInclude Include="..\src\game_state.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Item.h">
+    <ClInclude Include="..\src\item.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Renderer.h">
+    <ClInclude Include="..\src\renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\PopupNotification.h">
+    <ClInclude Include="..\src\popup_notification.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\SoundManager.h">
+    <ClInclude Include="..\src\sound_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

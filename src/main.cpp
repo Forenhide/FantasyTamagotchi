@@ -1,5 +1,5 @@
-#include "GameState.h" 
-#include "Renderer.h" 
+#include "game_state.h" 
+#include "renderer.h" 
 #include <windows.h> 
 
 int main(void) { 

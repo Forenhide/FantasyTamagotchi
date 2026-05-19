@@ -1,4 +1,4 @@
-#include "SoundManager.h"
+#include "sound_manager.h"
 #include <iostream>
 
 
@@ -25,10 +25,10 @@ void SoundManager::setSounds(void) {
 
 			sf::Sound& s = sounds.back();
 
-			if (type == SoundEffect::Click)			s.setVolume(2.f);
-			else if (type == SoundEffect::Warning)  s.setVolume(6.f);
-			else if (type == SoundEffect::ItemUsed) s.setVolume(5.f);
-			else									s.setVolume(5.f);
+			if (type == SoundEffect::Click)			s.setVolume(5.f);
+			else if (type == SoundEffect::Warning)  s.setVolume(4.f);
+			else if (type == SoundEffect::ItemUsed) s.setVolume(20.f);
+			else									s.setVolume(10.f);
 		}
 	}
 }

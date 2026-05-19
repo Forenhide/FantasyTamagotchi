@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include "renderer.h"
 #include <windows.h>
 #include <iostream>
 #include <algorithm>
@@ -87,7 +87,7 @@ bool Renderer::init(void) {
 	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
 
 	music.play();
-	music.setVolume(0.5f);
+	music.setVolume(0.f);
 	music.setLooping(true);
 
 	return true;
@@ -577,10 +577,15 @@ void Renderer::add_popup(const std::string& str, const sf::Color& color, float x
 
 void Renderer::consume_popups(std::vector<Request>& popups) {
 
-	for (const auto& pop : popups) {
+	for (auto& pop : popups) {
 		sf::Color col = get_popup_color(pop.event);
 		sf::Vector2f pos = get_popup_position(pop.pos);
 		float lifeTime = get_popup_lifetime(pop.event);
+
+		if (pop.event == GameEvent::ITEM_USED) {
+			pos += {0.f, gap};
+			gap += 30.f;
+		}
 
 		add_popup(pop.message, col, pos.x, pos.y, lifeTime);
 
@@ -596,6 +601,7 @@ void Renderer::consume_popups(std::vector<Request>& popups) {
 		}
 	}
 
+	gap = 0.f;
 	popups.clear();
 }
 
@@ -641,6 +647,8 @@ sf::Color Renderer::get_popup_color(GameEvent event) const {
 		return {230, 156, 105};
 	} else if (event == GameEvent::WARNING) {
 	    return {199, 92, 92};
+	} else if (event == GameEvent::ITEM_USED) {
+		return {92, 199, 108};
 	}
 }
 
@@ -656,6 +664,8 @@ sf::Vector2f Renderer::get_popup_position(PositionAnchor position) const {
 		return {24.f, 510.f};
 	} else if (position == LeftBottom) {
 		return {24.f, 574.f};
+	} else if (position == BottomCenter) {
+		return {168.f, 709.f};
 	}
 }
 
@@ -667,6 +677,8 @@ float Renderer::get_popup_lifetime(GameEvent event) const {
 		return 3.f;
 	} else if (event == GameEvent::WARNING) {
 	    return 2.f;
+	} else if (event == GameEvent::ITEM_USED) {
+		return 2.f;
 	}
 }
 

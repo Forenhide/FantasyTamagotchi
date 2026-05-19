@@ -1,4 +1,4 @@
-#include "GameState.h"
+#include "game_state.h"
 #include <iostream>
 #include <random>
 
@@ -283,7 +283,7 @@ std::vector<Request> drain_pending_popups(GameState& g) {
 #pragma region Hunger / Feed
 void pet_change_hunger(GameState& g, int delta) {
 	
-	g.hungerNum += delta;
+	g.hungerNum -= delta;
 	pet_clamp_hunger(g);
 	pet_translate_hunger(g);
 }
@@ -311,7 +311,7 @@ void pet_feed(GameState& g) {
 #pragma region Boredom / Play
 void pet_change_boredom(GameState& g, int delta) {
 	
-	g.boredomNum += delta;
+	g.boredomNum -= delta;
 	pet_clamp_boredom(g);
 	pet_translate_boredom(g);
 }
@@ -483,23 +483,25 @@ void use_item(GameState& g, int index) {
 		switch (item.itemEffects[i].type) {
 			case ItemEffect::StatType::HEALTH: {
 				pet_change_health(g, item.itemEffects[i].value);
-				inventory_set_message(g, item.name + " increased health by " + std::to_string(item.itemEffects[i].value) + " points!");
+				g.pendingPopups.push_back({"+" + std::to_string(item.itemEffects[i].value) + " health", GameEvent::ITEM_USED, BottomCenter});
 			} break;
 			case ItemEffect::StatType::HUNGER: {
 				pet_change_hunger(g, item.itemEffects[i].value);
-				inventory_set_message(g, item.name + " decreased hunger by " + std::to_string(item.itemEffects[i].value) + " points!");
+				g.pendingPopups.push_back({"-" + std::to_string(item.itemEffects[i].value) + " hunger", GameEvent::ITEM_USED, BottomCenter});
 			} break;
 			case ItemEffect::StatType::MOOD: {
 				pet_change_boredom(g, item.itemEffects[i].value);
-				inventory_set_message(g, item.name + " decreased boredom by " + std::to_string(item.itemEffects[i].value) + " points!");
+				g.pendingPopups.push_back({"-" + std::to_string(item.itemEffects[i].value) + " boredom", GameEvent::ITEM_USED, BottomCenter});
 			} break;
 			case ItemEffect::StatType::ENERGY: {
 				pet_change_energy(g, item.itemEffects[i].value);
-				inventory_set_message(g, item.name + " increased energy by " + std::to_string(item.itemEffects[i].value) + " points!");
+				g.pendingPopups.push_back({"+" + std::to_string(item.itemEffects[i].value) + " energy", GameEvent::ITEM_USED, BottomCenter});
 			} break;
 			default: break;
 		}
 	} 
+
+	g.usedItem = true;
 
 	g.inventory.erase(g.inventory.begin() + index);
 }

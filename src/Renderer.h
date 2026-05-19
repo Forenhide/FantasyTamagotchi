@@ -2,9 +2,9 @@
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include "GameState.h"
-#include "PopupNotification.h"
-#include "SoundManager.h"
+#include "game_state.h"
+#include "popup_notification.h"
+#include "sound_manager.h"
 #include <string>
 #include <vector>
 
@@ -242,7 +242,9 @@ private:
 
 	sf::Music music;
 
+	// Popups
 	std::vector<FloatingText> popups;
+	float gap{0.f};
 
 	// Buttons
 	ButtonSystem buttonsSystem;
