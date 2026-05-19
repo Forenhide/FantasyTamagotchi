@@ -446,21 +446,8 @@ void pet_get_condition(GameState& g) {
 	if (g.tickCount < g.illnessEnd) {
 		pet_get_ill(g);
 	} else if (g.tickCount == g.illnessEnd) {
-		g.reaction = "I have recovered!";
 		g.isIll = false;
 	}
-}
-#pragma endregion
-
-#pragma region Set art / reaction
-void pet_set_art(GameState& g, const std::string& art) {
-
-	g.art = art;
-}
-
-void pet_set_reaction(GameState& g, const std::string& reaction) {
-
-	g.reaction = reaction;
 }
 #pragma endregion
 
@@ -505,16 +492,6 @@ void use_item(GameState& g, int index) {
 
 	g.inventory.erase(g.inventory.begin() + index);
 }
-
-void inventory_clear_message(GameState& g) {
-
-	g.inventoryMessage.clear();
-}
-
-void inventory_set_message(GameState& g, std::string message) {
-
-	g.inventoryMessage = message;
-}
 #pragma endregion
 
 // Shop ==============================================================================
@@ -523,17 +500,17 @@ void buy_item(GameState& g, int index) {
 
 	if (index < 0 || index >= g.shop.size()) return;
 
-	Item item = g.shop[index];
+	Item& item = g.shop[index];
 
 	if (g.balance >= item.price) {
 		change_balance(g, -item.price);
 		g.inventory.push_back(g.shop[index]);
 		g.shop.erase(g.shop.begin() + index);
 		g.boughtItem = true;
-		transaction_set_message(g, "You've purchased '" + item.name + "' for $" + std::to_string(item.price));
+		g.pendingPopups.push_back({"+ " + item.name, GameEvent::ITEM_BOUGHT, ShopBottomLeft});
 	} else {
-		transaction_set_message(g, "Insufficient balance.");
 		g.boughtItem = false;
+		g.pendingPopups.push_back({"Insufficient Balance!", GameEvent::ITEM_BOUGHT, ShopBottomLeft});
 	}
 }
 
@@ -547,16 +524,6 @@ void clamp_balance(GameState& g) {
 
 	if (g.balance > MAX_BALANCE) g.balance = MAX_BALANCE;
 	if (g.balance < 0) g.balance = 0;
-}
-
-void transaction_clear_message(GameState& g) {
-
-	g.transactionMessage.clear();
-}
-
-void transaction_set_message(GameState& g, std::string message) {
-
-	g.transactionMessage = message;
 }
 
 void update_shop(GameState& g) {

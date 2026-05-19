@@ -71,6 +71,7 @@ struct FloatingText {
 	float lifetime = 0.f;
 	float maxLifetime = 1.f;
 	sf::Vector2f velocity = {0.f, -30.f};
+	GameEvent event;
 
 	FloatingText(const sf::Font& font) : text(font) {}
 };
@@ -240,6 +241,8 @@ private:
 	sf::RectangleShape ageRec;
 	sf::Text ageTitle;
 	sf::Text ageStat;
+	sf::Text balanceText;
+	sf::Text balanceAmount;
 
 	sf::Music music;
 
@@ -260,6 +263,7 @@ private:
 	sf::Text itemName;
 	sf::Text itemPrice;
 	sf::Text itemPriceTooltip;
+	sf::Text transactionMsg;
 
 	void load_resources(void);
 	void setup_sprites(void);
@@ -288,8 +292,10 @@ private:
 
 	// Shop
 	void update_shop(void);
+	void setup_balance(void);
+	void draw_popups(void);
 
-	void add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime);
+	void add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime, const GameEvent& event);
 	void update_popups(float dt);
 	sf::Color get_popup_color(GameEvent event) const;
 	sf::Vector2f get_popup_position(PositionAnchor position) const;

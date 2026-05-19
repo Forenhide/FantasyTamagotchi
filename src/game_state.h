@@ -121,14 +121,10 @@ void pet_translate_boredom(GameState& g);
 void pet_translate_health_to_art(GameState& g);
 void pet_get_ill(GameState& g);
 void pet_get_condition(GameState& g);
-void pet_set_art(GameState& g, const std::string& art);
-void pet_set_reaction(GameState& g, const std::string& reaction);
 bool pet_goal_reached(GameState& g);
 
 // Inventory
 void use_item(GameState& g, int index);
-void inventory_clear_message(GameState& g);
-void inventory_set_message(GameState& g, std::string message);
 
 // Shop
 void populate_shop_at_start(GameState& g);
@@ -137,8 +133,6 @@ void update_shop(GameState& g);
 void buy_item(GameState& g, int index);
 void change_balance(GameState& g, int delta);
 void clamp_balance(GameState& g);
-void transaction_clear_message(GameState& g);
-void transaction_set_message(GameState& g, std::string message);
 
 // Requests
 std::vector<Request> drain_pending_popups(GameState& g);

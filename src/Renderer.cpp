@@ -65,7 +65,10 @@ Renderer::Renderer(GameState& gameState) :
 
 	itemName(font),
 	itemPrice(font),
-	itemPriceTooltip(font)
+	itemPriceTooltip(font),
+	balanceText(font, "Balance:", 24),
+	balanceAmount(font),
+	transactionMsg(font)
 {}
 
 bool Renderer::init(void) {
@@ -564,13 +567,16 @@ void Renderer::update_buttons(float dt) {
 	}
 }
 
-void Renderer::add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime) {
+void Renderer::add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime, const GameEvent& event) {
 
 	FloatingText popup(font);
 
 	popup.text.setString(str);
 	popup.text.setFillColor(color);
-	popup.text.setCharacterSize(24);
+
+	if (event == GameEvent::ITEM_BOUGHT) popup.text.setCharacterSize(16);
+	else popup.text.setCharacterSize(24);
+
 	popup.text.setOutlineThickness(1.f);
 	popup.text.setOutlineColor(sf::Color::White);
 
@@ -580,6 +586,8 @@ void Renderer::add_popup(const std::string& str, const sf::Color& color, float x
 
 	popup.lifetime = 0.f;
 	popup.active = true;
+
+	popup.event = event;
 
 	popups.push_back(popup);
 }
@@ -596,7 +604,7 @@ void Renderer::consume_popups(std::vector<Request>& popups) {
 			gap += 30.f;
 		}
 
-		add_popup(pop.message, col, pos.x, pos.y, lifeTime);
+		add_popup(pop.message, col, pos.x, pos.y, lifeTime, pop.event);
 
 		switch (pop.event) {
 			case GameEvent::WARNING:
@@ -658,6 +666,8 @@ sf::Color Renderer::get_popup_color(GameEvent event) const {
 	    return {199, 92, 92};
 	} else if (event == GameEvent::ITEM_USED) {
 		return {92, 199, 108};
+	} else if (event == GameEvent::ITEM_BOUGHT) {
+		return {222, 145, 77};
 	}
 }
 
@@ -675,6 +685,8 @@ sf::Vector2f Renderer::get_popup_position(PositionAnchor position) const {
 		return {24.f, 574.f};
 	} else if (position == BottomCenter) {
 		return {168.f, 709.f};
+	} else if (position == ShopBottomLeft) {
+		return {24.f, 992.f};
 	}
 }
 
@@ -688,6 +700,8 @@ float Renderer::get_popup_lifetime(GameEvent event) const {
 	    return 2.f;
 	} else if (event == GameEvent::ITEM_USED) {
 		return 2.f;
+	} else if (event == GameEvent::ITEM_BOUGHT) {
+		return 3.f;
 	}
 }
 
@@ -778,6 +792,13 @@ void Renderer::draw_buttons(void) {
 	}
 }
 
+void Renderer::draw_popups(void) {
+	
+	for (const FloatingText& popup : popups) {
+		if (popup.active == true && popup.event == GameEvent::ITEM_BOUGHT) window.draw(popup.text);
+	}
+}
+
 void Renderer::render(void) {
 	
 	static sf::Clock clock;
@@ -786,6 +807,7 @@ void Renderer::render(void) {
 	window.clear();
 
 	update_buttons(dt);
+	update_popups(dt);
 
 	if (gameState.scene == Scene::Inventory) {
 		draw_inventory();
@@ -797,15 +819,17 @@ void Renderer::render(void) {
 	} else if (gameState.scene == Scene::Shop) {
 		draw_shop();
 		update_items(dt);
+		draw_popups();
 	} else if (gameState.scene == Scene::ShopTooltip) {
 		draw_shop();
 		update_items(dt);
+		draw_popups();
 		update_tooltip(dt);
 	} else {
 		update_pet_idle_animation();
 		update_stats();
-		update_popups(dt);
 		animate_subtitle(dt);
+		update_popups(dt);
 		draw_pet_screen();
 	}
 
@@ -925,6 +949,8 @@ void Renderer::draw_shop(void) {
 
 	window.draw(shopBgSprite);
 	window.draw(shopTitle);
+	window.draw(balanceText);
+	window.draw(balanceAmount);
 }
 
 void Renderer::build_item_visuals(void) {
@@ -932,32 +958,32 @@ void Renderer::build_item_visuals(void) {
 	auto& items = (gameState.scene == Scene::Inventory || gameState.scene == Scene::InventoryTooltip) ? gameState.inventory : gameState.shop;
 	
 	itemSystem.visuals.clear();
-	itemSystem.visuals.resize(items.size() );
-	std::cout << "SIZE: " << itemSystem.visuals.size() << '\n';
-
-	if (gameState.scene == Scene::Inventory ||
-		gameState.scene == Scene::InventoryTooltip)
-	{
-		std::cout << "INVENTORY\n";
-	}
-	else
-	{
-		std::cout << "SHOP\n";
-	}
+	itemSystem.visuals.resize(items.size());
 
 	for (size_t i = 0; i < itemSystem.visuals.size(); ++i) {
 
-		std::cout << "for loop:\n";
-		std::cout << "---> " << i;
-
 		itemSystem.visuals[i].position = itemsPosition[i];
-
-		std::cout << ": X=" << itemsPosition[i].x << "\n";
-
 		itemSystem.visuals[i].hoverT = 0.f;
 		itemSystem.visuals[i].hovered = false;
 		itemSystem.visuals[i].selected = false;
 	}
+
+	setup_balance();
+}
+
+void Renderer::setup_balance(void) {
+	
+	balanceText.setFillColor(sf::Color::White);
+	balanceText.setOutlineThickness(1.f);
+	balanceText.setOutlineColor({64, 64, 64});
+	
+	balanceAmount.setCharacterSize(24.f);
+	balanceAmount.setFillColor({232, 212, 149});
+	balanceAmount.setOutlineThickness(1.f);
+	balanceAmount.setOutlineColor({64, 64, 64});
+
+	balanceText.setPosition({24.f, 88.f});
+	balanceAmount.setPosition({216.f, 88.f});
 }
 
 void Renderer::setup_items_position(void) {
@@ -1105,9 +1131,15 @@ void Renderer::update_items(float dt) {
 		itemPrice.setPosition({v.position.x + 8.f, v.position.y + 48.f});
 		itemPrice.setScale({v.hoverT, v.hoverT});
 
+		balanceAmount.setString(std::to_string(gameState.balance) + "g");
+
 		window.draw(slot);
 		window.draw(sprite);
-		if (gameState.scene == Scene::Shop) window.draw(itemPrice);
+		if (gameState.scene == Scene::Shop) {
+			window.draw(itemPrice);
+			window.draw(balanceText);
+			window.draw(balanceAmount);
+		}
 	}
 }
 
@@ -1154,7 +1186,7 @@ void Renderer::update_tooltip(float dt) {
 
 	// Tooltip from top
 	sf::Vector2f tooltipTarget(78.f, 256.f);
-	sf::Vector2f tooltipStart(78.f, -130.f);
+	sf::Vector2f tooltipStart(78.f, 136.f);
 
 	sf::Vector2f tooltipPos = tooltipStart + (tooltipTarget - tooltipStart) * t;
 
@@ -1244,25 +1276,3 @@ void Renderer::update_tooltip(float dt) {
 
 	window.draw(sprite);
 }
-
-/////////////////////// ADD NOTIFICATION AFTER ITEM USAGE
-
-/*
-void Renderer::update_shop(void) {
-	
-	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
-		itemSlotRecSprite.setPosition({itemsPosition[i]});
-		for (int j = 0; j < gameState.items.size(); ++j) {
-			if (gameState.inventoryItems[i].name == gameState.items[j].name) {
-				itemSprites[j].setPosition({itemsPosition[i].x + 20.f, itemsPosition[i].y + 20.f});
-				window.draw(itemSlotRecSprite);
-				window.draw(itemSprites[j]);
-
-				sf::Text price(font);
-				price.setString(std::to_string(gameState.items[j].price));
-				price.setCharacterSize();
-				window.draw();
-			}
-		}
-	}
-}*/

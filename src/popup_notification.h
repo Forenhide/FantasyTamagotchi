@@ -7,7 +7,8 @@ enum class GameEvent {
 	STAT_CHANGE, 
 	EVENT, 
 	WARNING,
-	ITEM_USED
+	ITEM_USED,
+	ITEM_BOUGHT
 };
 
 enum PositionAnchor { 
@@ -16,7 +17,8 @@ enum PositionAnchor {
 	LeftUp,
 	LeftCenter,
 	LeftBottom,
-	BottomCenter
+	BottomCenter,
+	ShopBottomLeft
 };
 
 struct Request {
