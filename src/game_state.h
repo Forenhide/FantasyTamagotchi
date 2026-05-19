@@ -12,13 +12,13 @@ constexpr int MAX_HUNGER{100};
 constexpr int MAX_BOREDOM{75};
 constexpr int MAX_BALANCE{100};
 constexpr int AGE_CHECKPOINT{30};
-constexpr int EVOLVE_TICK{300};
 constexpr int THRESHOLD{950};
 constexpr int ILLNESS_DUR{5};
 constexpr int ENERGY_CHECKPOINT{2};
-constexpr int TICK_MONEY{1};\
+constexpr int TICK_MONEY{1};
 constexpr int SHOP_UPDATE_TICK{10};
 constexpr int MAX_ITEM_SLOTS{24};
+constexpr int EVOLVE_TICK{10};
 
 const std::string HUNGER[5]{ "Starving", "Hungry", "Okay", "Well-fed", "Full" };
 const std::string MOOD[5]{"Frustrated", "Bored", "Okay", "Good", "Happy"};
@@ -31,7 +31,9 @@ enum class Scene {
 	Inventory,
 	InventoryTooltip,
 	Shop,
-	ShopTooltip
+	ShopTooltip,
+	Death,
+	Evolve
 };
 
 struct GameState {
@@ -56,12 +58,10 @@ struct GameState {
 	int illnessEnd{};
 	int tickCount{};
 	int newStat{};
-	bool isAlive{};
 	bool birthday{};
 	bool isIll{};
 	bool starving{};
 	bool bored{};
-	bool isPlaying{false};
 
 	// Inventory & Shop
 	std::vector<Item> items;
@@ -92,20 +92,13 @@ struct GameState {
 
 // Game
 void game_init(GameState& g);
-void process_one_action(GameState& g);
-void pet_handle_input(GameState& g);
-void inventory_handle_input(GameState& g);
-void shop_handle_input(GameState& g);
-void make_decision(GameState& g, int input);
 void tick(GameState& g);
 
 // Pet
+void pet_handle_input(GameState& g);
 void pet_feed(GameState& g);
 void pet_play(GameState& g);
 void pet_sleep(GameState& g);
-void pet_check_health(GameState& g);
-void pet_die(GameState& g);
-void pet_evolve(GameState& g);
 void pet_update_warnings(GameState& g);
 void pet_update_age(GameState& g);
 void pet_change_hunger(GameState& g, int delta);
@@ -118,10 +111,10 @@ void pet_clamp_boredom(GameState& g);
 void pet_clamp_energy(GameState& g);
 void pet_translate_hunger(GameState& g);
 void pet_translate_boredom(GameState& g);
-void pet_translate_health_to_art(GameState& g);
 void pet_get_ill(GameState& g);
 void pet_get_condition(GameState& g);
-bool pet_goal_reached(GameState& g);
+void pet_check_death(GameState& g);
+void pet_check_evolve(GameState& g);
 
 // Inventory
 void use_item(GameState& g, int index);

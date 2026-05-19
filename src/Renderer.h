@@ -138,6 +138,8 @@ private:
 	sf::Texture petBgTexture;
 	sf::Texture inventoryBgTexture;
 	sf::Texture shopBgTexture;
+	sf::Texture deathBgTexture;
+	sf::Texture evolveBgTexture;
 
 	sf::Texture petIdleTexture;
 	sf::Texture petPlayTexture;
@@ -174,6 +176,8 @@ private:
 	sf::Sprite petBgSprite;
 	sf::Sprite inventoryBgSprite;
 	sf::Sprite shopBgSprite;
+	sf::Sprite deathBgSprite;
+	sf::Sprite evolveBgSprite;
 
 	sf::Sprite petIdleSprite;
 	sf::Sprite petPlaySprite;
@@ -271,11 +275,13 @@ private:
 	void draw_pet_screen(void);
 	void draw_inventory(void);
 	void draw_shop(void);
-
+	void draw_death_screen(void);
+	void draw_evolve_screen(void);
 	void animate_subtitle(float dt);
 	void update_pet_idle_animation(void);
 	void update_pet_play_animation(void);
 	void update_stats(void);
+	void decrement_stats(float dt);
 
 	void setup_buttons(void);
 	void update_buttons(float dt);
@@ -291,7 +297,6 @@ private:
 	void setup_button_sprites(void);
 
 	// Shop
-	void update_shop(void);
 	void setup_balance(void);
 	void draw_popups(void);
 

@@ -43,7 +43,6 @@ void game_init(GameState& g) {
 	g.illnessStart = 0;
 	g.illnessEnd = 0;
 	g.tickCount = 1;
-	g.isAlive = true;
 	g.birthday = false;
 	g.isIll = false;
 
@@ -89,21 +88,6 @@ void populate_shop_at_start(GameState& g) {
 	}	
 }
 
-void process_one_action(GameState& g) {
-
-	if (g.scene == Scene::Inventory) {
-		inventory_handle_input(g);
-		return;
-	}
-	if (g.scene == Scene::Shop) {
-		shop_handle_input(g);
-		return;
-	} else {
-		pet_check_health(g);
-		pet_handle_input(g);
-	}
-}
-
 void pet_handle_input(GameState& g) {
 
 	if (g.playPressed == true) {
@@ -144,113 +128,17 @@ void pet_handle_input(GameState& g) {
 	return;
 }
 
-void inventory_handle_input(GameState& g) {
-
-	int choice{};
-
-	std::cout << "Make a choice (0-" << g.inventory.size() << "): ";
-
-	if (!(std::cin >> choice)) {
-		std::cin.clear();
-		std::cin.ignore(1000, '\n');
-		return;
-	}
-
-	if ((choice < 0) || (choice > static_cast<int>(g.inventory.size()))) {
-		std::cin.ignore(1000, '\n');
-		std::cout << "Wrong input.\n";
-		return;
-	}
-
-	if (choice == 0) {
-		g.scene = Scene::Pet;
-		g.usedItem = false;
-		inventory_clear_message(g);
-	} else {
-		use_item(g, choice - 1);
-		g.usedItem = true;
-		g.scene = Scene::Pet;
-		return;
-	}
-
-	if (!g.usedItem) inventory_clear_message(g);
-}
-
-void shop_handle_input(GameState& g) {
-
-	int choice{};
-
-	std::cout << "Make a choice (0-" << g.shop.size() << "): ";
-
-	if (!(std::cin >> choice)) {
-		std::cin.clear();
-		std::cin.ignore(1000, '\n');
-		return;
-	}
-
-	if ((choice < 0) || (choice > static_cast<int>(g.shop.size()))) {
-		std::cin.ignore(1000, '\n');
-		std::cout << "Wrong input.\n";
-		return;
-	}
-
-	if (choice == 0) {
-		g.scene = Scene::Pet;
-		transaction_clear_message(g);
-	} else {
-		buy_item(g, choice - 1);
-	}
-}
-
-void make_decision(GameState& g, int input) {
-
-	switch (input) {
-		case 0:
-			g.reaction = "Goodbye!";
-			g.success = false;
-			g.playing = false;
-			break;
-		case 1:
-			if (g.energy > 0) {
-				pet_feed(g);
-				g.success = true;
-			} else {
-				g.success = false;
-			}
-			break;
-		case 2:
-			if (g.energy > 0) {
-				pet_play(g);
-				g.success = true;
-			} else {
-				g.success = false;
-			}
-			break;
-		case 3:
-			pet_sleep(g);
-			g.success = true;
-			break;
-		case 4:
-			g.scene = Scene::Inventory;
-			g.success = false;
-			break;
-		case 5:
-			g.scene = Scene::Shop;
-			g.success = false;
-			break;
-		default:
-			g.success = false;
-			break;
-	}
-}
-
 void tick(GameState& g) {
+
+	pet_check_death(g);
+	pet_check_evolve(g);
+
+	if (g.scene == Scene::Death || g.scene == Scene::Evolve) return;
 
 	pet_get_condition(g);
 
 	g.tickCount++;
 
-	pet_change_health(g, -2);
 	pet_change_hunger(g, -5);
 	pet_change_boredom(g, -3);
 	change_balance(g, TICK_MONEY);
@@ -263,6 +151,8 @@ void tick(GameState& g) {
 	if (g.starving)    g.pendingPopups.push_back({"I am starving!", GameEvent::WARNING, LeftCenter});
 	if (g.bored)       g.pendingPopups.push_back({"I want to play!", GameEvent::WARNING, LeftBottom});
 	if (g.statChanged) g.pendingPopups.push_back({std::to_string(g.newStat), GameEvent::STAT_CHANGE, BottomLeft});
+	
+	g.statChanged = false;
 
 	update_shop(g);
 
@@ -282,10 +172,10 @@ std::vector<Request> drain_pending_popups(GameState& g) {
 // Pet ===============================================================================
 #pragma region Hunger / Feed
 void pet_change_hunger(GameState& g, int delta) {
-	
-	g.hungerNum -= delta;
-	pet_clamp_hunger(g);
-	pet_translate_hunger(g);
+
+    g.hungerNum -= delta;
+    pet_clamp_hunger(g);
+    pet_translate_hunger(g);
 }
 
 void pet_clamp_hunger(GameState& g) {
@@ -301,19 +191,18 @@ void pet_translate_hunger(GameState& g) {
 
 void pet_feed(GameState& g) {
 	
-	pet_change_hunger(g, -7);
+	pet_change_hunger(g, 7);
 	pet_change_health(g, 1);
-	pet_change_energy(g, -1);
-	pet_set_reaction(g, "Yummy!");
+	pet_change_energy(g, 1);
 }
 #pragma endregion
 
 #pragma region Boredom / Play
 void pet_change_boredom(GameState& g, int delta) {
-	
-	g.boredomNum -= delta;
-	pet_clamp_boredom(g);
-	pet_translate_boredom(g);
+
+    g.boredomNum -= delta;
+    pet_clamp_boredom(g);
+    pet_translate_boredom(g);
 }
 
 void pet_clamp_boredom(GameState& g) {
@@ -329,10 +218,9 @@ void pet_translate_boredom(GameState& g) {
 
 void pet_play(GameState& g) {
 
-	pet_change_boredom(g, -5);
-	pet_change_hunger(g, 3);
+	pet_change_boredom(g, 5);
+	pet_change_hunger(g, -3);
 	pet_change_energy(g, -1);
-	pet_set_reaction(g, "Weee!");
 }
 #pragma endregion
 
@@ -340,8 +228,9 @@ void pet_play(GameState& g) {
 void pet_change_health(GameState& g, int delta) {
 	
 	g.health += delta;
+
 	pet_clamp_health(g);
-	pet_translate_health_to_art(g);
+	pet_check_death(g);
 }
 
 void pet_clamp_health(GameState& g) {
@@ -349,18 +238,13 @@ void pet_clamp_health(GameState& g) {
 	if (g.health > MAX_HEALTH) g.health = MAX_HEALTH;
 	if (g.health < 0) g.health = 0;
 }
-
-void pet_translate_health_to_art(GameState& g) {
-	
-	g.art = ART[get_level(g.health, MAX_HEALTH, 5)];
-}
 #pragma endregion
 
 #pragma region Energy / Sleep
 void pet_change_energy(GameState& g, int delta) {
-	
-	g.energy += delta;
-	pet_clamp_energy(g);
+
+    g.energy += delta;
+    pet_clamp_energy(g);
 }
 
 void pet_clamp_energy(GameState& g) {
@@ -373,30 +257,6 @@ void pet_sleep(GameState& g) {
 
 	if (g.tickCount % ENERGY_CHECKPOINT == 0)
 		pet_change_energy(g, 3);
-
-	pet_set_reaction(g, "Zzz...");
-}
-#pragma endregion
-
-#pragma region Check health / Die / Evolve
-void pet_check_health(GameState& g) {
-	
-	if (g.health == 0) {
-		pet_die(g);
-		g.playing = false;
-	}
-}
-
-void pet_die(GameState& g) {
-
-	g.isAlive = false;
-	g.playing = false;
-}
-
-void pet_evolve(GameState& g) {
-
-	g.art = "👾";
-	g.reaction = "I have evolved! Thank You!";
 }
 #pragma endregion
 
@@ -431,7 +291,7 @@ void pet_update_age(GameState& g) {
 void pet_get_ill(GameState& g) {
 
 	g.isIll = true;
-	pet_change_health(g, -7);
+	pet_change_health(g, -2);
 }
 
 void pet_get_condition(GameState& g) {
@@ -443,18 +303,18 @@ void pet_get_condition(GameState& g) {
 		g.illnessEnd = g.illnessStart + ILLNESS_DUR;
 	}
 
-	if (g.tickCount < g.illnessEnd) {
-		pet_get_ill(g);
-	} else if (g.tickCount == g.illnessEnd) {
-		g.isIll = false;
-	}
+	if (g.tickCount < g.illnessEnd) pet_get_ill(g);
+	else if (g.tickCount == g.illnessEnd) g.isIll = false;
+
+	if (g.hungerNum >= MAX_HUNGER) pet_change_health(g, -5);
+	if (g.boredomNum >= MAX_BOREDOM) pet_change_health(g, -5);
 }
 #pragma endregion
 
 #pragma region Goal reached
-bool pet_goal_reached(GameState& g) {
+void pet_check_evolve(GameState& g) {
 	
-	return g.tickCount >= EVOLVE_TICK;
+	if (g.tickCount >= EVOLVE_TICK) g.scene = Scene::Evolve;
 }
 #pragma endregion
 
@@ -541,5 +401,9 @@ void update_shop(GameState& g) {
 		}	
 	}
 }
-
 #pragma endregion
+
+void pet_check_death(GameState& g) {
+	
+	if (g.health <= 0) g.scene = Scene::Death;
+}

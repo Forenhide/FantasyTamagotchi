@@ -9,6 +9,8 @@ Renderer::Renderer(GameState& gameState) :
 	gameState(gameState),
 	petBgSprite(petBgTexture),
 	inventoryBgSprite(inventoryBgTexture),
+	deathBgSprite(deathBgTexture),
+	evolveBgSprite(evolveBgTexture),
 	shopBgSprite(shopBgTexture),
 	petIdleSprite(petIdleTexture),
 	petPlaySprite(petPlayTexture),
@@ -107,9 +109,11 @@ bool Renderer::is_open(void) const {
 void Renderer::load_resources(void) {
 	
 	// Backgrounds
-	if (!petBgTexture.loadFromFile("assets/sprites/background.jpg")) throw std::runtime_error("bg");
-	if (!inventoryBgTexture.loadFromFile("assets/sprites/inventoryBg.jpg")) throw std::runtime_error("bg");
-	if (!shopBgTexture.loadFromFile("assets/sprites/shopBg.jpg")) throw std::runtime_error("bg");
+	if (!petBgTexture.loadFromFile("assets/sprites/background.jpg")) throw std::runtime_error("pet bg");
+	if (!inventoryBgTexture.loadFromFile("assets/sprites/inventoryBg.jpg")) throw std::runtime_error("inventory bg");
+	if (!shopBgTexture.loadFromFile("assets/sprites/shopBg.jpg")) throw std::runtime_error("shop bg");
+	if (!deathBgTexture.loadFromFile("assets/sprites/deathBg.jpg")) throw std::runtime_error("death bg");
+	if (!evolveBgTexture.loadFromFile("assets/sprites/evolveBg.jpg")) throw std::runtime_error("evolve bg");
 
 	// Pet
 	if (!petIdleTexture.loadFromFile("assets/sprites/pet/IDLE.png")) throw std::runtime_error("pet");
@@ -157,6 +161,8 @@ void Renderer::setup_sprites(void) {
 	petBgSprite.setTexture(petBgTexture, true);
 	inventoryBgSprite.setTexture(inventoryBgTexture, true);
 	shopBgSprite.setTexture(shopBgTexture, true);
+	deathBgSprite.setTexture(deathBgTexture, true);
+	evolveBgSprite.setTexture(evolveBgTexture, true);
 
 	petIdleSprite.setTexture(petIdleTexture, true);
 	petPlaySprite.setTexture(petPlayTexture, true);
@@ -806,34 +812,45 @@ void Renderer::render(void) {
 
 	window.clear();
 
+	decrement_stats(dt);
+
 	update_buttons(dt);
 	update_popups(dt);
 
-	if (gameState.scene == Scene::Inventory) {
+	if (gameState.scene == Scene::Death) {
+		draw_death_screen();
+		music.stop();
+	} else if (gameState.scene == Scene::Evolve) {
+		draw_evolve_screen();
+		music.stop();
+	} else if (gameState.scene == Scene::Inventory) {
 		draw_inventory();
 		update_items(dt);
+		draw_buttons();
 	} else if (gameState.scene == Scene::InventoryTooltip) {
 		draw_inventory();
 		update_items(dt);
 		update_tooltip(dt);
+		draw_buttons();
 	} else if (gameState.scene == Scene::Shop) {
 		draw_shop();
 		update_items(dt);
 		draw_popups();
+		draw_buttons();
 	} else if (gameState.scene == Scene::ShopTooltip) {
 		draw_shop();
 		update_items(dt);
 		draw_popups();
 		update_tooltip(dt);
+		draw_buttons();
 	} else {
 		update_pet_idle_animation();
 		update_stats();
 		animate_subtitle(dt);
 		update_popups(dt);
 		draw_pet_screen();
+		draw_buttons();
 	}
-
-	draw_buttons();
 
 	window.display();
 }
@@ -851,6 +868,8 @@ void Renderer::handle_events(void) {
 
 				for (size_t i = 0; i < buttonsSystem.buttons.size() && i < buttonSprites.size(); ++i) {
 
+					if (gameState.scene == Scene::Death) return;
+
 					if (buttonSprites[i].getGlobalBounds().contains(mousePos)) {
 						auto& a = buttonsSystem.buttons[i].action;
 						
@@ -858,17 +877,17 @@ void Renderer::handle_events(void) {
 							case ButtonAction::PetPlay: {
 								soundMgr.play(SoundEffect::Click);
 								gameState.playPressed = true;
-								pet_handle_input(gameState);		
+								pet_handle_input(gameState);
 							} break;
 							case ButtonAction::PetFeed: {
 								soundMgr.play(SoundEffect::Click);
 								gameState.feedPressed = true;
-								pet_handle_input(gameState);		
+								pet_handle_input(gameState);
 							} break;
 							case ButtonAction::PetSleep: {
 								soundMgr.play(SoundEffect::Click);
 								gameState.sleepPressed = true;
-								pet_handle_input(gameState);		
+								pet_handle_input(gameState);
 							} break;
 							case ButtonAction::OpenInventory: {
 								soundMgr.play(SoundEffect::Click);
@@ -1275,4 +1294,41 @@ void Renderer::update_tooltip(float dt) {
 	sprite.setScale({1.f, 1.f});
 
 	window.draw(sprite);
+}
+
+void Renderer::decrement_stats(float dt) {
+	
+	const float HEALTH_DECREMENT_INTERVAL = 0.3f;
+	static float accumulator = 0.0f;
+
+	accumulator += dt;
+
+	if (accumulator >= HEALTH_DECREMENT_INTERVAL) {
+		gameState.hungerNum++;
+		gameState.health--;
+		gameState.boredomNum++;
+
+		accumulator -= HEALTH_DECREMENT_INTERVAL;
+	}
+}
+
+void Renderer::draw_death_screen(void) {
+
+	window.draw(deathBgSprite);
+
+	sf::Text deadText(font);
+	deadText.setString("KITTY DIED");
+	deadText.setCharacterSize(42);
+	deadText.setFillColor({199, 92, 92});
+	deadText.setOutlineThickness(1.f);
+	deadText.setOutlineColor(sf::Color::White);
+
+	deadText.setPosition({90.f, 491.f});
+
+	window.draw(deadText);
+}
+
+void Renderer::draw_evolve_screen(void) {
+	
+	window.draw(evolveBgSprite);
 }
