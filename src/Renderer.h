@@ -2,24 +2,24 @@
 
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include "GameState.h"
 #include "PopupNotification.h"
 #include "SoundManager.h"
 #include <string>
 #include <vector>
 
 
-struct GameState;
-
 enum class ButtonType {
-	
-	PlayButton,
-	FeedButton,
-	SleepButton,
-	InventoryButton,
-	ShopButton,
-	UseButton,
-	BuyButton,
-	BackButton
+    PlayButton,
+    FeedButton,
+    SleepButton,
+    InventoryButton,
+    ShopButton,
+    InventoryBackButton,
+    ShopBackButton,
+    PetBackButton,
+    UseButton,
+    BuyButton
 };
 
 enum class ButtonAction {
@@ -46,7 +46,8 @@ struct ButtonVisual {
 
 	int spriteIndex;
 
-	sf::Vector2f position;
+	sf::Vector2f currentPosition;
+	sf::Vector2f targetPosition;
 
 	float currentScale;
 	float targetScale;
@@ -122,6 +123,8 @@ public:
 	void setup_pet_idle_animation(void);
 	void setup_pet_play_animation(void);
 	void apply_scene_layout(const Scene& scene);
+	void change_scene(const Scene& scene);
+	void draw_buttons(void);
 
 private:
 	GameState& gameState;
@@ -182,7 +185,9 @@ private:
 	sf::Sprite sleepBtnSprite;
 	sf::Sprite inventoryBtnSprite;
 	sf::Sprite shopBtnSprite;
-	sf::Sprite backBtnSprite;
+	sf::Sprite inventoryBackToBtnSprite;
+	sf::Sprite shopBackToBtnSprite;
+	sf::Sprite petBackToBtnSprite;
 	sf::Sprite useBtnSprite;
 	sf::Sprite buyBtnSprite;
 
@@ -258,8 +263,6 @@ private:
 	void draw_inventory(void);
 	void draw_shop(void);
 
-	
-	
 	void animate_subtitle(float dt);
 	void update_pet_idle_animation(void);
 	void update_pet_play_animation(void);
