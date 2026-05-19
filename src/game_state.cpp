@@ -565,7 +565,6 @@ void update_shop(GameState& g) {
 		std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);
 
 		g.shop.clear();
-		g.shop.resize(MAX_ITEM_SLOTS - g.shop.size());
 
 		for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
 			int index = randomIndex(gen);

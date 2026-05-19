@@ -370,7 +370,7 @@ void Renderer::setup_titles(void) {
 	inventoryTitle.setFillColor({52, 168, 83});
 	inventoryTitle.setOutlineThickness(1.f);
 	inventoryTitle.setOutlineColor({255, 255, 255});
-	inventoryTitle.setPosition({204.f, 16.f});
+	inventoryTitle.setPosition({84.f, 16.f});
 
 	// Shop
 	shopTitle.setFillColor({222, 145, 77});
@@ -1110,7 +1110,7 @@ void Renderer::update_tooltip(float dt) {
 	
 	if (gameState.scene != Scene::InventoryTooltip && gameState.scene != Scene::ShopTooltip) return;
 
-	selectedItemState.t += dt * 2.5f;
+	selectedItemState.t += dt * 5.f;
 	float t = std::min(selectedItemState.t, 1.f);
 
 	auto& items = (gameState.scene == Scene::InventoryTooltip) ? gameState.inventory : gameState.shop;
