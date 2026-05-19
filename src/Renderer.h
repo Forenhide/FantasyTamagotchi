@@ -44,15 +44,17 @@ struct Button {
 
 struct ButtonVisual {
 
+	int spriteIndex;
+
 	sf::Vector2f position;
+
+	float currentScale;
+	float targetScale;
+
 	bool hovered;
+
 	float hoverT;
 	float scaleT;
-};
-
-struct ButtonLayout {
-	
-
 };
 
 struct ButtonSystem {
@@ -119,6 +121,7 @@ public:
 	void setup_stats(void);
 	void setup_pet_idle_animation(void);
 	void setup_pet_play_animation(void);
+	void apply_scene_layout(const Scene& scene);
 
 private:
 	GameState& gameState;
@@ -237,7 +240,8 @@ private:
 	std::vector<FloatingText> popups;
 
 	// Buttons
-	ButtonSystem buttons;
+	ButtonSystem buttonsSystem;
+	std::vector<sf::Sprite> buttonSprites;
 
 	// Inventory
 	InventorySystem inventory;
@@ -253,6 +257,8 @@ private:
 	void draw_pet_screen(void);
 	void draw_inventory(void);
 	void draw_shop(void);
+
+	
 	
 	void animate_subtitle(float dt);
 	void update_pet_idle_animation(void);
@@ -268,9 +274,9 @@ private:
 	void setup_items_position(void);
 	void animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mousePos, float& currentScale, float dt);
 	void update_tooltip(float dt);
-	void show_tooltip(float dt);
 	void setup_slot_sprites(void);
 	void setup_tooltip_window(void);
+	void setup_button_sprites(void);
 
 	// Shop
 	void update_shop(void);
