@@ -57,7 +57,7 @@ void game_init(GameState& g) {
 				{"Teddy Bear", 7, 6, { {3, ItemEffect::StatType::MOOD} }},
 				{"Tetris", 11, 7, { {5, ItemEffect::StatType::MOOD} }},
 				{"Tiramisu", 20, 8, {{ 7, ItemEffect::StatType::HUNGER} }},
-				{"Yo-Yo", 5, 9, { {2, ItemEffect::StatType::HUNGER} }} };
+				{"Yo-Yo", 5, 9, { {2, ItemEffect::StatType::MOOD} }} };
 
 	g.inventory = { g.items[0], g.items[1], g.items[2], g.items[3] };
 
@@ -81,7 +81,7 @@ void populate_shop_at_start(GameState& g) {
 	std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);
 
 	g.shop.clear();
-	g.shop.resize(MAX_ITEM_SLOTS);
+	g.shop.reserve(MAX_ITEM_SLOTS);
 
 	for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
 		int index = randomIndex(gen);
@@ -559,13 +559,13 @@ void transaction_set_message(GameState& g, std::string message) {
 
 void update_shop(GameState& g) {
 	
-	if (g.tickCount % SHOP_UPDATE_TICK == 0) {
+	if (g.tickCount > 0 && g.tickCount % SHOP_UPDATE_TICK == 0) {
 		std::random_device rd;
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);
 
 		g.shop.clear();
-		g.shop.resize(MAX_ITEM_SLOTS);
+		g.shop.resize(MAX_ITEM_SLOTS - g.shop.size());
 
 		for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
 			int index = randomIndex(gen);

@@ -89,13 +89,13 @@ struct SelectedItemState {
 	float t = 0.f;
 };
 
-struct InventoryItem {
+struct ItemState {
 	
 	int itemId;
 	int quantity;
 };
 
-struct InventorySlotVisual {
+struct ItemSlotVisual {
 	
 	sf::Vector2f position;
 	float hoverT;
@@ -103,10 +103,10 @@ struct InventorySlotVisual {
 	bool selected;
 };
 
-struct InventorySystem {
+struct ItemSystem {
 	
-	std::vector<InventoryItem> items;
-	std::vector<InventorySlotVisual> visuals;
+	std::vector<ItemState> items;
+	std::vector<ItemSlotVisual> visuals;
 };
 
 class Renderer {
@@ -220,6 +220,7 @@ private:
 	sf::Text title1;
 	sf::Text title2;
 	sf::Text inventoryTitle;
+	sf::Text shopTitle;
 	sf::Text subtitle;
 	sf::RectangleShape nameRec;
 	sf::Text nameTitle;
@@ -251,7 +252,7 @@ private:
 	std::vector<sf::Sprite> buttonSprites;
 
 	// Inventory
-	InventorySystem inventory;
+	ItemSystem itemSystem;
 	SelectedItemState selectedItemState;
 	std::vector<sf::Sprite> itemSprites;
 	std::vector<sf::Vector2f> itemsPosition;
@@ -274,8 +275,8 @@ private:
 	void update_buttons(float dt);
 
 	// Inventory
-	void build_inventory_visuals(void);
-	void update_inventory(float dt);
+	void build_item_visuals(void);
+	void update_items(float dt);
 	void setup_items_position(void);
 	void animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mousePos, float& currentScale, float dt);
 	void update_tooltip(float dt);

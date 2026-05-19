@@ -49,6 +49,7 @@ Renderer::Renderer(GameState& gameState) :
 	title2(font, "TAMAGOTCHI", 48),
 	subtitle(font, "* Kitty Edition *", 20),
 	inventoryTitle(font, "INVENTORY", 48),
+	shopTitle(font, "SHOP", 48),
 	nameTitle(font),
 	nameStat(font),
 	healthTitle(font),
@@ -367,11 +368,15 @@ void Renderer::setup_titles(void) {
 
 	// Inventory
 	inventoryTitle.setFillColor({52, 168, 83});
-	inventoryTitle.setOutlineColor({255, 255, 255});
 	inventoryTitle.setOutlineThickness(1.f);
-	inventoryTitle.setPosition({84.f, 16.f});
+	inventoryTitle.setOutlineColor({255, 255, 255});
+	inventoryTitle.setPosition({204.f, 16.f});
 
 	// Shop
+	shopTitle.setFillColor({222, 145, 77});
+	shopTitle.setOutlineThickness(1.f);
+	shopTitle.setOutlineColor({255, 255, 255});
+	shopTitle.setPosition({204.f, 16.f});
 }
 
 void Renderer::apply_scene_layout(const Scene& scene) {
@@ -780,13 +785,18 @@ void Renderer::render(void) {
 
 	if (gameState.scene == Scene::Inventory) {
 		draw_inventory();
-		update_inventory(dt);
+		update_items(dt);
 	} else if (gameState.scene == Scene::InventoryTooltip) {
 		draw_inventory();
-		update_inventory(dt);
+		update_items(dt);
 		update_tooltip(dt);
 	} else if (gameState.scene == Scene::Shop) {
 		draw_shop();
+		update_items(dt);
+	} else if (gameState.scene == Scene::ShopTooltip) {
+		draw_shop();
+		update_items(dt);
+		update_tooltip(dt);
 	} else {
 		update_pet_idle_animation();
 		update_stats();
@@ -865,20 +875,24 @@ void Renderer::handle_events(void) {
 					}
 				}
 
-				for (size_t i = 0; i < gameState.inventory.size(); ++i)
-{
-					if (slotSprites[i].getGlobalBounds().contains(mousePos))
-					{
-						const Item& item = gameState.inventory[i];
+				if (gameState.scene == Scene::Inventory || gameState.scene == Scene::Shop) {
 
-						if (item.name.empty())
-							continue;
+					auto& items = (gameState.scene == Scene::Inventory) ? gameState.inventory : gameState.shop;
 
-						selectedItemState.itemIndex = static_cast<int>(i);
-						selectedItemState.t = 0.f;
+					for (size_t i = 0; i < items.size(); ++i) {
 
-						change_scene(Scene::InventoryTooltip);
-						return;
+						if (slotSprites[i].getGlobalBounds().contains(mousePos)) {
+							const Item& item = items[i];
+
+							if (item.name.empty())
+								continue;
+
+							selectedItemState.itemIndex = static_cast<int>(i);
+							selectedItemState.t = 0.f;
+
+							change_scene(gameState.scene == Scene::Inventory ? Scene::InventoryTooltip : Scene::ShopTooltip);
+							return;
+						}
 					}
 				}
 			} 
@@ -891,8 +905,8 @@ void Renderer::change_scene(const Scene& scene) {
 	gameState.scene = scene;
 	apply_scene_layout(scene);
 
-	if (scene == Scene::Inventory || scene == Scene::InventoryTooltip)
-		build_inventory_visuals();
+	if (scene == Scene::Inventory || scene == Scene::InventoryTooltip || scene == Scene::Shop || scene == Scene::ShopTooltip)
+		build_item_visuals();
 }
 
 void Renderer::draw_inventory(void) {
@@ -901,15 +915,42 @@ void Renderer::draw_inventory(void) {
 	window.draw(inventoryTitle);
 }
 
-void Renderer::build_inventory_visuals(void) {
+void Renderer::draw_shop(void) {
 
-	inventory.visuals.resize(gameState.inventory.size());
+	window.draw(shopBgSprite);
+	window.draw(shopTitle);
+}
 
-	for (size_t i = 0; i < inventory.visuals.size(); ++i) {
-		inventory.visuals[i].position = itemsPosition[i];
-		inventory.visuals[i].hoverT = 0.f;
-		inventory.visuals[i].hovered = false;
-		inventory.visuals[i].selected = false;
+void Renderer::build_item_visuals(void) {
+
+	auto& items = (gameState.scene == Scene::Inventory || gameState.scene == Scene::InventoryTooltip) ? gameState.inventory : gameState.shop;
+	
+	itemSystem.visuals.clear();
+	itemSystem.visuals.resize(items.size() );
+	std::cout << "SIZE: " << itemSystem.visuals.size() << '\n';
+
+	if (gameState.scene == Scene::Inventory ||
+		gameState.scene == Scene::InventoryTooltip)
+	{
+		std::cout << "INVENTORY\n";
+	}
+	else
+	{
+		std::cout << "SHOP\n";
+	}
+
+	for (size_t i = 0; i < itemSystem.visuals.size(); ++i) {
+
+		std::cout << "for loop:\n";
+		std::cout << "---> " << i;
+
+		itemSystem.visuals[i].position = itemsPosition[i];
+
+		std::cout << ": X=" << itemsPosition[i].x << "\n";
+
+		itemSystem.visuals[i].hoverT = 0.f;
+		itemSystem.visuals[i].hovered = false;
+		itemSystem.visuals[i].selected = false;
 	}
 }
 
@@ -1000,16 +1041,18 @@ void Renderer::setup_tooltip_window(void) {
 	itemName.setOutlineColor({64, 64, 64});
 }
 
-void Renderer::update_inventory(float dt) {
+void Renderer::update_items(float dt) {
 	
 	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-	float hide = (gameState.scene == Scene::InventoryTooltip) ? 1.f : 0.f;
+	Scene& scene = gameState.scene;
 
-	for (size_t i = 0; i < inventory.visuals.size(); ++i) {
+	float hide = (scene == Scene::InventoryTooltip || scene == Scene::ShopTooltip) ? 1.f : 0.f;
 
-		auto& v = inventory.visuals[i];
-		v.hovered = (gameState.scene == Scene::Inventory) && slotSprites[i].getGlobalBounds().contains(mousePos);
+	for (size_t i = 0; i < itemSystem.visuals.size(); ++i) {
+
+		auto& v = itemSystem.visuals[i];
+		v.hovered = (scene == Scene::Inventory || scene == Scene::Shop) && slotSprites[i].getGlobalBounds().contains(mousePos);
 
 		float target = hide ? 0.f : (v.hovered ? 0.55f : 0.45f);
 
@@ -1021,7 +1064,7 @@ void Renderer::update_inventory(float dt) {
 		slot.setScale({v.hoverT, v.hoverT});
 
 		// item
-		const Item& item = gameState.inventory[i];
+		const Item& item = (scene == Scene::Inventory) ? gameState.inventory[i] : gameState.shop[i];
 
 		const Item* def = nullptr;
 
@@ -1063,16 +1106,18 @@ void Renderer::animate_item(sf::Sprite& rec, sf::Sprite& item, sf::Vector2f mous
 
 void Renderer::update_tooltip(float dt) {
 	
-	if (gameState.scene != Scene::InventoryTooltip) return;
+	if (gameState.scene != Scene::InventoryTooltip && gameState.scene != Scene::ShopTooltip) return;
 
 	selectedItemState.t += dt * 2.5f;
 	float t = std::min(selectedItemState.t, 1.f);
 
+	auto& items = (gameState.scene == Scene::InventoryTooltip) ? gameState.inventory : gameState.shop;
+
 	int i = selectedItemState.itemIndex;
 	if (i < 0) return;
-	if (i >= gameState.inventory.size()) return;
+	if (i >= items.size()) return;
 
-	const Item& item = gameState.inventory[i];
+	const Item& item = items[i];
 
 	const Item* def = nullptr;
 	for (auto& d : gameState.items)
@@ -1168,11 +1213,6 @@ void Renderer::update_tooltip(float dt) {
 	sprite.setScale({1.f, 1.f});
 
 	window.draw(sprite);
-}
-
-void Renderer::draw_shop(void) {
-
-	window.draw(shopBgSprite);
 }
 
 /////////////////////// ADD NOTIFICATION AFTER ITEM USAGE
