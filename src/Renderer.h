@@ -10,15 +10,56 @@
 
 struct GameState;
 
-struct Button {
+enum class ButtonType {
 	
-	sf::Sprite sprite;
-	sf::FloatRect hitbox;
-	float currentScale = 1.f;
-	bool isHovered = false;
+	PlayButton,
+	FeedButton,
+	SleepButton,
+	InventoryButton,
+	ShopButton,
+	UseButton,
+	BuyButton,
+	BackButton
+};
 
-	Button(const sf::Sprite& btnSprite) : sprite(btnSprite) {}
-}; 
+enum class ButtonAction {
+	
+	PetPlay,
+	PetFeed,
+	PetSleep,
+	OpenInventory,
+	OpenShop,
+	BackToInventory,
+	BackToShop,
+	BackToPet,
+	UseItem,
+	BuyItem
+};
+
+struct Button {
+
+	ButtonType type;
+	ButtonAction action;
+};
+
+struct ButtonVisual {
+
+	sf::Vector2f position;
+	bool hovered;
+	float hoverT;
+	float scaleT;
+};
+
+struct ButtonLayout {
+	
+
+};
+
+struct ButtonSystem {
+
+	std::vector<Button> buttons;
+	std::vector<ButtonVisual> visuals;
+};
 
 struct FloatingText {
 
@@ -73,7 +114,6 @@ public:
 	void render(void);
 	void handle_events(void);
 	bool is_open(void) const;
-	void setup_button(Button& btn, sf::Texture& texture, float x, float y);
 	void setup_titles(void);
 	void setup_stats_recs(sf::Sprite& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, float x, float y, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor);
 	void setup_stats(void);
@@ -192,21 +232,12 @@ private:
 	sf::Text ageTitle;
 	sf::Text ageStat;
 
-	Button playBtn;
-	Button feedBtn;
-	Button sleepBtn;
-	Button inventoryBtn;
-	Button shopBtn;
-	Button backBtn;
-	Button useBtn;
-	Button buyBtn;
-
-	std::vector<Button*> buttons;
-	bool btnHovered{false};
-
 	sf::Music music;
 
 	std::vector<FloatingText> popups;
+
+	// Buttons
+	ButtonSystem buttons;
 
 	// Inventory
 	InventorySystem inventory;
@@ -214,7 +245,6 @@ private:
 	std::vector<sf::Sprite> itemSprites;
 	std::vector<sf::Vector2f> itemsPosition;
 	std::vector<sf::Sprite> slotSprites;
-	int selectedItem;
 	sf::Text itemName;
 
 	void load_resources(void);
@@ -231,8 +261,6 @@ private:
 
 	void setup_buttons(void);
 	void update_buttons(float dt);
-	void update_button_hover(Button& btn, sf::Vector2f mousePos);
-	void animate_button(Button& btn, float dt);
 
 	// Inventory
 	void build_inventory_visuals(void);

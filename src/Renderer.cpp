@@ -32,14 +32,6 @@ Renderer::Renderer(GameState& gameState) :
 	ageRecSprite(smallStatRecTexture),
 	itemSlotRecSprite(itemSlotRecTexture),
 	tooltipRecSprite(tooltipRecTexture),
-	playBtn(playBtnSprite),
-	feedBtn(feedBtnSprite),
-	sleepBtn(sleepBtnSprite),
-	inventoryBtn(inventoryBtnSprite),
-	shopBtn(shopBtnSprite),
-	backBtn(backBtnSprite),
-	useBtn(useBtnSprite),
-	buyBtn(buyBtnSprite),
 
 	healingPotionSprite(healingPotionTexture),
 	joyPotionSprite(joyPotionTexture),
@@ -69,7 +61,6 @@ Renderer::Renderer(GameState& gameState) :
 	ageTitle(font),
 	ageStat(font),
 
-	selectedItem(-1),
 	itemName(font)
 {}
 
@@ -380,77 +371,62 @@ void Renderer::setup_titles(void) {
 
 void Renderer::setup_buttons(void) {
 	
-	setup_button(playBtn, playBtnTexture, 24.f, 908.f);
-	setup_button(feedBtn, feedBtnTexture, 210.f, 908.f);
-	setup_button(sleepBtn, sleepBtnTexture, 397.f, 908.f);
-	setup_button(inventoryBtn, inventoryBtnTexture, 24.f, 962.f);
-	setup_button(shopBtn, shopBtnTexture, 360.f, 962.f);
+	Button playBtn;
+	playBtn.type = ButtonType::BuyButton;
+	playBtn.action = ButtonAction::PetPlay;
 
-	setup_button(backBtn, backBtnTexture, 397.f, 962.f);
-	setup_button(useBtn, useBtnTexture, 344.f, 668.f);
-	setup_button(buyBtn, buyBtnTexture, 344.f, 668.f);
-}
+	Button feedBtn;
+	feedBtn.type = ButtonType::FeedButton;
+	feedBtn.action = ButtonAction::PetFeed;
 
-void Renderer::setup_button(Button& btn, sf::Texture& texture, float x, float y) {
+	Button sleepBtn;
+	sleepBtn.type = ButtonType::SleepButton;
+	sleepBtn.action = ButtonAction::PetSleep;
 
-	btn.sprite.setTexture(texture, true);
+	Button inventoryBtn;
+	inventoryBtn.type = ButtonType::InventoryButton;
+	inventoryBtn.action = ButtonAction::OpenInventory;
 
-	btn.hitbox.size = btn.sprite.getGlobalBounds().size;
-	btn.hitbox.position = {x, y};
+	Button shopBtn;
+	shopBtn.type = ButtonType::ShopButton;
+	shopBtn.action = ButtonAction::OpenShop;
 
-	btn.sprite.setOrigin(btn.sprite.getGlobalBounds().size / 2.f);
-	btn.sprite.setScale({btn.currentScale, btn.currentScale});
-	btn.sprite.setPosition({x + btn.sprite.getGlobalBounds().size.x / 2.f, y + btn.sprite.getGlobalBounds().size.y / 2.f});
+	Button inventoryBackToBtn;
+	inventoryBackToBtn.type = ButtonType::BackButton;
+	inventoryBackToBtn.action = ButtonAction::BackToInventory;
 
-	if (&btn != &backBtn && &btn != &useBtn && &btn != &buyBtn) buttons.push_back(&btn);
+	Button shopBackToBtn;
+	shopBackToBtn.type = ButtonType::BackButton;
+	shopBackToBtn.action = ButtonAction::BackToShop;
+
+	Button petBackToBtn;
+	petBackToBtn.type = ButtonType::BackButton;
+	petBackToBtn.action = ButtonAction::BackToPet;
+
+	Button useBtn;
+	useBtn.type = ButtonType::UseButton;
+	useBtn.action = ButtonAction::UseItem;
+
+	Button buyBtn;
+	buyBtn.type = ButtonType::BuyButton;
+	buyBtn.action = ButtonAction::BuyItem;
+
+	buttons.buttons.push_back(playBtn);
+	buttons.buttons.push_back(feedBtn);
+	buttons.buttons.push_back(sleepBtn);
+	buttons.buttons.push_back(inventoryBtn);
+	buttons.buttons.push_back(shopBtn);
+	buttons.buttons.push_back(inventoryBackToBtn);
+	buttons.buttons.push_back(shopBackToBtn);
+	buttons.buttons.push_back(petBackToBtn);
+	buttons.buttons.push_back(useBtn);
+	buttons.buttons.push_back(buyBtn);
 }
 
 void Renderer::update_buttons(float dt) {
 
 	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-	update_button_hover(playBtn, mousePos);
-	update_button_hover(feedBtn, mousePos);
-	update_button_hover(sleepBtn, mousePos);
-	update_button_hover(inventoryBtn, mousePos);
-	update_button_hover(shopBtn, mousePos);
-	update_button_hover(backBtn, mousePos);
-	update_button_hover(useBtn, mousePos);
-	update_button_hover(buyBtn, mousePos);
-
-	animate_button(playBtn, dt);
-	animate_button(feedBtn, dt);
-	animate_button(sleepBtn, dt);
-	animate_button(inventoryBtn, dt);
-	animate_button(shopBtn, dt);
-	animate_button(backBtn, dt);
-	animate_button(useBtn, dt);
-	animate_button(buyBtn, dt);
-}
-
-void Renderer::update_button_hover(Button& btn, sf::Vector2f mousePos) {
-
-	bool hovering = btn.hitbox.contains(mousePos);
-	if (hovering != btn.isHovered) btn.isHovered = hovering;
-}
-
-void Renderer::animate_button(Button& btn, float dt) {
-
-	static const float NORMAL_SCALE = 1.f;
-	static const float TARGET_SCALE = 1.1f;
-	static const float SPEED = 1.f;
-
-	float target = btn.isHovered ? TARGET_SCALE : NORMAL_SCALE;
-
-	if (btn.currentScale < target) {
-		btn.currentScale += SPEED * dt;
-		if (btn.currentScale > target) btn.currentScale = target;
-	} else if (btn.currentScale > target) {
-		btn.currentScale -= SPEED * dt;
-		if (btn.currentScale < target) btn.currentScale = target;
-	}
-
-	btn.sprite.setScale({btn.currentScale, btn.currentScale});
 }
 
 void Renderer::add_popup(const std::string& str, const sf::Color& color, float x, float y, float lifeTime) {
@@ -667,9 +643,9 @@ void Renderer::render(void) {
 		draw_inventory();
 		update_inventory(dt);
 	} else if (gameState.scene == Scene::InventoryTooltip) {
-			draw_inventory();
-			update_inventory(dt);
-			update_tooltip(dt);
+		draw_inventory();
+		update_inventory(dt);
+		update_tooltip(dt);
 	} else if (gameState.scene == Scene::Shop) {
 		draw_shop();
 	} else {
@@ -904,26 +880,6 @@ void Renderer::update_inventory(float dt) {
 
 		window.draw(slot);
 		window.draw(sprite);
-
-		/*// Item to sprite
-		for (size_t j = 0; j < gameState.items.size(); ++j) {
-			if (item.name != gameState.items[j].name) continue;
-
-			sf::Sprite& sprite = itemSprites[j];
-			sf::Sprite& slot = slotSprites[i];
-
-			sf::FloatRect slotBounds = slot.getGlobalBounds();
-
-			sprite.setOrigin(sprite.getLocalBounds().size / 2.f);
-			sprite.setPosition({slotBounds.position.x + slotBounds.size.x / 2.f, slotBounds.position.y + slotBounds.size.y / 2.f});
-
-			animate_item(slot, sprite, mousePos, item.currentScale, dt);
-
-			if (item.currentScale <= 0.02) continue;
-
-			window.draw(slot);
-			window.draw(sprite);
-		}*/
 	}
 }
 
@@ -1054,140 +1010,7 @@ void Renderer::update_tooltip(float dt) {
 	sprite.setScale({1.f, 1.f});
 
 	window.draw(sprite);
-
-
-
-	/*
-	if (gameState.scene == Scene::InventoryTooltip) {
-		show_tooltip(dt);
-	} else if (gameState.scene == Scene::ShopTooltip) {
-		// same thing
-	} */
 }
-
-/*
-void Renderer::show_tooltip(float dt) {
-
-	static const float TARGET_SCALE = 0.01f;
-
-	static const float SCALE_SPEED = 3.f;
-
-	for (int i = 0; i < gameState.inventoryItems.size(); ++i) {
-		Item& item = gameState.inventoryItems[i];
-
-		for (int j = 0; j < gameState.items.size(); ++j) {
-			if (item.name != gameState.items[j].name) continue;
-
-			// Hide item grid
-			item.currentScale -= SCALE_SPEED * dt;
-			if (item.currentScale < TARGET_SCALE) item.currentScale = TARGET_SCALE;
-			slotSprites[i].setScale({item.currentScale, item.currentScale});
-			itemSprites[j].setScale({item.currentScale, item.currentScale});
-
-			// Animate tooltip
-			if (i == selectedItem) {
-				static const sf::Vector2f TARGET_POS = {168.f, 380.f};
-				static const float TARGET_TOOLTIP_POS_Y = 236.f;
-				static const float MOVE_SPEED = 500.f;
-
-				FocusedItem tooltipItem(slotSprites[i], itemSprites[j]);
-
-				tooltipItem.item.setScale({1.f, 1.f});
-				tooltipItem.slot.setScale({1.f, 1.f});
-
-				sf::FloatRect slotounds = tooltipItem.slot.getLocalBounds();
-				sf::FloatRect itemBounds = tooltipItem.item.getLocalBounds();
-		
-				tooltipItem.slot.setOrigin(slotounds.size / 2.f);
-				tooltipItem.item.setOrigin(itemBounds.size / 2.f);
-
-				sf::Vector2f direction = TARGET_POS - tooltipItem.slot.getPosition() + tooltipItem.slot.getLocalBounds().size / 2.f;
-				float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-
-				if (length > 1.f) {
-				
-					direction /= length;
-
-					tooltipItem.slot.move(direction * MOVE_SPEED * dt);
-				}
-				
-				// Tooltip rectangle
-				float tooltipDirection = TARGET_TOOLTIP_POS_Y - tooltipRecSprite.getPosition().y;
-
-				if (std::abs(tooltipDirection) <= MOVE_SPEED * dt) {
-					tooltipRecSprite.setPosition({tooltipRecSprite.getPosition().x, TARGET_TOOLTIP_POS_Y});
-					
-				} else {
-					tooltipRecSprite.move({0.f, (tooltipDirection > 0 ? MOVE_SPEED * dt : -MOVE_SPEED * dt)});
-					itemName.move({0.f, (tooltipDirection > 0 ? MOVE_SPEED * dt : -MOVE_SPEED * dt)});
-				}
-
-				// Tooltip stat name
-				itemName.setString(item.name);
-
-				sf::FloatRect nameBounds = itemName.getLocalBounds();
-
-				itemName.setOrigin({nameBounds.position.x + nameBounds.size.x / 2.f, nameBounds.position.y + nameBounds.size.y / 2.f});
-
-				sf::FloatRect tooltipBounds = tooltipRecSprite.getGlobalBounds();
-
-				itemName.setPosition({tooltipBounds.position.x + tooltipBounds.size.x / 2.f, tooltipBounds.position.y + tooltipBounds.size.y / 2.f - 38.f});
-
-				// Tooltip stat value
-				std::vector<ItemEffect>& effects = item.itemEffects;
-				float fontSize = 12.f;
-				float gap = 4.f;
-				float totalHeight = (fontSize * effects.size()) + ((effects.size() - 1) * gap);
-				float centerY = tooltipBounds.position.y + tooltipBounds.size.y / 2.f;
-				float startY = centerY - totalHeight / 2.f + fontSize / 2.f + gap;
-				float posX = 234.f;
-
-				std::vector<sf::Text> effectTexts;
-
-				for (int i = 0; i < effects.size(); ++i) {
-
-					const ItemEffect& e = effects[i];
-
-					sf::Text text(font);
-					text.setCharacterSize(fontSize);
-					text.setFillColor(sf::Color::White);
-					text.setOutlineThickness(1.f);
-					
-					switch (e.type) {
-						case ItemEffect::StatType::HEALTH: {
-							text.setString("+" + std::to_string(e.value) + " health");
-							text.setOutlineColor({199, 92, 92});
-						} break;
-						case ItemEffect::StatType::HUNGER: {
-							text.setString("-" + std::to_string(e.value) + " hunger");
-							text.setOutlineColor({199, 92, 92});
-						} break;
-						case ItemEffect::StatType::MOOD: {
-							text.setString("-" + std::to_string(e.value) + " boredom");
-							text.setOutlineColor({115, 192, 255});
-						} break;
-						case ItemEffect::StatType::ENERGY: {
-							text.setString("+" + std::to_string(e.value) + " energy");
-							text.setOutlineColor({92, 199, 108});
-						} break;
-					}
-
-					float posY = startY + i * (fontSize + gap);
-					text.setPosition({posX, posY});
-
-					window.draw(text);
-				}
-
-				// Buttons
-				// [Back]
-
-
-				// [Use]
-			}
-		}
-	}
-}*/
-
 
 void Renderer::draw_shop(void) {
 
