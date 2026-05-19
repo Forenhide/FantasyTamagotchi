@@ -90,7 +90,7 @@ bool Renderer::init(void) {
 	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
 
 	music.play();
-	music.setVolume(0.f);
+	music.setVolume(3.f);
 	music.setLooping(true);
 
 	return true;
@@ -872,7 +872,9 @@ void Renderer::handle_events(void) {
 								change_scene(Scene::Pet);
 							} break;
 							case ButtonAction::BuyItem: {
-								soundMgr.play(SoundEffect::Click);
+								buy_item(gameState, selectedItemState.itemIndex);
+								if (gameState.boughtItem) soundMgr.play(SoundEffect::ItemBought);
+								else soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Shop);
 							} break;
 						}
@@ -1074,7 +1076,12 @@ void Renderer::update_items(float dt) {
 
 		// slot
 		sf::Sprite& slot = slotSprites[i];
-		slot.setPosition(v.position + sf::Vector2f(60.f, 60.f));
+		if (gameState.scene == Scene::Inventory) {
+			slot.setPosition(v.position + sf::Vector2f(60.f, 60.f));
+		} else {
+			slot.setPosition(v.position + sf::Vector2f(60.f, 100.f));
+		}
+
 		slot.setScale({v.hoverT, v.hoverT});
 
 		// item
@@ -1095,7 +1102,7 @@ void Renderer::update_items(float dt) {
 
 		itemPrice.setString(std::to_string(def->price) + "g");
 		itemPrice.setCharacterSize(27.f);
-		itemPrice.setPosition({v.position.x + 8.f, v.position.y + 8.f});
+		itemPrice.setPosition({v.position.x + 8.f, v.position.y + 48.f});
 		itemPrice.setScale({v.hoverT, v.hoverT});
 
 		window.draw(slot);

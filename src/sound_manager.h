@@ -14,6 +14,7 @@ namespace SoundEffect {
 		Warning,
 		ItemUsed,
 		Birthday,
+		ItemBought,
 		Count
 	};
 }

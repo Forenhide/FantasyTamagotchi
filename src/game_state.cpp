@@ -48,15 +48,15 @@ void game_init(GameState& g) {
 	g.isIll = false;
 
 	// Items
-	g.items = { {"Healing Potion", 30, 0, { {5, ItemEffect::StatType::HEALTH} }},
-				{"Joy Potion", 25, 1, { {7, ItemEffect::StatType::MOOD} }},
+	g.items = { {"Healing Potion", 10, 0, { {5, ItemEffect::StatType::HEALTH} }},
+				{"Joy Potion", 10, 1, { {7, ItemEffect::StatType::MOOD} }},
 				{"Energy Potion", 10, 2, { {9, ItemEffect::StatType::ENERGY} }},
 				{"Universal Potion", 50, 3, { {35, ItemEffect::StatType::HEALTH}, {50, ItemEffect::StatType::HUNGER}, {50, ItemEffect::StatType::MOOD}, {50, ItemEffect::StatType::ENERGY} }},
 				{"Mochi", 12, 4, { {5, ItemEffect::StatType::HUNGER} }},
-				{"Pineapple", 35, 5, { {2, ItemEffect::StatType::HUNGER} }},
+				{"Pineapple", 35, 5, { {25, ItemEffect::StatType::HUNGER} }},
 				{"Teddy Bear", 7, 6, { {3, ItemEffect::StatType::MOOD} }},
 				{"Tetris", 11, 7, { {5, ItemEffect::StatType::MOOD} }},
-				{"Tiramisu", 20, 8, {{ 7, ItemEffect::StatType::HUNGER} }},
+				{"Tiramisu", 20, 8, {{ 14, ItemEffect::StatType::HUNGER} }},
 				{"Yo-Yo", 5, 9, { {2, ItemEffect::StatType::MOOD} }} };
 
 	g.inventory = { g.items[0], g.items[1], g.items[2], g.items[3] };
@@ -251,8 +251,8 @@ void tick(GameState& g) {
 	g.tickCount++;
 
 	pet_change_health(g, -2);
-	pet_change_hunger(g, 5);
-	pet_change_boredom(g, 3);
+	pet_change_hunger(g, -5);
+	pet_change_boredom(g, -3);
 	change_balance(g, TICK_MONEY);
 	pet_update_age(g);
 	pet_update_warnings(g);
@@ -529,9 +529,11 @@ void buy_item(GameState& g, int index) {
 		change_balance(g, -item.price);
 		g.inventory.push_back(g.shop[index]);
 		g.shop.erase(g.shop.begin() + index);
+		g.boughtItem = true;
 		transaction_set_message(g, "You've purchased '" + item.name + "' for $" + std::to_string(item.price));
 	} else {
 		transaction_set_message(g, "Insufficient balance.");
+		g.boughtItem = false;
 	}
 }
 

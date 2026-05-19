@@ -78,6 +78,7 @@ struct GameState {
 	// UI flags
 	bool playing{true};
 	bool usedItem{false};
+	bool boughtItem{false};
 	bool success{true};
 	bool hasEnergy{true};
 	bool playPressed{false};
