@@ -193,7 +193,7 @@ void pet_feed(GameState& g) {
 	
 	pet_change_hunger(g, 7);
 	pet_change_health(g, 1);
-	pet_change_energy(g, 1);
+	pet_change_energy(g, -1);
 }
 #pragma endregion
 
@@ -255,8 +255,8 @@ void pet_clamp_energy(GameState& g) {
 
 void pet_sleep(GameState& g) {
 
-	if (g.tickCount % ENERGY_CHECKPOINT == 0)
-		pet_change_energy(g, 3);
+	pet_change_energy(g, 1);
+	pet_change_health(g, -1);
 }
 #pragma endregion
 

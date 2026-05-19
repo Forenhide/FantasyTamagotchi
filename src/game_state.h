@@ -14,11 +14,10 @@ constexpr int MAX_BALANCE{100};
 constexpr int AGE_CHECKPOINT{30};
 constexpr int THRESHOLD{950};
 constexpr int ILLNESS_DUR{5};
-constexpr int ENERGY_CHECKPOINT{2};
 constexpr int TICK_MONEY{1};
 constexpr int SHOP_UPDATE_TICK{10};
 constexpr int MAX_ITEM_SLOTS{24};
-constexpr int EVOLVE_TICK{10};
+constexpr int EVOLVE_TICK{100};
 
 const std::string HUNGER[5]{ "Starving", "Hungry", "Okay", "Well-fed", "Full" };
 const std::string MOOD[5]{"Frustrated", "Bored", "Okay", "Good", "Happy"};

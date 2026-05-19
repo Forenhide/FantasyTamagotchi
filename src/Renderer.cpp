@@ -634,7 +634,7 @@ void Renderer::update_popups(float dt) {
 	consume_popups(pops);
 
 	for (FloatingText& popup : popups) {
-		if (!popup.active) return;
+		if (!popup.active) continue;
 
 		popup.lifetime += dt;
 		popup.text.move(popup.velocity * dt);
@@ -813,6 +813,7 @@ void Renderer::render(void) {
 	window.clear();
 
 	decrement_stats(dt);
+	update_stats();
 
 	update_buttons(dt);
 	update_popups(dt);
@@ -845,7 +846,6 @@ void Renderer::render(void) {
 		draw_buttons();
 	} else {
 		update_pet_idle_animation();
-		update_stats();
 		animate_subtitle(dt);
 		update_popups(dt);
 		draw_pet_screen();
@@ -1298,17 +1298,17 @@ void Renderer::update_tooltip(float dt) {
 
 void Renderer::decrement_stats(float dt) {
 	
-	const float HEALTH_DECREMENT_INTERVAL = 0.3f;
+	const float INTERVAL = 3.0f;
 	static float accumulator = 0.0f;
 
 	accumulator += dt;
 
-	if (accumulator >= HEALTH_DECREMENT_INTERVAL) {
-		gameState.hungerNum++;
-		gameState.health--;
-		gameState.boredomNum++;
+	if (accumulator >= INTERVAL) {
+		pet_change_hunger(gameState, -1);
+		pet_change_health(gameState, -1);
+		pet_change_boredom(gameState, -1);
 
-		accumulator -= HEALTH_DECREMENT_INTERVAL;
+		accumulator -= INTERVAL;
 	}
 }
 
