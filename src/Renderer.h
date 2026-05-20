@@ -116,6 +116,8 @@ public:
 	Renderer(GameState& gameState);
 	bool init(void);
 	void render(void);
+	void update(float dt);
+	void draw_scene(void);
 	void handle_events(void);
 	bool is_open(void) const;
 	void setup_titles(void);
@@ -281,7 +283,6 @@ private:
 	void update_pet_idle_animation(void);
 	void update_pet_play_animation(void);
 	void update_stats(void);
-	void decrement_stats(float dt);
 
 	void setup_buttons(void);
 	void update_buttons(float dt);

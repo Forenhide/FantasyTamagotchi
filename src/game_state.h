@@ -3,26 +3,29 @@
 
 #include "item.h"
 #include "popup_notification.h"
+
 #include <vector>
 #include <string>
 
+
 constexpr int MAX_HEALTH{100};
-constexpr int MAX_ENERGY{30};
+constexpr int MAX_ENERGY{100};
 constexpr int MAX_HUNGER{100};
-constexpr int MAX_BOREDOM{75};
-constexpr int MAX_BALANCE{100};
-constexpr int AGE_CHECKPOINT{30};
-constexpr int THRESHOLD{950};
-constexpr int ILLNESS_DUR{5};
-constexpr int TICK_MONEY{1};
-constexpr int SHOP_UPDATE_TICK{10};
+constexpr int MAX_BOREDOM{100};
+constexpr int MAX_BALANCE{9999};
 constexpr int MAX_ITEM_SLOTS{24};
-constexpr int EVOLVE_TICK{100};
+constexpr int MAX_LEVEL{50};
+
+constexpr float HUNGER_INTERVAL{45.f};
+constexpr float BOREDOM_INTERVAL{60.f};
+constexpr float ENERGY_INTERVAL{75.f};
+constexpr float INCOME_INTERVAL{10.f};
+constexpr float AGE_INTERVAL{60.f};
+constexpr float SHOP_INTERVAL{30.f};
+constexpr float ILLNESS_CHECK_INTERVAL{5.f};
 
 const std::string HUNGER[5]{ "Starving", "Hungry", "Okay", "Well-fed", "Full" };
 const std::string MOOD[5]{"Frustrated", "Bored", "Okay", "Good", "Happy"};
-const std::string ART[5]{"😭", "😒", "😶", "😊", "😀"};
-
 
 enum class Scene {
 
@@ -44,23 +47,38 @@ struct GameState {
 	std::string name;
 	std::string hunger;
 	std::string mood;
-	std::string art;
-	std::string reaction;
 	std::string warning;
 	std::vector<std::string> warnings;
+
 	int health{};
 	int energy{};
 	int age{};
+
 	int hungerNum{};
 	int boredomNum{};
-	int illnessStart{};
-	int illnessEnd{};
-	int tickCount{};
-	int newStat{};
+
+	int level;
+	int experience;
+	int nextLevelExp;
+
 	bool birthday{};
 	bool isIll{};
 	bool starving{};
 	bool bored{};
+	bool exhausted{};
+
+	int newStat{};				// DELETE
+	
+	// Timers
+	float totalPlayTime{};
+
+	float timeSinceLastHunger{};
+	float timeSinceLastBoredom{};
+	float timeSinceLastEnergy{};
+	float timeSinceLastAge{};
+	float timeSinceLastShop{};
+	float timeSinceLastIncome{};
+	float timeSinceLastIllness{};
 
 	// Inventory & Shop
 	std::vector<Item> items;
@@ -71,19 +89,17 @@ struct GameState {
 
 	// Shop data
 	int balance{5};
-	bool isEnoughBalance{true};
-	std::string transactionMessage;
 
 	// UI flags
-	bool playing{true};
-	bool usedItem{false};
-	bool boughtItem{false};
-	bool success{true};
-	bool hasEnergy{true};
+	bool playing{true};			// DELETE
+	bool usedItem{false};		// DELETE
+	bool boughtItem{false};		// DELETE
+	bool success{true};			// DELETE
+	bool hasEnergy{true};		// DELETE
 	bool playPressed{false};
 	bool feedPressed{false};
 	bool sleepPressed{false};
-	bool statChanged{false};
+	bool statChanged{false};	// DELETE
 
 	// Popups
 	std::vector<Request> pendingPopups; 
@@ -91,38 +107,48 @@ struct GameState {
 
 // Game
 void game_init(GameState& g);
-void tick(GameState& g);
+//void tick(GameState& g);
+void tick(GameState& g, float dt);
+
 
 // Pet
 void pet_handle_input(GameState& g);
+
 void pet_feed(GameState& g);
 void pet_play(GameState& g);
 void pet_sleep(GameState& g);
-void pet_update_warnings(GameState& g);
-void pet_update_age(GameState& g);
+
+void pet_change_health(GameState& g, int delta);
 void pet_change_hunger(GameState& g, int delta);
 void pet_change_boredom(GameState& g, int delta);
-void pet_change_health(GameState& g, int delta);
 void pet_change_energy(GameState& g, int delta);
+
 void pet_clamp_health(GameState& g);
 void pet_clamp_hunger(GameState& g);
 void pet_clamp_boredom(GameState& g);
 void pet_clamp_energy(GameState& g);
+
 void pet_translate_hunger(GameState& g);
 void pet_translate_boredom(GameState& g);
-void pet_get_ill(GameState& g);
-void pet_get_condition(GameState& g);
+
 void pet_check_death(GameState& g);
 void pet_check_evolve(GameState& g);
+
+void pet_update_warnings(GameState& g);
+
+void pet_change_exp(GameState& g, int delta);
+void pet_level_up(GameState& g);
+
+void pet_get_condition(GameState& g, float dt);
 
 // Inventory
 void use_item(GameState& g, int index);
 
 // Shop
-void populate_shop_at_start(GameState& g);
 void update_shop(GameState& g);
 
 void buy_item(GameState& g, int index);
+
 void change_balance(GameState& g, int delta);
 void clamp_balance(GameState& g);
 

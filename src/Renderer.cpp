@@ -805,19 +805,30 @@ void Renderer::draw_popups(void) {
 	}
 }
 
-void Renderer::render(void) {
+void Renderer::render() {
 	
-	static sf::Clock clock;
-	float dt = clock.restart().asSeconds();
-
 	window.clear();
 
-	decrement_stats(dt);
-	update_stats();
+	draw_scene();
+	draw_buttons();
+	draw_popups();
 
+	window.display();
+}
+
+void Renderer::update(float dt) {
+	
+	update_pet_idle_animation();
+	update_stats();
 	update_buttons(dt);
 	update_popups(dt);
+	update_items(dt);
+	update_tooltip(dt);
+	animate_subtitle(dt);
+}
 
+void Renderer::draw_scene(void) {
+	
 	if (gameState.scene == Scene::Death) {
 		draw_death_screen();
 		music.stop();
@@ -826,33 +837,15 @@ void Renderer::render(void) {
 		music.stop();
 	} else if (gameState.scene == Scene::Inventory) {
 		draw_inventory();
-		update_items(dt);
-		draw_buttons();
 	} else if (gameState.scene == Scene::InventoryTooltip) {
 		draw_inventory();
-		update_items(dt);
-		update_tooltip(dt);
-		draw_buttons();
 	} else if (gameState.scene == Scene::Shop) {
 		draw_shop();
-		update_items(dt);
-		draw_popups();
-		draw_buttons();
 	} else if (gameState.scene == Scene::ShopTooltip) {
 		draw_shop();
-		update_items(dt);
-		draw_popups();
-		update_tooltip(dt);
-		draw_buttons();
 	} else {
-		update_pet_idle_animation();
-		animate_subtitle(dt);
-		update_popups(dt);
 		draw_pet_screen();
-		draw_buttons();
 	}
-
-	window.display();
 }
 
 void Renderer::handle_events(void) {
@@ -1294,22 +1287,6 @@ void Renderer::update_tooltip(float dt) {
 	sprite.setScale({1.f, 1.f});
 
 	window.draw(sprite);
-}
-
-void Renderer::decrement_stats(float dt) {
-	
-	const float INTERVAL = 3.0f;
-	static float accumulator = 0.0f;
-
-	accumulator += dt;
-
-	if (accumulator >= INTERVAL) {
-		pet_change_hunger(gameState, -1);
-		pet_change_health(gameState, -1);
-		pet_change_boredom(gameState, -1);
-
-		accumulator -= INTERVAL;
-	}
 }
 
 void Renderer::draw_death_screen(void) {

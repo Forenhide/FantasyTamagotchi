@@ -34,17 +34,17 @@ void game_init(GameState& g) {
 	g.name = "Tony Tony Chopper";
 	g.hunger = HUNGER[4];
 	g.mood = MOOD[4];
-	g.art = "😀";
 	g.health = 100;
-	g.energy = 30;
+	g.energy = 70;
 	g.age = 0;
-	g.hungerNum = 0;
-	g.boredomNum = 0;
-	g.illnessStart = 0;
-	g.illnessEnd = 0;
-	g.tickCount = 1;
+	g.hungerNum = 20;
+	g.boredomNum = 10;
 	g.birthday = false;
 	g.isIll = false;
+
+	g.level = 1;
+	g.experience = 0;
+	g.nextLevelExp = 100;
 
 	// Items
 	g.items = { {"Healing Potion", 10, 0, { {5, ItemEffect::StatType::HEALTH} }},
@@ -60,11 +60,10 @@ void game_init(GameState& g) {
 
 	g.inventory = { g.items[0], g.items[1], g.items[2], g.items[3] };
 
-	populate_shop_at_start(g);
+	update_shop(g);
 
 	// Shop data
-	g.balance = 5;
-	g.isEnoughBalance = true;
+	g.balance = 25;
 
 	// UI flags
 	g.playing = true;
@@ -73,7 +72,7 @@ void game_init(GameState& g) {
 	g.hasEnergy = true;
 }
 
-void populate_shop_at_start(GameState& g) {
+void update_shop(GameState& g) {
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -98,7 +97,6 @@ void pet_handle_input(GameState& g) {
 		g.playPressed = false;
 
 		g.statChanged = true;
-		tick(g);
 		g.statChanged = false;
 	}
 	if (g.feedPressed == true) {
@@ -109,7 +107,6 @@ void pet_handle_input(GameState& g) {
 		g.feedPressed = false;
 
 		g.statChanged = true;
-		tick(g);
 		g.statChanged = false;
 	}
 	if (g.sleepPressed == true) {
@@ -120,43 +117,70 @@ void pet_handle_input(GameState& g) {
 		g.sleepPressed = false;
 
 		g.statChanged = true;
-		tick(g);
 		g.statChanged = false;
 	}
-
 
 	return;
 }
 
-void tick(GameState& g) {
+void tick(GameState& g, float dt)
+{
+    g.totalPlayTime += dt;
 
-	pet_check_death(g);
-	pet_check_evolve(g);
+    // HUNGER
+    g.timeSinceLastHunger += dt;
+    if (g.timeSinceLastHunger >= HUNGER_INTERVAL) {
+        pet_change_hunger(g, 2);
+        g.timeSinceLastHunger = 0.f;
+    }
 
-	if (g.scene == Scene::Death || g.scene == Scene::Evolve) return;
+    // BOREDOM
+    g.timeSinceLastBoredom += dt;
+    if (g.timeSinceLastBoredom >= BOREDOM_INTERVAL) {
+        pet_change_boredom(g, 2);
+        g.timeSinceLastBoredom = 0.f;
+    }
 
-	pet_get_condition(g);
+    // ENERGY DRAIN
+    g.timeSinceLastEnergy += dt;
+    if (g.timeSinceLastEnergy >= ENERGY_INTERVAL) {
+        pet_change_energy(g, -2);
+        g.timeSinceLastEnergy = 0.f;
+    }
 
-	g.tickCount++;
+    // AGE
+    g.timeSinceLastAge += dt;
+    if (g.timeSinceLastAge >= AGE_INTERVAL) {
+        g.age++;
+        g.birthday = true;
+        g.timeSinceLastAge = 0.f;
+    } else g.birthday = false;
 
-	pet_change_hunger(g, -5);
-	pet_change_boredom(g, -3);
-	change_balance(g, TICK_MONEY);
-	pet_update_age(g);
-	pet_update_warnings(g);
+    // INCOME
+    g.timeSinceLastIncome += dt;
+    if (g.timeSinceLastIncome >= INCOME_INTERVAL) {
+        change_balance(g, 1);
+        g.timeSinceLastIncome = 0.f;
+    }
 
-	// Requests
-	if (g.birthday)    g.pendingPopups.push_back({"It's my birthday today!", GameEvent::EVENT, TopCenter});
-	if (g.isIll)       g.pendingPopups.push_back({"I feel sick...", GameEvent::WARNING, LeftUp});
-	if (g.starving)    g.pendingPopups.push_back({"I am starving!", GameEvent::WARNING, LeftCenter});
-	if (g.bored)       g.pendingPopups.push_back({"I want to play!", GameEvent::WARNING, LeftBottom});
-	if (g.statChanged) g.pendingPopups.push_back({std::to_string(g.newStat), GameEvent::STAT_CHANGE, BottomLeft});
-	
-	g.statChanged = false;
+    // SHOP REFRESH
+    g.timeSinceLastShop += dt;
+    if (g.timeSinceLastShop >= SHOP_INTERVAL) {
+        update_shop(g);
+        g.timeSinceLastShop = 0.f;
+    }
 
-	update_shop(g);
+    // CONDITION SYSTEM
+    g.timeSinceLastIllness += dt;
+    if (g.timeSinceLastIllness >= ILLNESS_CHECK_INTERVAL) {
+        pet_get_condition(g, dt);
+        g.timeSinceLastIllness = 0.f;
+    }
 
-	return;
+	// Derived
+    pet_update_warnings(g);
+    pet_check_death(g);
+    pet_check_evolve(g);
 }
 
 std::vector<Request> drain_pending_popups(GameState& g) {
@@ -173,7 +197,7 @@ std::vector<Request> drain_pending_popups(GameState& g) {
 #pragma region Hunger / Feed
 void pet_change_hunger(GameState& g, int delta) {
 
-    g.hungerNum -= delta;
+    g.hungerNum += delta;
     pet_clamp_hunger(g);
     pet_translate_hunger(g);
 }
@@ -191,16 +215,40 @@ void pet_translate_hunger(GameState& g) {
 
 void pet_feed(GameState& g) {
 	
-	pet_change_hunger(g, 7);
-	pet_change_health(g, 1);
-	pet_change_energy(g, -1);
+	pet_change_hunger(g, -18);
+	pet_change_energy(g, 2);
+	pet_change_exp(g, 5);
 }
 #pragma endregion
+
+void pet_change_exp(GameState& g, int delta) {
+
+	g.experience += delta;
+
+	while (g.experience >= g.nextLevelExp) {
+		pet_level_up(g);
+	}
+}
+
+void pet_level_up(GameState& g) {
+	
+	if (g.level >= MAX_LEVEL) return;
+
+	g.experience -= g.nextLevelExp;
+
+	g.level++;
+
+	g.nextLevelExp = static_cast<int>(100 + (50 * pow(g.level, 1.35)));
+
+	pet_change_health(g, 25);
+
+	g.pendingPopups.push_back({"Level Up!", GameEvent::EVENT, TopCenter});
+}
 
 #pragma region Boredom / Play
 void pet_change_boredom(GameState& g, int delta) {
 
-    g.boredomNum -= delta;
+    g.boredomNum += delta;
     pet_clamp_boredom(g);
     pet_translate_boredom(g);
 }
@@ -218,9 +266,10 @@ void pet_translate_boredom(GameState& g) {
 
 void pet_play(GameState& g) {
 
-	pet_change_boredom(g, 5);
-	pet_change_hunger(g, -3);
-	pet_change_energy(g, -1);
+	pet_change_boredom(g, -20);
+	pet_change_hunger(g, 5);
+	pet_change_energy(g, -8);
+	pet_change_exp(g, 7);
 }
 #pragma endregion
 
@@ -255,66 +304,60 @@ void pet_clamp_energy(GameState& g) {
 
 void pet_sleep(GameState& g) {
 
-	pet_change_energy(g, 1);
-	pet_change_health(g, -1);
+	pet_change_energy(g, 35);
+	pet_change_hunger(g, 6);
+	pet_change_boredom(g, 4);
+	pet_change_health(g, 2);
+	pet_change_exp(g, 3);
 }
 #pragma endregion
 
 #pragma region Update Warnings / Age
 void pet_update_warnings(GameState& g) {
 	
-	if (g.hungerNum > 80) {
-		g.starving = true;
-	} else {
-		g.starving = false;
-	}
-
-	if (g.boredomNum > 60)  {
-		g.bored = true;
-	} else {
-		g.bored = false;
-	}
-}
-
-void pet_update_age(GameState& g) {
-
-	if ((g.tickCount % AGE_CHECKPOINT == 0) && (g.energy > 0)) {
-		g.age++;
-		g.birthday = true;
-	} else {
-		g.birthday = false;
-	}
+	g.starving = g.hungerNum >= 80;
+	g.bored = g.boredomNum >= 70;
+	g.exhausted = g.energy <= 15;
 }
 #pragma endregion
 
 #pragma region Get ill / condition
-void pet_get_ill(GameState& g) {
-
-	g.isIll = true;
-	pet_change_health(g, -2);
-}
-
-void pet_get_condition(GameState& g) {
+void pet_get_condition(GameState& g, float dt) {
 	
-	int randomNum = get_random_number();
+	static float illnessCheckTimer = 0.f;
 
-	if (randomNum >= THRESHOLD) {
-		g.illnessStart = g.tickCount;
-		g.illnessEnd = g.illnessStart + ILLNESS_DUR;
+	illnessCheckTimer += dt;
+
+	if (illnessCheckTimer >= 30.f) {
+		illnessCheckTimer = 0.f;
+
+		int risk = 5;
+
+		risk += g.hungerNum / 4;
+		risk += (100 - g.energy) / 5;
+
+		// Clamp
+		if (risk > 80) risk = 80;
+		if (risk < 0) risk = 0;
+
+		int random = rand() % 100;
+
+		if (random < risk) {
+			g.isIll = true;
+			g.pendingPopups.push_back({"I feel sick..", GameEvent::WARNING, LeftUp});
+		}
 	}
 
-	if (g.tickCount < g.illnessEnd) pet_get_ill(g);
-	else if (g.tickCount == g.illnessEnd) g.isIll = false;
-
-	if (g.hungerNum >= MAX_HUNGER) pet_change_health(g, -5);
-	if (g.boredomNum >= MAX_BOREDOM) pet_change_health(g, -5);
+	if (g.isIll) pet_change_health(g, -1);
 }
 #pragma endregion
 
 #pragma region Goal reached
 void pet_check_evolve(GameState& g) {
 	
-	if (g.tickCount >= EVOLVE_TICK) g.scene = Scene::Evolve;
+	if (g.level >= MAX_LEVEL && g.health >= 80) {
+		g.scene = Scene::Evolve;
+	}
 }
 #pragma endregion
 
@@ -333,11 +376,11 @@ void use_item(GameState& g, int index) {
 				g.pendingPopups.push_back({"+" + std::to_string(item.itemEffects[i].value) + " health", GameEvent::ITEM_USED, BottomCenter});
 			} break;
 			case ItemEffect::StatType::HUNGER: {
-				pet_change_hunger(g, item.itemEffects[i].value);
+				pet_change_hunger(g, -item.itemEffects[i].value);
 				g.pendingPopups.push_back({"-" + std::to_string(item.itemEffects[i].value) + " hunger", GameEvent::ITEM_USED, BottomCenter});
 			} break;
 			case ItemEffect::StatType::MOOD: {
-				pet_change_boredom(g, item.itemEffects[i].value);
+				pet_change_boredom(g, -item.itemEffects[i].value);
 				g.pendingPopups.push_back({"-" + std::to_string(item.itemEffects[i].value) + " boredom", GameEvent::ITEM_USED, BottomCenter});
 			} break;
 			case ItemEffect::StatType::ENERGY: {
@@ -384,22 +427,6 @@ void clamp_balance(GameState& g) {
 
 	if (g.balance > MAX_BALANCE) g.balance = MAX_BALANCE;
 	if (g.balance < 0) g.balance = 0;
-}
-
-void update_shop(GameState& g) {
-	
-	if (g.tickCount > 0 && g.tickCount % SHOP_UPDATE_TICK == 0) {
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);
-
-		g.shop.clear();
-
-		for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
-			int index = randomIndex(gen);
-			g.shop.push_back(g.items[index]);
-		}	
-	}
 }
 #pragma endregion
 
