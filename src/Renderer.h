@@ -111,6 +111,13 @@ struct ItemSystem {
 	std::vector<ItemSlotVisual> visuals;
 };
 
+struct PetAnimation {
+	
+	std::vector<sf::Sprite> sprites;
+	sf::Vector2f position;
+	int size;
+};
+
 class Renderer {
 
 public:
@@ -144,9 +151,10 @@ private:
 	sf::Texture deathBgTexture;
 	sf::Texture evolveBgTexture;
 
-	sf::Texture petIdleTexture;
-	sf::Texture petPlayTexture;
-	sf::Texture petHurtTexture;
+	sf::Texture petSheetTexture;
+	//sf::Texture petIdleTexture;
+	//sf::Texture petPlayTexture;
+	//sf::Texture petHurtTexture;
 	sf::Texture outerShadowTexture;
 	sf::Texture innerShadowTexture;
 
@@ -182,9 +190,10 @@ private:
 	sf::Sprite deathBgSprite;
 	sf::Sprite evolveBgSprite;
 
-	sf::Sprite petIdleSprite;
-	sf::Sprite petPlaySprite;
-	sf::Sprite petHurtSprite;
+	sf::Sprite petSheetSprite;
+	//sf::Sprite petIdleSprite;
+	//sf::Sprite petPlaySprite;
+	//sf::Sprite petHurtSprite;
 	sf::Sprite outerShadowSprite;
 	sf::Sprite innerShadowSprite;
 
@@ -252,6 +261,7 @@ private:
 	sf::Text balanceAmount;
 
 	sf::Music music;
+	sf::Music petAmbient;
 	float lastDt{0.f};
 
 	// Popups

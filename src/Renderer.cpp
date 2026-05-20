@@ -12,9 +12,10 @@ Renderer::Renderer(GameState& gameState) :
 	deathBgSprite(deathBgTexture),
 	evolveBgSprite(evolveBgTexture),
 	shopBgSprite(shopBgTexture),
-	petIdleSprite(petIdleTexture),
-	petPlaySprite(petPlayTexture),
-	petHurtSprite(petHurtTexture),
+	//petIdleSprite(petIdleTexture),
+	//petPlaySprite(petPlayTexture),
+	//petHurtSprite(petHurtTexture),
+	petSheetSprite(petSheetTexture),
 	outerShadowSprite(outerShadowTexture), 
 	innerShadowSprite(innerShadowTexture), 
 	playBtnSprite(playBtnTexture),
@@ -94,8 +95,12 @@ bool Renderer::init(void) {
 
 	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
 
+	petAmbient.play();
+	petAmbient.setVolume(2.f);
+	petAmbient.setLooping(true);
+
 	music.play();
-	music.setVolume(3.f);
+	music.setVolume(1.f);
 	music.setLooping(true);
 
 	return true;
@@ -116,9 +121,10 @@ void Renderer::load_resources(void) {
 	if (!evolveBgTexture.loadFromFile("assets/sprites/evolveBg.jpg")) throw std::runtime_error("evolve bg");
 
 	// Pet
-	if (!petIdleTexture.loadFromFile("assets/sprites/pet/IDLE.png")) throw std::runtime_error("pet");
-	if (!petPlayTexture.loadFromFile("assets/sprites/pet/PLAY.png")) throw std::runtime_error("pet");
-	if (!petHurtTexture.loadFromFile("assets/sprites/pet/HURT.png")) throw std::runtime_error("pet");
+	if (!petSheetTexture.loadFromFile("assets/sprites/pet/petSheet.png")) throw std::runtime_error("pet sheet");
+	//if (!petIdleTexture.loadFromFile("assets/sprites/pet/IDLE.png")) throw std::runtime_error("pet");
+	//if (!petPlayTexture.loadFromFile("assets/sprites/pet/PLAY.png")) throw std::runtime_error("pet");
+	//if (!petHurtTexture.loadFromFile("assets/sprites/pet/HURT.png")) throw std::runtime_error("pet");
 	if (!outerShadowTexture.loadFromFile("assets/sprites/pet/shadow1.png")) throw std::runtime_error("outer shadow");
 	if (!innerShadowTexture.loadFromFile("assets/sprites/pet/shadow2.png")) throw std::runtime_error("inner shadow");
 
@@ -153,6 +159,7 @@ void Renderer::load_resources(void) {
 	// Other
 	if (!font.openFromFile("assets/fonts/PressStart2P-Regular.ttf")) throw std::runtime_error("font");
 	if (!music.openFromFile("assets/sounds/Music.mp3")) throw std::runtime_error("music");
+	if (!petAmbient.openFromFile("assets/sounds/petAmbient.mp3")) throw std::runtime_error("pet ambient");
 }
 
 void Renderer::setup_sprites(void) {
@@ -164,9 +171,10 @@ void Renderer::setup_sprites(void) {
 	deathBgSprite.setTexture(deathBgTexture, true);
 	evolveBgSprite.setTexture(evolveBgTexture, true);
 
-	petIdleSprite.setTexture(petIdleTexture, true);
-	petPlaySprite.setTexture(petPlayTexture, true);
-	petHurtSprite.setTexture(petHurtTexture, true);
+	petSheetSprite.setTexture(petSheetTexture, true);
+	//petIdleSprite.setTexture(petIdleTexture, true);
+	//petPlaySprite.setTexture(petPlayTexture, true);
+	//petHurtSprite.setTexture(petHurtTexture, true);
 	outerShadowSprite.setTexture(outerShadowTexture, true);
 	innerShadowSprite.setTexture(innerShadowTexture, true);
 
@@ -213,31 +221,45 @@ void Renderer::setup_sprites(void) {
 	itemSprites.push_back(yoYoSprite);
 
 	// Adjust scale
-	petIdleSprite.setScale({15.f, 15.f});
-	petPlaySprite.setScale({15.f, 15.f});
-	petHurtSprite.setScale({15.f, 15.f});
+	petSheetSprite.setScale({15.f, 15.f});
+	//petIdleSprite.setScale({15.f, 15.f});
+	//petPlaySprite.setScale({15.f, 15.f});
+	//petHurtSprite.setScale({15.f, 15.f});
 
 	// Adjust positions
-	petIdleSprite.setPosition({-300.f, 110.f});
-	petPlaySprite.setPosition({-300.f, 110.f});
-	petHurtSprite.setPosition({-300.f, 110.f});
-	outerShadowSprite.setPosition({133.f, 780.f});
-	innerShadowSprite.setPosition({182.f, 795.f});
+	petSheetSprite.setPosition({57.f, 458.f});
+	//petIdleSprite.setPosition({-300.f, 110.f});
+	//petPlaySprite.setPosition({-300.f, 110.f});
+	//petHurtSprite.setPosition({-300.f, 110.f});
+	outerShadowSprite.setPosition({133.f, 760.f});
+	innerShadowSprite.setPosition({182.f, 775.f});
 }
 
 void Renderer::setup_pet_idle_animation(void) {
-	
-	idleFrames.push_back(sf::IntRect({0, 0}, {80, 64}));
-	idleFrames.push_back(sf::IntRect({80, 0}, {80, 64}));
-	idleFrames.push_back(sf::IntRect({160, 0}, {80, 64}));
-	idleFrames.push_back(sf::IntRect({240, 0}, {80, 64}));
-	idleFrames.push_back(sf::IntRect({320, 0}, {80, 64}));
-	idleFrames.push_back(sf::IntRect({400, 0}, {80, 64}));
-	idleFrames.push_back(sf::IntRect({480, 0}, {80, 64}));
-	idleFrames.push_back(sf::IntRect({560, 0}, {80, 64}));
 
-	petIdleSprite.setTexture(petIdleTexture, true);
-	petIdleSprite.setTextureRect(idleFrames[0]);
+	const int SIZE = 32;
+
+	// LOW ENERGY
+	const std::vector<int> EXHAUSTED_32 = {0, 1, 2, 3, 4, 5, 6, 7}; // 352
+
+	// MEOW (On click)
+	const std::vector<int> MEOW_28 = {0, 1, 2}; // 308
+
+	// ON HOVER
+	const std::vector<int> HOVER_52 = {0, 1, 2, 3}; // 572
+
+	// IDLE
+	const std::vector<int> IDLE_0 = {0, 4, 2, 1, 3, 5}; // 0
+	const std::vector<int> IDLE_36 = {0, 1, 2, 3, 4, 5, 6, 7, 8}; // 396
+	const std::vector<int> IDLE_39 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}; // 429
+	const std::vector<int> IDLE_40 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}; // 440
+
+	for (size_t i = 0; i < HOVER_52.size(); ++i) {
+		idleFrames.push_back(sf::IntRect({SIZE * HOVER_52[i], SIZE * 52}, {SIZE, SIZE}));
+	}
+
+	petSheetSprite.setTexture(petSheetTexture, true);
+	petSheetSprite.setTextureRect(idleFrames[0]);
 }
 
 void Renderer::update_pet_idle_animation(void) {
@@ -246,24 +268,24 @@ void Renderer::update_pet_idle_animation(void) {
 
 	if (clock.getElapsedTime().asSeconds() >= frameDuration) {
 		currentFrame = (currentFrame + 1) % idleFrames.size();
-		petIdleSprite.setTextureRect(idleFrames[currentFrame]);
+		petSheetSprite.setTextureRect(idleFrames[currentFrame]);
 		clock.restart();
 	}
 }
 
 void Renderer::setup_pet_play_animation(void) {
 	
-	playFrames.push_back(sf::IntRect({0, 0}, {80, 64}));
-	playFrames.push_back(sf::IntRect({80, 0}, {80, 64}));
-	playFrames.push_back(sf::IntRect({160, 0}, {80, 64}));
-	playFrames.push_back(sf::IntRect({240, 0}, {80, 64}));
-	playFrames.push_back(sf::IntRect({320, 0}, {80, 64}));
-	playFrames.push_back(sf::IntRect({400, 0}, {80, 64}));
-	playFrames.push_back(sf::IntRect({480, 0}, {80, 64}));
-	playFrames.push_back(sf::IntRect({560, 0}, {80, 64}));
+	playFrames.push_back(sf::IntRect({0, 0}, {32, 32}));
+	playFrames.push_back(sf::IntRect({80, 0}, {32, 32}));
+	playFrames.push_back(sf::IntRect({160, 0}, {32, 32}));
+	playFrames.push_back(sf::IntRect({240, 0}, {32, 32}));
+	playFrames.push_back(sf::IntRect({320, 0}, {32, 32}));
+	playFrames.push_back(sf::IntRect({400, 0}, {32, 32}));
+	playFrames.push_back(sf::IntRect({480, 0}, {32, 32}));
+	playFrames.push_back(sf::IntRect({560, 0}, {32, 32}));
 
-	petPlaySprite.setTexture(petPlayTexture, true);
-	petPlaySprite.setTextureRect(playFrames[0]);
+	petSheetSprite.setTexture(petSheetTexture, true);
+	petSheetSprite.setTextureRect(playFrames[0]);
 }
 
 void Renderer::update_pet_play_animation(void) {
@@ -272,7 +294,7 @@ void Renderer::update_pet_play_animation(void) {
 
 	if (clock.getElapsedTime().asSeconds() >= frameDuration) {
 		currentFrame = (currentFrame + 1) % playFrames.size();
-		petPlaySprite.setTextureRect(playFrames[currentFrame]);
+		petSheetSprite.setTextureRect(playFrames[currentFrame]);
 		clock.restart();
 	}
 }
@@ -782,7 +804,7 @@ void Renderer::draw_pet_screen(void) {
 	// } else {
 	//		window.draw(petIdleSprite);
 	// }
-	window.draw(petIdleSprite);
+	window.draw(petSheetSprite);
 
 	window.draw(energyRecSprite);
 	window.draw(energyTitle);
@@ -853,6 +875,7 @@ void Renderer::draw_scene(void) {
 	if (gameState.scene == Scene::Death) {
 		draw_death_screen();
 		music.stop();
+		petAmbient.stop();
 	} else if (gameState.scene == Scene::Evolve) {
 		draw_evolve_screen();
 		music.stop();
@@ -906,10 +929,12 @@ void Renderer::handle_events(void) {
 							case ButtonAction::OpenInventory: {
 								soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Inventory);
+								petAmbient.stop();
 							} break;
 							case ButtonAction::OpenShop: {
 								soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Shop);
+								petAmbient.stop();
 							} break;
 							case ButtonAction::BackToInventory: {
 								soundMgr.play(SoundEffect::Click);
@@ -922,11 +947,13 @@ void Renderer::handle_events(void) {
 							case ButtonAction::BackToPet: {
 								soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Pet);
+								petAmbient.play();
 							} break;
 							case ButtonAction::UseItem: {
 								use_item(gameState, selectedItemState.itemIndex);
 								soundMgr.play(SoundEffect::ItemUsed);
 								change_scene(Scene::Pet);
+								petAmbient.play();
 							} break;
 							case ButtonAction::BuyItem: {
 								int shopSlotIndex = selectedItemState.itemIndex;

@@ -11,7 +11,7 @@ bool SoundManager::init(void) {
 }
 
 void SoundManager::loadSounds(void) {
-	
+
 	if (!buffers[SoundEffect::Click].loadFromFile("assets/sounds/Click.mp3")) throw std::runtime_error("btn clicked sound");
 	if (!buffers[SoundEffect::Warning].loadFromFile("assets/sounds/Warning.wav")) throw std::runtime_error("warning sound");
 	if (!buffers[SoundEffect::ItemUsed].loadFromFile("assets/sounds/ItemUsed.wav")) throw std::runtime_error("item used sound");
