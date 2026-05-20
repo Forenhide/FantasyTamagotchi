@@ -810,6 +810,8 @@ void Renderer::render() {
 	window.clear();
 
 	draw_scene();
+	update_items(lastDt);
+	update_tooltip(lastDt);
 	draw_buttons();
 	draw_popups();
 
@@ -818,12 +820,11 @@ void Renderer::render() {
 
 void Renderer::update(float dt) {
 	
+	lastDt = dt;
 	update_pet_idle_animation();
 	update_stats();
 	update_buttons(dt);
 	update_popups(dt);
-	update_items(dt);
-	update_tooltip(dt);
 	animate_subtitle(dt);
 }
 
@@ -1096,10 +1097,16 @@ void Renderer::setup_tooltip_window(void) {
 }
 
 void Renderer::update_items(float dt) {
+
+	if (gameState.scene != Scene::Inventory && gameState.scene != Scene::Shop && gameState.scene != Scene::InventoryTooltip && gameState.scene != Scene::ShopTooltip) return;
 	
 	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-	Scene& scene = gameState.scene;
+	Scene scene = gameState.scene;
+	Scene baseScene = scene;
+
+	if (scene == Scene::InventoryTooltip) baseScene = Scene::Inventory;
+	else if (scene == Scene::ShopTooltip) baseScene = Scene::Shop;
 
 	float hide = (scene == Scene::InventoryTooltip || scene == Scene::ShopTooltip) ? 1.f : 0.f;
 

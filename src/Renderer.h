@@ -251,6 +251,7 @@ private:
 	sf::Text balanceAmount;
 
 	sf::Music music;
+	float lastDt{0.f};
 
 	// Popups
 	std::vector<FloatingText> popups;

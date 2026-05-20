@@ -16,12 +16,12 @@ constexpr int MAX_BALANCE{9999};
 constexpr int MAX_ITEM_SLOTS{24};
 constexpr int MAX_LEVEL{50};
 
-constexpr float HUNGER_INTERVAL{45.f};
-constexpr float BOREDOM_INTERVAL{60.f};
-constexpr float ENERGY_INTERVAL{75.f};
+constexpr float HUNGER_INTERVAL{20.f};
+constexpr float BOREDOM_INTERVAL{15.f};
+constexpr float ENERGY_INTERVAL{35.f};
 constexpr float INCOME_INTERVAL{10.f};
 constexpr float AGE_INTERVAL{60.f};
-constexpr float SHOP_INTERVAL{30.f};
+constexpr float SHOP_INTERVAL{60.f};
 constexpr float ILLNESS_CHECK_INTERVAL{5.f};
 
 const std::string HUNGER[5]{ "Starving", "Hungry", "Okay", "Well-fed", "Full" };
@@ -66,11 +66,16 @@ struct GameState {
 	bool starving{};
 	bool bored{};
 	bool exhausted{};
+	bool sleeping{};
 
 	int newStat{};				// DELETE
 	
 	// Timers
 	float totalPlayTime{};
+	float sleepTimer{};
+	float illTimer{};
+	float illDurationTimer{};
+	float illDuration{};
 
 	float timeSinceLastHunger{};
 	float timeSinceLastBoredom{};
@@ -91,15 +96,11 @@ struct GameState {
 	int balance{5};
 
 	// UI flags
-	bool playing{true};			// DELETE
-	bool usedItem{false};		// DELETE
-	bool boughtItem{false};		// DELETE
-	bool success{true};			// DELETE
-	bool hasEnergy{true};		// DELETE
-	bool playPressed{false};
-	bool feedPressed{false};
-	bool sleepPressed{false};
-	bool statChanged{false};	// DELETE
+	bool usedItem{};		// DELETE
+	bool boughtItem{};		// DELETE
+	bool playPressed{};
+	bool feedPressed{};
+	bool sleepPressed{};
 
 	// Popups
 	std::vector<Request> pendingPopups; 
@@ -139,7 +140,7 @@ void pet_update_warnings(GameState& g);
 void pet_change_exp(GameState& g, int delta);
 void pet_level_up(GameState& g);
 
-void pet_get_condition(GameState& g, float dt);
+void pet_get_condition(GameState& g);
 
 // Inventory
 void use_item(GameState& g, int index);
