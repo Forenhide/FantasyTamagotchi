@@ -26,10 +26,10 @@ void SoundManager::setSounds(void) {
 
 			sf::Sound& s = sounds.back();
 
-			if (type == SoundEffect::Click)			s.setVolume(5.f);
-			else if (type == SoundEffect::Warning)  s.setVolume(10.f);
-			else if (type == SoundEffect::ItemUsed) s.setVolume(30.f);
-			else if (type == SoundEffect::ItemBought) s.setVolume(30.f);
+			if (type == SoundEffect::Click)			s.setVolume(10.f);
+			else if (type == SoundEffect::Warning)  s.setVolume(15.f);
+			else if (type == SoundEffect::ItemUsed) s.setVolume(50.f);
+			else if (type == SoundEffect::ItemBought) s.setVolume(50.f);
 		}
 	}
 }

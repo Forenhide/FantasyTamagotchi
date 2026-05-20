@@ -21,7 +21,7 @@ constexpr float BOREDOM_INTERVAL{15.f};
 constexpr float ENERGY_INTERVAL{35.f};
 constexpr float INCOME_INTERVAL{10.f};
 constexpr float AGE_INTERVAL{60.f};
-constexpr float SHOP_INTERVAL{60.f};
+constexpr float SHOP_INTERVAL{30.f};
 constexpr float ILLNESS_CHECK_INTERVAL{5.f};
 
 const std::string HUNGER[5]{ "Starving", "Hungry", "Okay", "Well-fed", "Full" };

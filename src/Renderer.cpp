@@ -909,9 +909,18 @@ void Renderer::handle_events(void) {
 								change_scene(Scene::Pet);
 							} break;
 							case ButtonAction::BuyItem: {
-								buy_item(gameState, selectedItemState.itemIndex);
-								if (gameState.boughtItem) soundMgr.play(SoundEffect::ItemBought);
-								else soundMgr.play(SoundEffect::Click);
+								int shopSlotIndex = selectedItemState.itemIndex;
+
+								if (shopSlotIndex >= 0 && shopSlotIndex < static_cast<int>(gameState.shop.size())) {
+									buy_item(gameState, shopSlotIndex);
+
+									if (gameState.boughtItem) soundMgr.play(SoundEffect::ItemBought);
+									else soundMgr.play(SoundEffect::Click);
+								} else {
+									gameState.pendingPopups.push_back({"Item no longer available!", GameEvent::ITEM_BOUGHT, ShopBottomLeft});
+									soundMgr.play(SoundEffect::Click);
+								}
+
 								change_scene(Scene::Shop);
 							} break;
 						}
@@ -927,11 +936,25 @@ void Renderer::handle_events(void) {
 						if (slotSprites[i].getGlobalBounds().contains(mousePos)) {
 							const Item& item = items[i];
 
+							std::cout << "// Selected item name (on click): " << items[i].name << '\n';
+
 							if (item.name.empty())
 								continue;
 
 							selectedItemState.itemIndex = static_cast<int>(i);
 							selectedItemState.t = 0.f;
+
+							selectedItemState.masterIndex = -1;
+							for (size_t j = 0; j < gameState.items.size(); ++j) {
+								
+								if (gameState.items[j].name == item.name) {
+									selectedItemState.masterIndex = static_cast<int>(j);
+									break;
+								}
+							}
+
+							std::cout << "* SELECTED index: " << selectedItemState.itemIndex << '\n';
+							std::cout << "* SELECETED item name: " << items[selectedItemState.itemIndex].name << '\n';
 
 							change_scene(gameState.scene == Scene::Inventory ? Scene::InventoryTooltip : Scene::ShopTooltip);
 							return;
@@ -944,6 +967,12 @@ void Renderer::handle_events(void) {
 }
 
 void Renderer::change_scene(const Scene& scene) {
+
+	if (gameState.scene == Scene::ShopTooltip || gameState.scene == Scene::InventoryTooltip) {
+		selectedItemState.itemIndex = -1;
+		selectedItemState.masterIndex = -1;
+		selectedItemState.t = 0.f;
+	}
 	
 	gameState.scene = scene;
 	apply_scene_layout(scene);

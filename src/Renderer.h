@@ -87,6 +87,7 @@ enum class TooltipState {
 struct SelectedItemState {
 	
 	int itemIndex = -1;
+	int masterIndex = -1;
 	float t = 0.f;
 };
 

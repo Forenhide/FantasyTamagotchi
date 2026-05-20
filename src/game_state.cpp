@@ -182,7 +182,7 @@ void tick(GameState& g, float dt) {
 
     // SHOP REFRESH
     g.timeSinceLastShop += dt;
-    if (g.timeSinceLastShop >= SHOP_INTERVAL) {
+    if (g.timeSinceLastShop >= SHOP_INTERVAL && g.scene != Scene::ShopTooltip && g.scene != Scene::Shop) {
         update_shop(g);
         g.timeSinceLastShop = 0.f;
 		std::cout << "Shop refreshed\n";
@@ -257,13 +257,23 @@ void update_shop(GameState& g) {
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);
 
+	std::cout << "* Checking g.items size before update: " << g.items.size() << '\n';
+	std::cout << "* Checking g.shop size before update: " << g.shop.size() << "\n\n";
+
 	g.shop.clear();
 	g.shop.reserve(MAX_ITEM_SLOTS);
 
+	std::cout << "std::random_device rd; std::mt19937 gen(rd()); std::uniform_int_distribution<int> randomIndex(0, g.items.size() - 1);\n";
+
+	std::cout << "----Updating Shop----\n";
 	for (int i = 0; i < MAX_ITEM_SLOTS; ++i) {
 		int index = randomIndex(gen);
+		std::cout << "int index = randomIndex(gen);\n";
+		std::cout << "Index = " << index << " : " << g.items[index].name << '\n';
 		g.shop.push_back(g.items[index]);
-	}	
+	}
+
+	std::cout << "* Checking g.shop size after update: " << g.shop.size() << "\n\n";
 }
 
 std::vector<Request> drain_pending_popups(GameState& g) {
@@ -442,19 +452,20 @@ void buy_item(GameState& g, int index) {
 
 	if (index < 0 || index >= g.shop.size()) return;
 
-	Item& item = g.shop[index];
+	Item item = g.shop[index];
 
 	if (g.balance >= item.price) {
-		change_balance(g, -item.price);
-
 		if (g.inventory.size() >= MAX_ITEM_SLOTS) {
 			g.boughtItem = false;
 			g.pendingPopups.push_back({"Not enough space!", GameEvent::ITEM_BOUGHT, ShopBottomLeft});
 		} else {
+			change_balance(g, -item.price);
 			g.inventory.push_back(g.shop[index]);
 			g.shop.erase(g.shop.begin() + index);
 			g.boughtItem = true;
 			g.pendingPopups.push_back({"+ " + item.name, GameEvent::ITEM_BOUGHT, ShopBottomLeft});
+			std::cout << "BOUGTH item name: " << item.name << '\n';
+			std::cout << "* BOUGHT ITEM index " << index << '\n';
 		}
 	} else {
 		g.boughtItem = false;
