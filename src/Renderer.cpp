@@ -640,6 +640,7 @@ void Renderer::update_popups(float dt) {
 		popup.text.move(popup.velocity * dt);
 
 		float ratio = 1.f - (popup.lifetime / popup.maxLifetime);
+		ratio = std::max(0.f, std::min(ratio, 1.f));
 
 		sf::Color textC = popup.text.getFillColor();
 		sf::Color outlineC = popup.text.getOutlineColor();
@@ -648,18 +649,14 @@ void Renderer::update_popups(float dt) {
 
 		popup.text.setFillColor(textC);
 		popup.text.setOutlineColor(outlineC);
+	}
 
-		// Delete
-		if (popup.lifetime >= popup.maxLifetime) {
-			popup.active = false;
-			popups.erase(
+	popups.erase(
 				std::remove_if(popups.begin(), popups.end(), [](const FloatingText& pop) {
-					return pop.active == false;
+					return !pop.active;
 				}),
 				popups.end()
-			);
-		}
-	}
+	);
 }
 
 sf::Color Renderer::get_popup_color(GameEvent event) const {
@@ -777,6 +774,14 @@ void Renderer::draw_pet_screen(void) {
 	window.draw(moodTitle);
 	window.draw(moodStat);
 	
+
+	// if (gameState.health <= 20) {
+	//		window.draw(petHurtSprite);
+	// } else if (gameState.playPressed) {
+	//		window.draw(petPlaySprite);
+	// } else {
+	//		window.draw(petIdleSprite);
+	// }
 	window.draw(petIdleSprite);
 
 	window.draw(energyRecSprite);
@@ -801,7 +806,7 @@ void Renderer::draw_buttons(void) {
 void Renderer::draw_popups(void) {
 	
 	for (const FloatingText& popup : popups) {
-		if (popup.active == true && popup.event == GameEvent::ITEM_BOUGHT) window.draw(popup.text);
+		if (popup.active) window.draw(popup.text);
 	}
 }
 
@@ -809,10 +814,15 @@ void Renderer::render() {
 	
 	window.clear();
 
+	// Layer 1
 	draw_scene();
 	update_items(lastDt);
 	update_tooltip(lastDt);
+
+	// Layer 2
 	draw_buttons();
+
+	// Layer 3
 	draw_popups();
 
 	window.display();
@@ -821,7 +831,17 @@ void Renderer::render() {
 void Renderer::update(float dt) {
 	
 	lastDt = dt;
+
+	// if (gameState.health <= 20 {
+	//		update_pet_hurt_animation();
+	// } else if (gameState.playPressed) {
+	//		update_pet_play_animation();
+	// } else {
+	//		update_pet_idle_animation();
+	// }
+
 	update_pet_idle_animation();
+
 	update_stats();
 	update_buttons(dt);
 	update_popups(dt);
@@ -936,8 +956,6 @@ void Renderer::handle_events(void) {
 						if (slotSprites[i].getGlobalBounds().contains(mousePos)) {
 							const Item& item = items[i];
 
-							std::cout << "// Selected item name (on click): " << items[i].name << '\n';
-
 							if (item.name.empty())
 								continue;
 
@@ -952,9 +970,6 @@ void Renderer::handle_events(void) {
 									break;
 								}
 							}
-
-							std::cout << "* SELECTED index: " << selectedItemState.itemIndex << '\n';
-							std::cout << "* SELECETED item name: " << items[selectedItemState.itemIndex].name << '\n';
 
 							change_scene(gameState.scene == Scene::Inventory ? Scene::InventoryTooltip : Scene::ShopTooltip);
 							return;

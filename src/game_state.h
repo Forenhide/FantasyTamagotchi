@@ -67,8 +67,6 @@ struct GameState {
 	bool bored{};
 	bool exhausted{};
 	bool sleeping{};
-
-	int newStat{};				// DELETE
 	
 	// Timers
 	float totalPlayTime{};
@@ -117,7 +115,6 @@ void pet_handle_input(GameState& g);
 
 void pet_feed(GameState& g);
 void pet_play(GameState& g);
-void pet_sleep(GameState& g);
 
 void pet_change_health(GameState& g, int delta);
 void pet_change_hunger(GameState& g, int delta);
@@ -138,7 +135,6 @@ void pet_check_evolve(GameState& g);
 void pet_update_warnings(GameState& g);
 
 void pet_change_exp(GameState& g, int delta);
-void pet_level_up(GameState& g);
 
 void pet_get_condition(GameState& g);
 
