@@ -18,7 +18,9 @@ Renderer::Renderer(GameState& gameState) :
 	//petHurtSprite(petHurtTexture),
 	petSheetSprite(petSheetTexture),
 	outerShadowSprite(outerShadowTexture), 
-	innerShadowSprite(innerShadowTexture), 
+	innerShadowSprite(innerShadowTexture),
+	menuPlayBtnSprite(menuPlayBtnTexture),
+	quitBtnSprite(quitBtnTexture),
 	playBtnSprite(playBtnTexture),
 	feedBtnSprite(feedBtnTexture),
 	sleepBtnSprite(sleepBtnTexture),
@@ -96,7 +98,6 @@ bool Renderer::init(void) {
 
 	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
 
-	petAmbient.play();
 	petAmbient.setVolume(2.f);
 	petAmbient.setLooping(true);
 
@@ -137,6 +138,8 @@ void Renderer::load_resources(void) {
 	if (!tooltipRecTexture.loadFromFile("assets/sprites/recs/tooltipRec.png")) throw std::runtime_error("stat rec");
 
 	// Buttons
+	if (!menuPlayBtnTexture.loadFromFile("assets/sprites/buttons/menuPlayBtn.png")) throw std::runtime_error("play btn");
+	if (!quitBtnTexture.loadFromFile("assets/sprites/buttons/quitBtn.png")) throw std::runtime_error("play btn");
 	if (!playBtnTexture.loadFromFile("assets/sprites/buttons/playBtn.png")) throw std::runtime_error("play btn");
 	if (!feedBtnTexture.loadFromFile("assets/sprites/buttons/feedBtn.png")) throw std::runtime_error("feed btn");
 	if (!sleepBtnTexture.loadFromFile("assets/sprites/buttons/sleepBtn.png")) throw std::runtime_error("sleep btn");
@@ -190,6 +193,8 @@ void Renderer::setup_sprites(void) {
 	itemSlotRecSprite.setTexture(itemSlotRecTexture, true);
 	tooltipRecSprite.setTexture(tooltipRecTexture, true);
 
+	menuPlayBtnSprite.setTexture(menuPlayBtnTexture, true);
+	quitBtnSprite.setTexture(quitBtnTexture, true);
 	playBtnSprite.setTexture(playBtnTexture, true);
 	feedBtnSprite.setTexture(feedBtnTexture, true);
 	sleepBtnSprite.setTexture(sleepBtnTexture, true);
@@ -419,6 +424,8 @@ void Renderer::apply_scene_layout(const Scene& scene) {
 	
 	auto& v = buttonsSystem.visuals;
 
+	v[static_cast<size_t>(ButtonType::MenuPlayButton)].targetScale = 0.f;
+	v[static_cast<size_t>(ButtonType::QuitButton)].targetScale = 0.f;
 	v[static_cast<size_t>(ButtonType::PlayButton)].targetScale = 0.f;
 	v[static_cast<size_t>(ButtonType::FeedButton)].targetScale = 0.f;
 	v[static_cast<size_t>(ButtonType::SleepButton)].targetScale = 0.f;
@@ -431,6 +438,14 @@ void Renderer::apply_scene_layout(const Scene& scene) {
 	v[static_cast<size_t>(ButtonType::BuyButton)].targetScale = 0.f;
 
 	switch (scene) {
+
+		case Scene::Menu: {
+			v[static_cast<size_t>(ButtonType::MenuPlayButton)].targetScale = 1.f;
+			v[static_cast<size_t>(ButtonType::MenuPlayButton)].targetPosition = {123.f, 402.f};
+
+			v[static_cast<size_t>(ButtonType::QuitButton)].targetScale = 1.f;
+			v[static_cast<size_t>(ButtonType::QuitButton)].targetPosition = {123.f, 500.f};
+		} break;
 		case Scene::Pet: {
 			v[static_cast<size_t>(ButtonType::PlayButton)].targetScale = 1.f;
 			v[static_cast<size_t>(ButtonType::PlayButton)].targetPosition = {24.f, 908.f};
@@ -483,6 +498,8 @@ void Renderer::apply_scene_layout(const Scene& scene) {
 
 void Renderer::setup_button_sprites(void) {
 	
+	menuPlayBtnSprite.setTexture(menuPlayBtnTexture, true);
+	quitBtnSprite.setTexture(quitBtnTexture, true);
 	playBtnSprite.setTexture(playBtnTexture, true);
 	feedBtnSprite.setTexture(feedBtnTexture, true);
 	sleepBtnSprite.setTexture(sleepBtnTexture, true);
@@ -494,6 +511,8 @@ void Renderer::setup_button_sprites(void) {
 	inventoryBackToBtnSprite.setTexture(backBtnTexture, true);
 	shopBackToBtnSprite.setTexture(backBtnTexture, true);
 
+	buttonSprites.push_back(menuPlayBtnSprite);
+	buttonSprites.push_back(quitBtnSprite);
 	buttonSprites.push_back(playBtnSprite);
 	buttonSprites.push_back(feedBtnSprite);
 	buttonSprites.push_back(sleepBtnSprite);
@@ -508,6 +527,14 @@ void Renderer::setup_button_sprites(void) {
 
 void Renderer::setup_buttons(void) {
 	
+	Button menuPlayBtn;
+	menuPlayBtn.type = ButtonType::MenuPlayButton;
+	menuPlayBtn.action = ButtonAction::MenuPlay;
+
+	Button quitBtn;
+	quitBtn.type = ButtonType::QuitButton;
+	quitBtn.action = ButtonAction::Quit;
+
 	Button playBtn;
 	playBtn.type = ButtonType::PlayButton;
 	playBtn.action = ButtonAction::PetPlay;
@@ -548,6 +575,8 @@ void Renderer::setup_buttons(void) {
 	buyBtn.type = ButtonType::BuyButton;
 	buyBtn.action = ButtonAction::BuyItem;
 
+	buttonsSystem.buttons.push_back(menuPlayBtn);
+	buttonsSystem.buttons.push_back(quitBtn);
 	buttonsSystem.buttons.push_back(playBtn);
 	buttonsSystem.buttons.push_back(feedBtn);
 	buttonsSystem.buttons.push_back(sleepBtn);
@@ -917,6 +946,16 @@ void Renderer::handle_events(void) {
 						auto& a = buttonsSystem.buttons[i].action;
 						
 						switch (a) {
+							case ButtonAction::MenuPlay: {
+								soundMgr.play(SoundEffect::Click);
+								change_scene(Scene::Pet);
+								petAmbient.play();
+							} break;
+							case ButtonAction::Quit: {
+								// SAVE HERE?
+								soundMgr.play(SoundEffect::Click);
+								window.close();
+							}break;
 							case ButtonAction::PetPlay: {
 								soundMgr.play(SoundEffect::Click);
 								gameState.playPressed = true;
@@ -1397,4 +1436,7 @@ void Renderer::draw_evolve_screen(void) {
 void Renderer::draw_menu_screen(void) {
 	
 	window.draw(menuBgSprite);
+	window.draw(title1);
+	window.draw(title2);
+	window.draw(subtitle);
 }

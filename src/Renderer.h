@@ -10,6 +10,8 @@
 
 
 enum class ButtonType {
+	MenuPlayButton,
+	QuitButton,
     PlayButton,
     FeedButton,
     SleepButton,
@@ -24,6 +26,8 @@ enum class ButtonType {
 
 enum class ButtonAction {
 	
+	MenuPlay,
+	Quit,
 	PetPlay,
 	PetFeed,
 	PetSleep,
@@ -159,6 +163,8 @@ private:
 	sf::Texture outerShadowTexture;
 	sf::Texture innerShadowTexture;
 
+	sf::Texture menuPlayBtnTexture;
+	sf::Texture quitBtnTexture;
 	sf::Texture playBtnTexture;
 	sf::Texture feedBtnTexture;
 	sf::Texture sleepBtnTexture;
@@ -199,6 +205,8 @@ private:
 	sf::Sprite outerShadowSprite;
 	sf::Sprite innerShadowSprite;
 
+	sf::Sprite menuPlayBtnSprite;
+	sf::Sprite quitBtnSprite;
 	sf::Sprite playBtnSprite;
 	sf::Sprite feedBtnSprite;
 	sf::Sprite sleepBtnSprite;

@@ -15,7 +15,7 @@ int main(void) {
 		float dt = clock.restart().asSeconds();
 
 		renderer.handle_events(); 
-		tick(game, dt);
+		if (game.scene != Scene::Menu) tick(game, dt);
 		renderer.update(dt);
 		renderer.render(); 
 	}
