@@ -145,6 +145,7 @@ private:
 	
 	// Resources
 	// Textures
+	sf::Texture menuBgTexture;
 	sf::Texture petBgTexture;
 	sf::Texture inventoryBgTexture;
 	sf::Texture shopBgTexture;
@@ -184,6 +185,7 @@ private:
 	sf::Texture yoYoTexture;
 
 	// Sprites
+	sf::Sprite menuBgSprite;
 	sf::Sprite petBgSprite;
 	sf::Sprite inventoryBgSprite;
 	sf::Sprite shopBgSprite;
@@ -282,6 +284,9 @@ private:
 	sf::Text itemPrice;
 	sf::Text itemPriceTooltip;
 	sf::Text transactionMsg;
+
+	// Menu
+	void draw_menu_screen(void);
 
 	void load_resources(void);
 	void setup_sprites(void);

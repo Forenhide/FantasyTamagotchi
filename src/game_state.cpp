@@ -28,7 +28,7 @@ static int get_random_number(void) {
 void game_init(GameState& g) {
 
 	// Scene
-	g.scene = Scene::Pet;
+	g.scene = Scene::Menu;
 	
 	// Pet
 	g.name = "Tony Tony Chopper";

@@ -7,6 +7,7 @@
 Renderer::Renderer(GameState& gameState) : 
 
 	gameState(gameState),
+	menuBgSprite(menuBgTexture),
 	petBgSprite(petBgTexture),
 	inventoryBgSprite(inventoryBgTexture),
 	deathBgSprite(deathBgTexture),
@@ -114,7 +115,8 @@ bool Renderer::is_open(void) const {
 void Renderer::load_resources(void) {
 	
 	// Backgrounds
-	if (!petBgTexture.loadFromFile("assets/sprites/background.jpg")) throw std::runtime_error("pet bg");
+	if (!menuBgTexture.loadFromFile("assets/sprites/petBg.jpg")) throw std::runtime_error("menu bg");
+	if (!petBgTexture.loadFromFile("assets/sprites/petBg.jpg")) throw std::runtime_error("pet bg");
 	if (!inventoryBgTexture.loadFromFile("assets/sprites/inventoryBg.jpg")) throw std::runtime_error("inventory bg");
 	if (!shopBgTexture.loadFromFile("assets/sprites/shopBg.jpg")) throw std::runtime_error("shop bg");
 	if (!deathBgTexture.loadFromFile("assets/sprites/deathBg.jpg")) throw std::runtime_error("death bg");
@@ -165,6 +167,7 @@ void Renderer::load_resources(void) {
 void Renderer::setup_sprites(void) {
 	
 	// Set textures
+	menuBgSprite.setTexture(menuBgTexture, true);
 	petBgSprite.setTexture(petBgTexture, true);
 	inventoryBgSprite.setTexture(inventoryBgTexture, true);
 	shopBgSprite.setTexture(shopBgTexture, true);
@@ -872,7 +875,10 @@ void Renderer::update(float dt) {
 
 void Renderer::draw_scene(void) {
 	
-	if (gameState.scene == Scene::Death) {
+	if (gameState.scene == Scene::Menu) {
+		draw_menu_screen();
+		petAmbient.stop();
+	} else if (gameState.scene == Scene::Death) {
 		draw_death_screen();
 		music.stop();
 		petAmbient.stop();
@@ -1386,4 +1392,9 @@ void Renderer::draw_death_screen(void) {
 void Renderer::draw_evolve_screen(void) {
 	
 	window.draw(evolveBgSprite);
+}
+
+void Renderer::draw_menu_screen(void) {
+	
+	window.draw(menuBgSprite);
 }

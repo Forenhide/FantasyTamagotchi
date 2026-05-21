@@ -29,13 +29,14 @@ const std::string MOOD[5]{"Frustrated", "Bored", "Okay", "Good", "Happy"};
 
 enum class Scene {
 
+	Menu,
 	Pet,
 	Inventory,
 	InventoryTooltip,
 	Shop,
 	ShopTooltip,
 	Death,
-	Evolve
+	Evolve,
 };
 
 struct GameState {
