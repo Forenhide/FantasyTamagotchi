@@ -870,14 +870,17 @@ void Renderer::render() {
 
 	// Layer 1
 	draw_scene();
-	update_items(lastDt);
-	update_tooltip(lastDt);
 
-	// Layer 2
-	draw_buttons();
+	if (gameState.scene != Scene::Death && gameState.scene != Scene::Evolve) {
+		update_items(lastDt);
+		update_tooltip(lastDt);
 
-	// Layer 3
-	draw_popups();
+		// Layer 2
+		draw_buttons();
+
+		// Layer 3
+		draw_popups();
+	}
 
 	window.display();
 }
@@ -894,12 +897,14 @@ void Renderer::update(float dt) {
 	//		update_pet_idle_animation();
 	// }
 
-	update_pet_idle_animation();
+	if (gameState.scene != Scene::Death && gameState.scene != Scene::Evolve) {
+		update_pet_idle_animation();
 
-	update_stats();
-	update_buttons(dt);
-	update_popups(dt);
-	animate_subtitle(dt);
+		update_stats();
+		update_buttons(dt);
+		update_popups(dt);
+		animate_subtitle(dt);
+	}
 }
 
 void Renderer::draw_scene(void) {
@@ -914,6 +919,7 @@ void Renderer::draw_scene(void) {
 	} else if (gameState.scene == Scene::Evolve) {
 		draw_evolve_screen();
 		music.stop();
+		petAmbient.stop();
 	} else if (gameState.scene == Scene::Inventory) {
 		draw_inventory();
 	} else if (gameState.scene == Scene::InventoryTooltip) {
@@ -940,7 +946,7 @@ void Renderer::handle_events(void) {
 
 				for (size_t i = 0; i < buttonsSystem.buttons.size() && i < buttonSprites.size(); ++i) {
 
-					if (gameState.scene == Scene::Death) return;
+					if (gameState.scene == Scene::Death || gameState.scene == Scene::Evolve) return;
 
 					if (buttonSprites[i].getGlobalBounds().contains(mousePos)) {
 						auto& a = buttonsSystem.buttons[i].action;
