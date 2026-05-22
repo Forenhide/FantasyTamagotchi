@@ -1437,6 +1437,17 @@ void Renderer::draw_death_screen(void) {
 void Renderer::draw_evolve_screen(void) {
 	
 	window.draw(evolveBgSprite);
+
+	sf::Text evolveText(font);
+	evolveText.setString("EVOLVED!");
+	evolveText.setCharacterSize(42);
+	evolveText.setFillColor({52, 168, 83});
+	evolveText.setOutlineThickness(1.f);
+	evolveText.setOutlineColor(sf::Color::White);
+
+	evolveText.setPosition({132.f, 491.f});
+
+	window.draw(evolveText);
 }
 
 void Renderer::draw_menu_screen(void) {
