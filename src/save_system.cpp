@@ -1,7 +1,7 @@
 #include "save_system.h"
 #include <fstream>
 #include <iostream>
-#include <cstdio>;
+#include <limits>
 
 
 void save_game(const GameState& g) {
@@ -13,7 +13,6 @@ void save_game(const GameState& g) {
 		return;
 	}
 
-	file << g.name << '\n';
 	file << g.health << '\n';
 	file << g.energy << '\n';
 	file << g.hungerNum << '\n';
@@ -47,8 +46,6 @@ bool load_game(GameState& g) {
 		return false;
 	}
 
-	std::getline(file, g.name);
-
 	file >> g.health;
 	file >> g.energy;
 	file >> g.hungerNum;
@@ -67,20 +64,19 @@ bool load_game(GameState& g) {
 	int inventorySize;
 	file >> inventorySize;
 
-	file.ignore();
+	file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 	g.inventory.clear();
 
 	for (size_t i = 0; i < inventorySize; ++i) {
 		
 		std::string itemName;
-		std::getline(file, itemName);
-
-		for (const Item& item : g.items) {
-			
-			if (item.name == itemName) {
-				g.inventory.push_back(item);
-				break;
+		if (std::getline(file, itemName)) {
+			for (const Item& item : g.items) {
+				if (item.name == itemName) {
+					g.inventory.push_back(item);
+					break;
+				}
 			}
 		}
 	}

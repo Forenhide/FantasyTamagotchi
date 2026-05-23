@@ -77,7 +77,7 @@ struct FloatingText {
 	sf::Vector2f velocity = {0.f, -30.f};
 	GameEvent event;
 
-	FloatingText(const sf::Font& font) : text(font) {}
+	FloatingText(const sf::Font& font) : text(font, "") {}
 };
 
 enum class TooltipState {
@@ -136,7 +136,6 @@ public:
 	void setup_stats_recs(sf::Sprite& rec, sf::Text& titleText, sf::Text& statText, const std::string& title, const std::string& stat, float x, float y, int fontSizeTitle, int fontSizeStat, const sf::Color& fontColorTitle, const sf::Color& fontColorStat, const sf::Color& titleOutlineColor, const sf::Color& statOutlineColor);
 	void setup_stats(void);
 	void setup_pet_idle_animation(void);
-	void setup_pet_play_animation(void);
 	void apply_scene_layout(const Scene& scene);
 	void change_scene(const Scene& scene);
 	void draw_buttons(void);
@@ -156,7 +155,7 @@ private:
 	sf::Texture deathBgTexture;
 	sf::Texture evolveBgTexture;
 
-	sf::Texture petSheetTexture;
+	sf::Texture petIdleTexture;
 	sf::Texture outerShadowTexture;
 	sf::Texture innerShadowTexture;
 
@@ -195,10 +194,7 @@ private:
 	sf::Sprite deathBgSprite;
 	sf::Sprite evolveBgSprite;
 
-	sf::Sprite petSheetSprite;
-	//sf::Sprite petIdleSprite;
-	//sf::Sprite petPlaySprite;
-	//sf::Sprite petHurtSprite;
+	sf::Sprite petIdleSprite;
 	sf::Sprite outerShadowSprite;
 	sf::Sprite innerShadowSprite;
 
@@ -218,7 +214,7 @@ private:
 	sf::Sprite healthRecSprite;
 	sf::Sprite hungerRecSprite;
 	sf::Sprite moodRecSprite;
-	sf::Sprite nameRecSprite;
+	sf::Sprite levelRecSprite;
 	sf::Sprite ageRecSprite;
 	sf::Sprite energyRecSprite;
 	sf::Sprite itemSlotRecSprite;
@@ -236,7 +232,6 @@ private:
 	sf::Sprite yoYoSprite;
 
 	std::vector<sf::IntRect> idleFrames;
-	std::vector<sf::IntRect> playFrames;
 	float frameDuration = 0.13f;
 	int currentFrame = 0;
 
@@ -246,9 +241,9 @@ private:
 	sf::Text inventoryTitle;
 	sf::Text shopTitle;
 	sf::Text subtitle;
-	sf::RectangleShape nameRec;
-	sf::Text nameTitle;
-	sf::Text nameStat;
+	sf::RectangleShape levelRec;
+	sf::Text levelTitle;
+	sf::Text levelStat;
 	sf::RectangleShape healthRec;
 	sf::Text healthTitle;
 	sf::Text healthStat;
@@ -270,6 +265,9 @@ private:
 	sf::Music music;
 	sf::Music petAmbient;
 	float lastDt{0.f};
+
+	// Pet
+	sf::FloatRect petBounds;
 
 	// Popups
 	std::vector<FloatingText> popups;
@@ -303,7 +301,6 @@ private:
 	void draw_evolve_screen(void);
 	void animate_subtitle(float dt);
 	void update_pet_idle_animation(void);
-	void update_pet_play_animation(void);
 	void update_stats(void);
 
 	void setup_buttons(void);

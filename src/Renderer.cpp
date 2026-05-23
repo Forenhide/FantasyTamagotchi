@@ -14,10 +14,7 @@ Renderer::Renderer(GameState& gameState) :
 	deathBgSprite(deathBgTexture),
 	evolveBgSprite(evolveBgTexture),
 	shopBgSprite(shopBgTexture),
-	//petIdleSprite(petIdleTexture),
-	//petPlaySprite(petPlayTexture),
-	//petHurtSprite(petHurtTexture),
-	petSheetSprite(petSheetTexture),
+	petIdleSprite(petIdleTexture),
 	outerShadowSprite(outerShadowTexture), 
 	innerShadowSprite(innerShadowTexture),
 	menuPlayBtnSprite(menuPlayBtnTexture),
@@ -32,7 +29,7 @@ Renderer::Renderer(GameState& gameState) :
 	petBackToBtnSprite(backBtnTexture),
 	useBtnSprite(useBtnTexture),
 	buyBtnSprite(buyBtnTexture),
-	nameRecSprite(statRecTexture),
+	levelRecSprite(statRecTexture),
 	healthRecSprite(statRecTexture),
 	hungerRecSprite(statRecTexture),
 	moodRecSprite(statRecTexture),
@@ -57,8 +54,8 @@ Renderer::Renderer(GameState& gameState) :
 	subtitle(font, "* Kitty Edition *", 20),
 	inventoryTitle(font, "INVENTORY", 48),
 	shopTitle(font, "SHOP", 48),
-	nameTitle(font),
-	nameStat(font),
+	levelTitle(font),
+	levelStat(font),
 	healthTitle(font),
 	healthStat(font),
 	hungerTitle(font),
@@ -89,7 +86,6 @@ bool Renderer::init(void) {
 	setup_titles();
 	setup_stats();
 	setup_pet_idle_animation();
-	setup_pet_play_animation();
 	apply_scene_layout(gameState.scene);
 
 	// Inventory
@@ -99,11 +95,11 @@ bool Renderer::init(void) {
 
 	if(!soundMgr.init()) throw std::runtime_error("sound manager init");
 
-	petAmbient.setVolume(2.f);
+	petAmbient.setVolume(1.f);
 	petAmbient.setLooping(true);
 
 	music.play();
-	music.setVolume(1.f);
+	music.setVolume(3.f);
 	music.setLooping(true);
 
 	return true;
@@ -125,10 +121,7 @@ void Renderer::load_resources(void) {
 	if (!evolveBgTexture.loadFromFile("assets/sprites/evolveBg.jpg")) throw std::runtime_error("evolve bg");
 
 	// Pet
-	if (!petSheetTexture.loadFromFile("assets/sprites/pet/petSheet.png")) throw std::runtime_error("pet sheet");
-	//if (!petIdleTexture.loadFromFile("assets/sprites/pet/IDLE.png")) throw std::runtime_error("pet");
-	//if (!petPlayTexture.loadFromFile("assets/sprites/pet/PLAY.png")) throw std::runtime_error("pet");
-	//if (!petHurtTexture.loadFromFile("assets/sprites/pet/HURT.png")) throw std::runtime_error("pet");
+	if (!petIdleTexture.loadFromFile("assets/sprites/pet/IDLE.png")) throw std::runtime_error("pet idle sprite");
 	if (!outerShadowTexture.loadFromFile("assets/sprites/pet/shadow1.png")) throw std::runtime_error("outer shadow");
 	if (!innerShadowTexture.loadFromFile("assets/sprites/pet/shadow2.png")) throw std::runtime_error("inner shadow");
 
@@ -178,11 +171,11 @@ void Renderer::setup_sprites(void) {
 	deathBgSprite.setTexture(deathBgTexture, true);
 	evolveBgSprite.setTexture(evolveBgTexture, true);
 
-	petSheetSprite.setTexture(petSheetTexture, true);
+	petIdleSprite.setTexture(petIdleTexture, true);
 	outerShadowSprite.setTexture(outerShadowTexture, true);
 	innerShadowSprite.setTexture(innerShadowTexture, true);
 
-	nameRecSprite.setTexture(statRecTexture, true);
+	levelRecSprite.setTexture(statRecTexture, true);
 	healthRecSprite.setTexture(statRecTexture, true);
 	hungerRecSprite.setTexture(statRecTexture, true);
 	moodRecSprite.setTexture(statRecTexture, true);
@@ -227,39 +220,30 @@ void Renderer::setup_sprites(void) {
 	itemSprites.push_back(yoYoSprite);
 
 	// Adjust scale
-	petSheetSprite.setScale({15.f, 15.f});
+	petIdleSprite.setScale({15.f, 15.f});
 
 	// Adjust positions
-	petSheetSprite.setPosition({57.f, 458.f});
-	outerShadowSprite.setPosition({133.f, 760.f});
-	innerShadowSprite.setPosition({182.f, 775.f});
+	petIdleSprite.setPosition({-300.f, 110.f});
+	outerShadowSprite.setPosition({133.f, 780.f});
+	innerShadowSprite.setPosition({182.f, 795.f});
 }
 
 void Renderer::setup_pet_idle_animation(void) {
 
-	const int SIZE = 32;
+	idleFrames.push_back(sf::IntRect({0, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({80, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({160, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({240, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({320, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({400, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({480, 0}, {80, 64}));
+	idleFrames.push_back(sf::IntRect({560, 0}, {80, 64}));
 
-	// LOW ENERGY
-	const std::vector<int> EXHAUSTED_32 = {0, 1, 2, 3, 4, 5, 6, 7}; // 352
+	petIdleSprite.setTexture(petIdleTexture, true);
+	petIdleSprite.setTextureRect(idleFrames[0]);
 
-	// MEOW (On click)
-	const std::vector<int> MEOW_28 = {0, 1, 2}; // 308
-
-	// ON HOVER
-	const std::vector<int> HOVER_52 = {0, 1, 2, 3}; // 572
-
-	// IDLE
-	const std::vector<int> IDLE_0 = {0, 4, 2, 1, 3, 5}; // 0
-	const std::vector<int> IDLE_36 = {0, 1, 2, 3, 4, 5, 6, 7, 8}; // 396
-	const std::vector<int> IDLE_39 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}; // 429
-	const std::vector<int> IDLE_40 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}; // 440
-
-	for (size_t i = 0; i < HOVER_52.size(); ++i) {
-		idleFrames.push_back(sf::IntRect({SIZE * HOVER_52[i], SIZE * 52}, {SIZE, SIZE}));
-	}
-
-	petSheetSprite.setTexture(petSheetTexture, true);
-	petSheetSprite.setTextureRect(idleFrames[0]);
+	petBounds.size = {450.f, 400.f};
+	petBounds.position = {75.f, 410.f};
 }
 
 void Renderer::update_pet_idle_animation(void) {
@@ -268,40 +252,14 @@ void Renderer::update_pet_idle_animation(void) {
 
 	if (clock.getElapsedTime().asSeconds() >= frameDuration) {
 		currentFrame = (currentFrame + 1) % idleFrames.size();
-		petSheetSprite.setTextureRect(idleFrames[currentFrame]);
-		clock.restart();
-	}
-}
-
-void Renderer::setup_pet_play_animation(void) {
-	
-	playFrames.push_back(sf::IntRect({0, 0}, {32, 32}));
-	playFrames.push_back(sf::IntRect({80, 0}, {32, 32}));
-	playFrames.push_back(sf::IntRect({160, 0}, {32, 32}));
-	playFrames.push_back(sf::IntRect({240, 0}, {32, 32}));
-	playFrames.push_back(sf::IntRect({320, 0}, {32, 32}));
-	playFrames.push_back(sf::IntRect({400, 0}, {32, 32}));
-	playFrames.push_back(sf::IntRect({480, 0}, {32, 32}));
-	playFrames.push_back(sf::IntRect({560, 0}, {32, 32}));
-
-	petSheetSprite.setTexture(petSheetTexture, true);
-	petSheetSprite.setTextureRect(playFrames[0]);
-}
-
-void Renderer::update_pet_play_animation(void) {
-	
-	static sf::Clock clock;
-
-	if (clock.getElapsedTime().asSeconds() >= frameDuration) {
-		currentFrame = (currentFrame + 1) % playFrames.size();
-		petSheetSprite.setTextureRect(playFrames[currentFrame]);
+		petIdleSprite.setTextureRect(idleFrames[currentFrame]);
 		clock.restart();
 	}
 }
 
 void Renderer::setup_stats(void) {
 
-	setup_stats_recs(nameRecSprite, nameTitle, nameStat, "Name", gameState.name, 17.5f, 157.5f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {115, 192, 255});
+	setup_stats_recs(levelRecSprite, levelTitle, levelStat, "Level", std::to_string(gameState.level), 17.5f, 157.5f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {115, 192, 255});
 	setup_stats_recs(healthRecSprite, healthTitle, healthStat, "Health", std::to_string(gameState.health), 17.5f, 246.f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {92, 199, 108});
 	setup_stats_recs(hungerRecSprite, hungerTitle, hungerStat, "Hunger", gameState.hunger, 305.5f, 157.5f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {92, 199, 108});
 	setup_stats_recs(moodRecSprite, moodTitle, moodStat, "Mood", gameState.mood, 305.5f, 246.5f, 16, 14, {255, 255, 255}, {255, 255, 255}, {64, 64, 64}, {199, 92, 92});
@@ -346,6 +304,7 @@ void Renderer::setup_stats_recs(sf::Sprite& rec, sf::Text& titleText, sf::Text& 
 
 void Renderer::update_stats(void) {
 	
+	levelStat.setString(std::to_string(gameState.level));
 	healthStat.setString(std::to_string(gameState.health));
 	hungerStat.setString(gameState.hunger);
 	moodStat.setString(gameState.mood);
@@ -353,15 +312,16 @@ void Renderer::update_stats(void) {
 	ageStat.setString(std::to_string(gameState.age));
 
 	// Center stats
+	sf::FloatRect levelBounds = levelStat.getLocalBounds();
 	sf::FloatRect healthBounds = healthStat.getLocalBounds();
 	sf::FloatRect hungerBounds = hungerStat.getLocalBounds();
 	sf::FloatRect moodBounds = moodStat.getLocalBounds();
 	sf::FloatRect energyBounds = energyStat.getLocalBounds();
 	sf::FloatRect ageBounds = ageStat.getLocalBounds();
 
-	healthStat.setOrigin({
-		healthBounds.position.x + healthBounds.size.x / 2.f,
-		healthBounds.position.y + healthBounds.size.y / 2.f - 16.f
+	levelStat.setOrigin({
+		levelBounds.position.x + levelBounds.size.x / 2.f,
+		levelBounds.position.y + levelBounds.size.y / 2.f - 16.f
 	});
 	hungerStat.setOrigin({
 		hungerBounds.position.x + hungerBounds.size.x / 2.f,
@@ -695,13 +655,15 @@ void Renderer::update_popups(float dt) {
 
 		popup.text.setFillColor(textC);
 		popup.text.setOutlineColor(outlineC);
+
+		if (popup.lifetime >= popup.maxLifetime) popup.active = false;
 	}
 
 	popups.erase(
-				std::remove_if(popups.begin(), popups.end(), [](const FloatingText& pop) {
+		std::remove_if(popups.begin(), popups.end(), [](const FloatingText& pop) {
 					return !pop.active;
-				}),
-				popups.end()
+		}),
+		popups.end()
 	);
 }
 
@@ -807,9 +769,9 @@ void Renderer::draw_pet_screen(void) {
 	window.draw(title1);
 	window.draw(title2);
 	window.draw(subtitle);
-	window.draw(nameRecSprite);
-	window.draw(nameTitle);
-	window.draw(nameStat);
+	window.draw(levelRecSprite);
+	window.draw(levelTitle);
+	window.draw(levelStat);
 	window.draw(healthRecSprite);
 	window.draw(healthTitle);
 	window.draw(healthStat);
@@ -828,7 +790,7 @@ void Renderer::draw_pet_screen(void) {
 	// } else {
 	//		window.draw(petIdleSprite);
 	// }
-	window.draw(petSheetSprite);
+	window.draw(petIdleSprite);
 
 	window.draw(energyRecSprite);
 	window.draw(energyTitle);
@@ -951,11 +913,12 @@ void Renderer::handle_events(void) {
 								soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Pet);
 								petAmbient.play();
+								return;
 							} break;
 							case ButtonAction::Quit: {
-								// SAVE HERE?
 								soundMgr.play(SoundEffect::Click);
 								window.close();
+								return;
 							}break;
 							case ButtonAction::PetPlay: {
 								soundMgr.play(SoundEffect::Click);
@@ -976,30 +939,36 @@ void Renderer::handle_events(void) {
 								soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Inventory);
 								petAmbient.stop();
+								return;
 							} break;
 							case ButtonAction::OpenShop: {
 								soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Shop);
 								petAmbient.stop();
+								return;
 							} break;
 							case ButtonAction::BackToInventory: {
 								soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Inventory);
+								return;
 							} break;
 							case ButtonAction::BackToShop: {
 								soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Shop);
+								return;
 							} break;
 							case ButtonAction::BackToPet: {
 								soundMgr.play(SoundEffect::Click);
 								change_scene(Scene::Pet);
 								petAmbient.play();
+								return;
 							} break;
 							case ButtonAction::UseItem: {
 								use_item(gameState, selectedItemState.itemIndex);
 								soundMgr.play(SoundEffect::ItemUsed);
 								change_scene(Scene::Pet);
 								petAmbient.play();
+								return;
 							} break;
 							case ButtonAction::BuyItem: {
 								int shopSlotIndex = selectedItemState.itemIndex;
@@ -1015,8 +984,15 @@ void Renderer::handle_events(void) {
 								}
 
 								change_scene(Scene::Shop);
+								return;
 							} break;
 						}
+					}
+				}
+
+				if (gameState.scene == Scene::Pet) {
+					if (petBounds.contains(mousePos)) {
+						soundMgr.play(SoundEffect::Meow);
 					}
 				}
 

@@ -32,7 +32,6 @@ void game_init(GameState& g) {
 	g.scene = Scene::Menu;
 	
 	// Pet
-	g.name = "Tony Tony Chopper";
 	g.hunger = HUNGER[4];
 	g.mood = MOOD[4];
 	g.health = 100;

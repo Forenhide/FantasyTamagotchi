@@ -45,7 +45,6 @@ struct GameState {
 	Scene scene;
 
 	// Pet data
-	std::string name;
 	std::string hunger;
 	std::string mood;
 	std::string warning;

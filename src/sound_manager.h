@@ -15,6 +15,7 @@ namespace SoundEffect {
 		ItemUsed,
 		Birthday,
 		ItemBought,
+		Meow,
 		Count
 	};
 }
