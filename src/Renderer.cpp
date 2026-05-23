@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "save_system.h"
 #include <windows.h>
 #include <iostream>
 #include <algorithm>
@@ -178,9 +179,6 @@ void Renderer::setup_sprites(void) {
 	evolveBgSprite.setTexture(evolveBgTexture, true);
 
 	petSheetSprite.setTexture(petSheetTexture, true);
-	//petIdleSprite.setTexture(petIdleTexture, true);
-	//petPlaySprite.setTexture(petPlayTexture, true);
-	//petHurtSprite.setTexture(petHurtTexture, true);
 	outerShadowSprite.setTexture(outerShadowTexture, true);
 	innerShadowSprite.setTexture(innerShadowTexture, true);
 
@@ -230,15 +228,9 @@ void Renderer::setup_sprites(void) {
 
 	// Adjust scale
 	petSheetSprite.setScale({15.f, 15.f});
-	//petIdleSprite.setScale({15.f, 15.f});
-	//petPlaySprite.setScale({15.f, 15.f});
-	//petHurtSprite.setScale({15.f, 15.f});
 
 	// Adjust positions
 	petSheetSprite.setPosition({57.f, 458.f});
-	//petIdleSprite.setPosition({-300.f, 110.f});
-	//petPlaySprite.setPosition({-300.f, 110.f});
-	//petHurtSprite.setPosition({-300.f, 110.f});
 	outerShadowSprite.setPosition({133.f, 760.f});
 	innerShadowSprite.setPosition({182.f, 775.f});
 }
@@ -936,7 +928,10 @@ void Renderer::draw_scene(void) {
 void Renderer::handle_events(void) {
 	
 	while (const std::optional event = window.pollEvent()) {
-		if (event->is<sf::Event::Closed>()) window.close();
+		if (event->is<sf::Event::Closed>()) {
+			if (gameState.scene != Scene::Death) save_game(gameState);
+			window.close();
+		}
 
 		sf::Vector2f mousePos = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
 

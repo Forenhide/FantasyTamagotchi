@@ -157,9 +157,6 @@ private:
 	sf::Texture evolveBgTexture;
 
 	sf::Texture petSheetTexture;
-	//sf::Texture petIdleTexture;
-	//sf::Texture petPlayTexture;
-	//sf::Texture petHurtTexture;
 	sf::Texture outerShadowTexture;
 	sf::Texture innerShadowTexture;
 

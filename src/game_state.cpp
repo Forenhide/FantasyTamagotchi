@@ -1,4 +1,5 @@
 #include "game_state.h"
+#include "save_system.h"
 #include <iostream>
 #include <random>
 #include <cmath>
@@ -484,5 +485,8 @@ void clamp_balance(GameState& g) {
 
 void pet_check_death(GameState& g) {
 	
-	if (g.health <= 0) g.scene = Scene::Death;
+	if (g.health <= 0) {
+		delete_save();
+		g.scene = Scene::Death;
+	}
 }
