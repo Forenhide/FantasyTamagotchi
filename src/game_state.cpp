@@ -89,7 +89,7 @@ void pet_handle_input(GameState& g) {
 	}
 
 	if (g.playPressed == true) {
-		if (g.energy < 10) {
+		if (g.energy < 10 || g.boredomNum <= 0) {
 			g.pendingPopups.push_back({"Too tired to play..", GameEvent::WARNING, LeftUp});
 		} else {
 			int before = g.boredomNum;
