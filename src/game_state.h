@@ -14,7 +14,7 @@ constexpr int MAX_HUNGER{100};
 constexpr int MAX_BOREDOM{100};
 constexpr int MAX_BALANCE{9999};
 constexpr int MAX_ITEM_SLOTS{24};
-constexpr int MAX_LEVEL{50};
+constexpr int MAX_LEVEL{20};
 
 constexpr float HUNGER_INTERVAL{20.f};
 constexpr float BOREDOM_INTERVAL{15.f};
